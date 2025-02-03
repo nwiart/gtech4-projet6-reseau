@@ -59,16 +59,15 @@ int Socket::acceptTCP()
 
 int Socket::bindUDP(uint16_t port)
 {
-    sockaddr_in serverAddr = {};
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(port);
+    sockaddr addr;
+    network::getServerAddressUDP(&addr, "127.0.0.1", port);  // Bind to all available interfaces
 
-    if (bind(mSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (bind(mSocket, &addr, sizeof(addr)) == SOCKET_ERROR) {
         std::cerr << "UDP Bind failed: " << WSAGetLastError() << std::endl;
         return SOCKET_ERROR;
     }
-    return 0;
+
+    return 0; // Success
 }
 
 int Socket::receiveUDP(std::string& outMessage)

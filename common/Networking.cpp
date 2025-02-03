@@ -49,7 +49,7 @@ int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t 
     return 0;
 }
 
-void network::sendSocketUDP(std::string message)
+void network::sendPacketUDP(std::string message)
 {
     int iResult;
 
@@ -61,7 +61,7 @@ void network::sendSocketUDP(std::string message)
     }
 }
 
-void network::sendSocketTCP(std::string message)
+void network::sendPacketTCP(std::string message)
 {
     int iResult;
 

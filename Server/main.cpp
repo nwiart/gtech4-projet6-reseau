@@ -5,6 +5,7 @@
 
 
 #define MESSAGE_ACCEPT (WM_USER)
+#define MESSAGE_UDP (WM_USER + 1)
 
 Server server;
 HWND hwnd;
@@ -23,6 +24,7 @@ int main(int argc, const char** argv)
 	server.open();
 
 	WSAAsyncSelect(server.getListenSocket().mSocket, hwnd, MESSAGE_ACCEPT, FD_ACCEPT);
+	WSAAsyncSelect(server.getUDPSocket().mSocket, hwnd, MESSAGE_UDP, FD_READ);
 
 	std::cout << "Server started.\n";
 
@@ -61,6 +63,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	case MESSAGE_ACCEPT:
 		std::cout << "dsdfosignofgn\n";
+		return 0;
+	case MESSAGE_UDP:
+		if (WSAGETSELECTEVENT(lparam) == FD_READ) {
+			char buffer[512];
+			sockaddr_in udpSenderAddr;
+			int addrLen = sizeof(udpSenderAddr);
+
+			int bytesReceived = recvfrom(wparam, buffer, sizeof(buffer), 0, (struct sockaddr*)&udpSenderAddr, &addrLen);
+			if (bytesReceived == SOCKET_ERROR) {
+				std::cerr << "Error receiving UDP message. Error: " << WSAGetLastError() << std::endl;
+				return 0;
+			}
+
+			std::cout << "Received UDP message: " << std::string(buffer, bytesReceived) << std::endl;
+		}
 		return 0;
 	}
 

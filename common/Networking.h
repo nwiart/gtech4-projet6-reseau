@@ -27,11 +27,13 @@ public:
 
 	static int getServerAddressUDP(struct sockaddr* out, const char* ip, uint16_t port);
 	static int getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t port);
-	void sendSocketUDP(std::string message);
-	void sendSocketTCP(std::string message);
-private:
+	void sendPacketUDP(std::string message);
+	void sendPacketTCP(std::string message);
+
 	Socket mSocketUDP;
 	Socket mSocketTCP;
+private:
+
 
 };
 
