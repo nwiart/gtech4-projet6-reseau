@@ -1,6 +1,6 @@
-#include "ServConnection.h"
+#include "Network.h"
 
-int ServConnection::connect(const char* ip)
+int Network::connect(const char* ip)
 {
     m_serverTCP.createSocketTCP();
     m_serverUDP.createSocketUDP();
