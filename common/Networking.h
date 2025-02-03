@@ -7,6 +7,10 @@
 
 #include "Socket.h"
 
+
+#define UDPPort "27015"
+#define TCPPort "27014"
+
 //#define DEFAULT_BUFLEN 512
 
 class network {
@@ -16,10 +20,10 @@ public:
 
 	static void initializeWinsock();
 	static void cleanupWinsock();
-	static int getServerAddressUDP(PCSTR PORT);
-	static int getServerAddressTCP(PCSTR PORT);
-	void sendSocketUDP();
-	void sendSocketTCP();
+	static int getServerAddressUDP();
+	static int getServerAddressTCP();
+	void sendSocketUDP(std::string message);
+	void sendSocketTCP(std::string message);
 };
 
 #endif // NETWORKING_H

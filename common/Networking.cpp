@@ -1,6 +1,8 @@
 #include "Networking.h"
 #include <iostream>
 
+
+
 void network::initializeWinsock() {
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -14,7 +16,7 @@ void network::cleanupWinsock() {
     WSACleanup();
 }
 
-int network::getServerAddressUDP(PCSTR PORT) {
+int network::getServerAddressUDP() {
     struct addrinfo* result = nullptr, * ptr = nullptr, hints;
 
     // Set up hints for getaddrinfo
@@ -23,7 +25,7 @@ int network::getServerAddressUDP(PCSTR PORT) {
     hints.ai_socktype = SOCK_DGRAM;  // UDP
     hints.ai_protocol = IPPROTO_UDP;
 
-    int iResult = getaddrinfo(serverAddress, PORT, &hints, &result);
+    int iResult = getaddrinfo(serverAddress, UDPPort, &hints, &result);
     if (iResult != 0) {
         std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
         return SOCKET_ERROR;
@@ -37,7 +39,7 @@ int network::getServerAddressUDP(PCSTR PORT) {
     return 0;
 }
 
-int network::getServerAddressTCP(PCSTR PORT)
+int network::getServerAddressTCP()
 {
     struct addrinfo* result = nullptr, * ptr = nullptr, hints;
 
@@ -47,7 +49,7 @@ int network::getServerAddressTCP(PCSTR PORT)
     hints.ai_socktype = SOCK_STREAM;  // UDP
     hints.ai_protocol = IPPROTO_TCP;
 
-    int iResult = getaddrinfo(serverAddress, PORT, &hints, &result);
+    int iResult = getaddrinfo(serverAddress, TCPPort, &hints, &result);
     if (iResult != 0) {
         std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
         return SOCKET_ERROR;
