@@ -66,17 +66,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		return 0;
 	case MESSAGE_UDP:
 		if (WSAGETSELECTEVENT(lparam) == FD_READ) {
-			char buffer[512];
-			sockaddr_in udpSenderAddr;
-			int addrLen = sizeof(udpSenderAddr);
-
-			int bytesReceived = recvfrom(wparam, buffer, sizeof(buffer), 0, (struct sockaddr*)&udpSenderAddr, &addrLen);
-			if (bytesReceived == SOCKET_ERROR) {
-				std::cerr << "Error receiving UDP message. Error: " << WSAGetLastError() << std::endl;
-				return 0;
+			std::string message = server.getUDPSocket().receiveUDP();
+			if (message.length() != 0) {
+				std::cout << "Received UDP message: " << server.getUDPSocket().receiveUDP() << std::endl;
 			}
-
-			std::cout << "Received UDP message: " << std::string(buffer, bytesReceived) << std::endl;
 		}
 		return 0;
 	}

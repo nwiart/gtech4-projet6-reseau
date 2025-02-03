@@ -60,17 +60,17 @@ int Socket::acceptTCP()
 int Socket::bindUDP(uint16_t port)
 {
     sockaddr addr;
-    network::getServerAddressUDP(&addr, "127.0.0.1", port);  // Bind to all available interfaces
+    network::getServerAddressUDP(&addr, "127.0.0.1", port);
 
     if (bind(mSocket, &addr, sizeof(addr)) == SOCKET_ERROR) {
         std::cerr << "UDP Bind failed: " << WSAGetLastError() << std::endl;
         return SOCKET_ERROR;
     }
 
-    return 0; // Success
+    return 0;
 }
 
-int Socket::receiveUDP(std::string& outMessage)
+std::string Socket::receiveUDP()
 {
     char buffer[512];
     sockaddr_in senderAddr;
@@ -79,10 +79,9 @@ int Socket::receiveUDP(std::string& outMessage)
     int bytesReceived = recvfrom(mSocket, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<sockaddr*>(&senderAddr), &senderAddrSize);
     if (bytesReceived == SOCKET_ERROR) {
         std::cerr << "UDP receive failed: " << WSAGetLastError() << std::endl;
-        return SOCKET_ERROR;
+        return "SOCKET_ERROR";
     }
 
     buffer[bytesReceived] = '\0';
-    outMessage = buffer;
-    return bytesReceived;
+    return std::string(buffer);
 }

@@ -21,7 +21,7 @@ public:
 	int acceptTCP();
 
 	int bindUDP(uint16_t port);
-	int receiveUDP(std::string& outMessage);
+	std::string receiveUDP();
 
 };
 
