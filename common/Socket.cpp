@@ -9,6 +9,12 @@ Socket::Socket()
 
 }
 
+Socket::~Socket() {
+    if (mSocket != INVALID_SOCKET) {
+        closesocket(mSocket);
+    }
+}
+
 void Socket::createSocketUDP()
 {
     mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -49,4 +55,35 @@ int Socket::acceptTCP()
 
     SOCKET so = accept(mSocket, &clientAddr, &addrLen);
     return 1;
+}
+
+int Socket::bindUDP(uint16_t port)
+{
+    sockaddr_in serverAddr = {};
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    serverAddr.sin_port = htons(port);
+
+    if (bind(mSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "UDP Bind failed: " << WSAGetLastError() << std::endl;
+        return SOCKET_ERROR;
+    }
+    return 0;
+}
+
+int Socket::receiveUDP(std::string& outMessage)
+{
+    char buffer[512];
+    sockaddr_in senderAddr;
+    int senderAddrSize = sizeof(senderAddr);
+
+    int bytesReceived = recvfrom(mSocket, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<sockaddr*>(&senderAddr), &senderAddrSize);
+    if (bytesReceived == SOCKET_ERROR) {
+        std::cerr << "UDP receive failed: " << WSAGetLastError() << std::endl;
+        return SOCKET_ERROR;
+    }
+
+    buffer[bytesReceived] = '\0';
+    outMessage = buffer;
+    return bytesReceived;
 }

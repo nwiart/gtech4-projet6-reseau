@@ -36,4 +36,5 @@ private:
 
 	Socket m_socketListener;
 	ClientConnection m_clients[MAX_CLIENTS];
+	Socket m_socketUDP;
 };

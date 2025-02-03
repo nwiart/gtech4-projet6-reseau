@@ -1,15 +1,12 @@
 #include "Networking.h"
 #include <iostream>
 
-
-PCSTR network::serverAddress;
-struct sockaddr_in network::serverAddr;
-
-
-
 network::network()
 {
     initializeWinsock();
+    mSocketUDP.createSocketUDP();
+    mSocketTCP.createSocketTCP();
+    mSocketUDP.bindUDP(UDPPort);
 }
 
 network::~network()
@@ -30,27 +27,14 @@ void network::cleanupWinsock() {
     WSACleanup();
 }
 
-int network::getServerAddressUDP(struct sockaddr* out, PCSTR PORT)
+int network::getServerAddressUDP(struct sockaddr* out, const char* ip, uint16_t port)
 {
-    struct addrinfo* result = nullptr, * ptr = nullptr, hints;
+    struct sockaddr_in* inetaddr = reinterpret_cast<sockaddr_in*>(out);
+    ZeroMemory(inetaddr->sin_zero, sizeof(inetaddr->sin_zero));
+    inetaddr->sin_family = AF_INET;
+    inetaddr->sin_addr.S_un.S_addr = inet_addr(ip);
+    inetaddr->sin_port = htons(port);
 
-    // Set up hints for getaddrinfo
-    ZeroMemory(&hints, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_DGRAM;  // UDP
-    hints.ai_protocol = IPPROTO_UDP;
-
-    int iResult = getaddrinfo(serverAddress.c_str(), UDPPort, &hints, &result);
-    if (iResult != 0) {
-        std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
-        return SOCKET_ERROR;
-    }
-
-    for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        memcpy(out, ptr->ai_addr, sizeof(sockaddr));
-    }
-
-    freeaddrinfo(result);
     return 0;
 }
 
@@ -63,37 +47,13 @@ int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t 
     inetaddr->sin_port = htons(port);
 
     return 0;
-
-
-    /*struct addrinfo* result = nullptr, * ptr = nullptr, hints;
-
-    // Set up hints for getaddrinfo
-    ZeroMemory(&hints, sizeof(hints));
-    hints.ai_family = AF_INET;  // IPv4
-    hints.ai_socktype = SOCK_STREAM;  // UDP
-    hints.ai_protocol = IPPROTO_TCP;
-
-    int iResult = getaddrinfo(serverAddress.c_str(), TCPPort, &hints, &result);
-    if (iResult != 0) {
-        std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
-        return SOCKET_ERROR;
-    }
-
-    for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        memcpy(out, ptr->ai_addr, sizeof(sockaddr));
-    }
-
-    freeaddrinfo(result);
-    return 0;*/
 }
 
 void network::sendSocketUDP(std::string message)
 {
     int iResult;
-    Socket clientSocket;
-    clientSocket.createSocketUDP();
 
-    iResult = sendto(clientSocket.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    iResult = sendto(mSocketUDP.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (iResult == SOCKET_ERROR) {
         std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
         cleanupWinsock();
@@ -104,10 +64,8 @@ void network::sendSocketUDP(std::string message)
 void network::sendSocketTCP(std::string message)
 {
     int iResult;
-    Socket clientSocket;
-    clientSocket.createSocketTCP();
 
-    iResult = send(clientSocket.mSocket, message.c_str(), message.length(), 0);
+    iResult = send(mSocketTCP.mSocket, message.c_str(), message.length(), 0);
     if (iResult == SOCKET_ERROR) {
         std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
         cleanupWinsock();

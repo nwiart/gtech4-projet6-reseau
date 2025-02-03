@@ -126,18 +126,18 @@ int main()
                 }
                 else if (event.text.unicode == 13) // Touche Entr�e
                 {
-                    mNetwork->serverAddress = inputText;
-                    if (mNetwork->getServerAddressUDP() != 0) // V�rification de l'IP
-                    {
-                        std::cout << "Adresse IP Invalide : " << inputText << std::endl;
-                        inputText = "";
-                    }
-                    else
-                    {
-                        std::cout << "Adresse IP Valide : " << inputText  << std::endl;
-                        mNetwork->sendSocketUDP(std::string("Hello!"));
-                        inputText = "";
-                    }
+                    //mNetwork->serverAddress = inputText;
+                    //if (mNetwork->getServerAddressUDP() != 0) // V�rification de l'IP
+                    //{
+                    //    std::cout << "Adresse IP Invalide : " << inputText << std::endl;
+                    //    inputText = "";
+                    //}
+                    //else
+                    //{
+                    //    std::cout << "Adresse IP Valide : " << inputText  << std::endl;
+                    //    mNetwork->sendSocketUDP(std::string("Hello!"));
+                    //    inputText = "";
+                    //}
                 }
                 else if ((enteredChar >= '0' && enteredChar <= '9') || enteredChar == '.')
                 {
