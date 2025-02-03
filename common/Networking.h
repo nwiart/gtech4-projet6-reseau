@@ -4,6 +4,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
+#pragma comment(lib, "Ws2_32.lib")
 
 #include "Socket.h"
 
@@ -15,13 +16,15 @@
 
 class network {
 public:
-	static PCSTR serverAddress;
-	static struct sockaddr_in serverAddr;
+	network();
+	~network();
+	std::string serverAddress;
+	struct sockaddr_in serverAddr;
 
-	static void initializeWinsock();
-	static void cleanupWinsock();
-	static int getServerAddressUDP();
-	static int getServerAddressTCP();
+	void initializeWinsock();
+	void cleanupWinsock();
+	int getServerAddressUDP();
+	int getServerAddressTCP();
 	void sendSocketUDP(std::string message);
 	void sendSocketTCP(std::string message);
 };

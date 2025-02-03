@@ -12,7 +12,6 @@ public:
 	void createSocketUDP();
 	void createSocketTCP();
 private:
-	void initClient();
 };
 
 #endif // SOCKET_H

@@ -1,8 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "Networking.h"
 
 int main()
 {
+    network* mNetwork = new network();
+
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong Multiplayer", sf::Style::Default);
     window.setVerticalSyncEnabled(true);
 
@@ -94,15 +97,18 @@ int main()
                 }
                 else if (event.text.unicode == 13) // Touche Entrée
                 {
-                    //if (isValidIP(inputText)) // Vérification de l'IP
-                    //{
-                        std::cout << "Adresse IP valide entree : " << inputText << std::endl;
-                        inputText = ""; // Effacer le champ
-                    //}
-                    //else
-                    //{
-                    //    std::cout << "Adresse IP invalide !" << std::endl;
-                    //}
+                    mNetwork->serverAddress = inputText;
+                    if (mNetwork->getServerAddressUDP() != 0) // Vérification de l'IP
+                    {
+                        std::cout << "Adresse IP Invalide : " << inputText << std::endl;
+                        inputText = "";
+                    }
+                    else
+                    {
+                        std::cout << "Adresse IP Valide : " << inputText  << std::endl;
+                        mNetwork->sendSocketUDP(std::string("Hello!"));
+                        inputText = "";
+                    }
                 }
                 else if ((enteredChar >= '0' && enteredChar <= '9') || enteredChar == '.')
                 {
