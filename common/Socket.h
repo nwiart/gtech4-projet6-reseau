@@ -18,7 +18,7 @@ public:
 
 	int connectTCP(const char* ip, uint16_t port);
 	int listenTCP(uint16_t port);
-	int acceptTCP();
+	Socket acceptTCP();
 
 	int bindUDP(uint16_t port);
 	std::string receiveUDP();

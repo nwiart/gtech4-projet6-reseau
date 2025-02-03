@@ -24,7 +24,6 @@ int main(int argc, const char** argv)
 	server.open();
 
 	WSAAsyncSelect(server.getListenSocket().mSocket, hwnd, MESSAGE_ACCEPT, FD_ACCEPT);
-	WSAAsyncSelect(server.getUDPSocket().mSocket, hwnd, MESSAGE_UDP, FD_READ);
 
 	std::cout << "Server started.\n";
 
@@ -62,14 +61,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	switch (msg)
 	{
 	case MESSAGE_ACCEPT:
-		std::cout << "dsdfosignofgn\n";
-		return 0;
-	case MESSAGE_UDP:
-		if (WSAGETSELECTEVENT(lparam) == FD_READ) {
-			std::string message = server.getUDPSocket().receiveUDP();
-			if (message.length() != 0) {
-				std::cout << "Received UDP message: " << server.getUDPSocket().receiveUDP() << std::endl;
-			}
+		Socket newClientSocket = server.getListenSocket().acceptTCP();
+		if (newClientSocket.mSocket != INVALID_SOCKET) {
+			std::string playerName = "Player";
+			ClientConnection* newClient = new ClientConnection();
+			newClient->connect(newClientSocket, playerName);
+			server.addClient(newClient);
 		}
 		return 0;
 	}

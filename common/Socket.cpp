@@ -48,13 +48,20 @@ int Socket::listenTCP(uint16_t port)
     return listen(mSocket, SOMAXCONN);
 }
 
-int Socket::acceptTCP()
+Socket Socket::acceptTCP()
 {
     sockaddr clientAddr;
-    int addrLen;
+    int addrLen = sizeof(clientAddr);
 
-    SOCKET so = accept(mSocket, &clientAddr, &addrLen);
-    return 1;
+    SOCKET clientSocket = accept(mSocket, &clientAddr, &addrLen);
+    if (clientSocket == INVALID_SOCKET) {
+        std::cerr << "TCP accept failed: " << WSAGetLastError() << std::endl;
+        return Socket(); // Return an invalid socket
+    }
+
+    Socket newSocket;
+    newSocket.mSocket = clientSocket;
+    return newSocket;
 }
 
 int Socket::bindUDP(uint16_t port)
