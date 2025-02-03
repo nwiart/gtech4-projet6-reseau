@@ -2,9 +2,13 @@
 #include "Scene.h"
 #include "MainMenu.h"
 #include "GameScene.h"
+#include "Networking.h"
 
 int main()
 {
+    if (network::initializeWinsock() != 0) {
+        std::cerr << "WSAStartup failed" << std::endl;
+    }
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong Multiplayer", sf::Style::Default);
     window.setVerticalSyncEnabled(true);
 

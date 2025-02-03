@@ -11,13 +11,13 @@ network::~network()
     cleanupWinsock();
 }
 
-void network::initializeWinsock() {
+int network::initializeWinsock() {
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != 0) {
         std::cerr << "WSAStartup failed with error: " << iResult << std::endl;
-        exit(1);
     }
+    return iResult;
 }
 
 void network::cleanupWinsock() {

@@ -22,7 +22,7 @@ public:
 	std::string serverAddress;
 	struct sockaddr_in serverAddr;
 
-	static void initializeWinsock();
+	static int initializeWinsock();
 	static void cleanupWinsock();
 
 	static int getServerAddressUDP(struct sockaddr* out, const char* ip, uint16_t port);

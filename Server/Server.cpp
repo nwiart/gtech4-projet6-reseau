@@ -18,7 +18,7 @@ void Server::open()
 void Server::addClient(ClientConnection* pClient)
 {
 	for (int i = 0; i < MAX_CLIENTS; ++i) {
-		if (!m_clients[i]->isConnected()) {
+		if (m_clients[i] == nullptr) {
 			m_clients[i] = pClient;
 			return;
 		}
