@@ -1,6 +1,7 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
@@ -21,10 +22,11 @@ public:
 	std::string serverAddress;
 	struct sockaddr_in serverAddr;
 
-	void initializeWinsock();
-	void cleanupWinsock();
-	int getServerAddressUDP();
-	int getServerAddressTCP();
+	static void initializeWinsock();
+	static void cleanupWinsock();
+
+	static int getServerAddressUDP(struct sockaddr* out, PCSTR PORT);
+	static int getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t port);
 	void sendSocketUDP(std::string message);
 	void sendSocketTCP(std::string message);
 };

@@ -6,7 +6,8 @@ Server::Server()
 
 }
 
-void Server::open(uint16_t tcpPort, uint16_t udpPort)
+void Server::open()
 {
-
+	m_socketListener.createSocketTCP();
+	m_socketListener.listenTCP(serverBasePort);
 }

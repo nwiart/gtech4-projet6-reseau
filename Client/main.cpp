@@ -2,6 +2,35 @@
 #include <iostream>
 #include "Networking.h"
 
+#include "Networking.h"
+#include "Socket.h"
+
+
+class ServerConnection
+{
+public:
+
+    ServerConnection() { }
+
+    int connect(const char* ip);
+
+private:
+
+    static const uint16_t serverBasePort = 27014;
+
+    Socket m_serverTCP;
+    Socket m_serverUDP;
+};
+
+int ServerConnection::connect(const char* ip)
+{
+    m_serverTCP.createSocketTCP();
+    m_serverUDP.createSocketUDP();
+
+    return m_serverTCP.connectTCP(ip, serverBasePort);
+}
+
+
 int main()
 {
     network* mNetwork = new network();
@@ -95,10 +124,10 @@ int main()
                         inputText.pop_back();
                     }
                 }
-                else if (event.text.unicode == 13) // Touche Entrée
+                else if (event.text.unicode == 13) // Touche Entrï¿½e
                 {
                     mNetwork->serverAddress = inputText;
-                    if (mNetwork->getServerAddressUDP() != 0) // Vérification de l'IP
+                    if (mNetwork->getServerAddressUDP() != 0) // Vï¿½rification de l'IP
                     {
                         std::cout << "Adresse IP Invalide : " << inputText << std::endl;
                         inputText = "";
@@ -160,6 +189,8 @@ int main()
         window.draw(text);
         window.display();
     }
+
+    network::cleanupWinsock();
 
     return 0;
 }
