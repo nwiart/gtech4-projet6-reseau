@@ -27,6 +27,9 @@ public:
 	int getServerAddressTCP();
 	void sendSocketUDP(std::string message);
 	void sendSocketTCP(std::string message);
+private:
+	Socket udpSocket;
+	Socket tcpSocket;
 };
 
 #endif // NETWORKING_H
