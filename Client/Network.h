@@ -2,11 +2,11 @@
 #include "Networking.h"
 #include "Socket.h"
 
-class ServConnection
+class Network
 {
 public:
 
-    ServConnection() { }
+    Network() { }
 
     int connect(const char* ip);
 
