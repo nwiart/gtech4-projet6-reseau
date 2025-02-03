@@ -2,9 +2,11 @@
 #include "Networking.h"
 #include <iostream>
 
-void Socket::initClient()
+
+Socket::Socket()
+    : mSocket(INVALID_SOCKET)
 {
-    network::initializeWinsock();
+
 }
 
 void Socket::createSocketUDP()
@@ -25,4 +27,12 @@ void Socket::createSocketTCP()
         network::cleanupWinsock();
         return;
     }
+}
+
+int Socket::connectTCP(const char* ip, uint16_t port)
+{
+    sockaddr addr;
+    network::getServerAddressTCP(&addr, ip, port);
+
+    return connect(mSocket, &addr, sizeof(sockaddr));
 }

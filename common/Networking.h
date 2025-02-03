@@ -16,8 +16,8 @@ public:
 
 	static void initializeWinsock();
 	static void cleanupWinsock();
-	static int getServerAddressUDP(PCSTR PORT);
-	static int getServerAddressTCP(PCSTR PORT);
+	static int getServerAddressUDP(struct sockaddr* out, PCSTR PORT);
+	static int getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t port);
 	void sendSocketUDP();
 	void sendSocketTCP();
 };

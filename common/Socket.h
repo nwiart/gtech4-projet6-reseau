@@ -9,10 +9,12 @@ class Socket {
 public:
 	SOCKET mSocket;
 
+	Socket();
+
 	void createSocketUDP();
 	void createSocketTCP();
-private:
-	void initClient();
+
+	int connectTCP(const char* ip, uint16_t port);
 };
 
 #endif // SOCKET_H

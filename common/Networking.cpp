@@ -14,7 +14,7 @@ void network::cleanupWinsock() {
     WSACleanup();
 }
 
-int network::getServerAddressUDP(PCSTR PORT) {
+int network::getServerAddressUDP(struct sockaddr* out, PCSTR PORT) {
     struct addrinfo* result = nullptr, * ptr = nullptr, hints;
 
     // Set up hints for getaddrinfo
@@ -30,16 +30,25 @@ int network::getServerAddressUDP(PCSTR PORT) {
     }
 
     for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        memcpy(server, ptr->ai_addr, sizeof(*server));
+        memcpy(out, ptr->ai_addr, sizeof(sockaddr));
     }
 
     freeaddrinfo(result);
     return 0;
 }
 
-int network::getServerAddressTCP(PCSTR PORT)
+int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t port)
 {
-    struct addrinfo* result = nullptr, * ptr = nullptr, hints;
+    struct sockaddr_in* inetaddr = reinterpret_cast<sockaddr_in*>(out);
+    ZeroMemory(inetaddr->sin_zero, sizeof(inetaddr->sin_zero));
+    inetaddr->sin_family = AF_INET;
+    inetaddr->sin_addr.S_un.S_addr = inet_addr(ip);
+    inetaddr->sin_port = htons(port);
+
+    return 0;
+
+
+    /*struct addrinfo* result = nullptr, * ptr = nullptr, hints;
 
     // Set up hints for getaddrinfo
     ZeroMemory(&hints, sizeof(hints));
@@ -54,11 +63,11 @@ int network::getServerAddressTCP(PCSTR PORT)
     }
 
     for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        memcpy(server, ptr->ai_addr, sizeof(*server));
+        memcpy(out, ptr->ai_addr, sizeof(sockaddr));
     }
 
     freeaddrinfo(result);
-    return 0;
+    return 0;*/
 }
 
 void network::sendSocketUDP()

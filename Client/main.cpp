@@ -1,7 +1,38 @@
 #include <SFML/Graphics.hpp>
 
+#include "Networking.h"
+#include "Socket.h"
+
+
+class ServerConnection
+{
+public:
+
+    ServerConnection() { }
+
+    int connect(const char* ip);
+
+private:
+
+    static const uint16_t serverBasePort = 27015;
+
+    Socket m_serverTCP;
+    Socket m_serverUDP;
+};
+
+int ServerConnection::connect(const char* ip)
+{
+    m_serverTCP.createSocketTCP();
+    m_serverUDP.createSocketUDP();
+
+    m_serverTCP.connectTCP(ip, serverBasePort);
+}
+
+
 int main()
 {
+    network::initializeWinsock();
+
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong Multiplayer", sf::Style::Default);
     window.setVerticalSyncEnabled(true);
 
@@ -69,6 +100,8 @@ int main()
         window.draw(rectangle2);
         window.display();
     }
+
+    network::cleanupWinsock();
 
     return 0;
 }
