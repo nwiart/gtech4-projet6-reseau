@@ -36,3 +36,21 @@ int Socket::connectTCP(const char* ip, uint16_t port)
 
     return connect(mSocket, &addr, sizeof(sockaddr));
 }
+
+int Socket::listenTCP(uint16_t port)
+{
+    sockaddr addr;
+    network::getServerAddressTCP(&addr, "127.0.0.1", port);
+
+    bind(mSocket, &addr, sizeof(sockaddr));
+    return listen(mSocket, SOMAXCONN);
+}
+
+int Socket::acceptTCP()
+{
+    sockaddr clientAddr;
+    int addrLen;
+
+    SOCKET so = accept(mSocket, &clientAddr, &addrLen);
+    return 1;
+}

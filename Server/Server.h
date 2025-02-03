@@ -25,10 +25,15 @@ public:
 
 	Server();
 
-	void open(uint16_t tcpPort, uint16_t udpPort);
+	void open();
+
+	inline Socket& getListenSocket() { return m_socketListener; }
 
 
 private:
 
+	static const uint16_t serverBasePort = 27014;
+
+	Socket m_socketListener;
 	ClientConnection m_clients[MAX_CLIENTS];
 };

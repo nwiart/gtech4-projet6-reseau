@@ -15,7 +15,7 @@ public:
 
 private:
 
-    static const uint16_t serverBasePort = 27015;
+    static const uint16_t serverBasePort = 27014;
 
     Socket m_serverTCP;
     Socket m_serverUDP;
@@ -26,13 +26,14 @@ int ServerConnection::connect(const char* ip)
     m_serverTCP.createSocketTCP();
     m_serverUDP.createSocketUDP();
 
-    m_serverTCP.connectTCP(ip, serverBasePort);
+    return m_serverTCP.connectTCP(ip, serverBasePort);
 }
 
 
 int main()
 {
     network::initializeWinsock();
+    ServerConnection server;
 
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong Multiplayer", sf::Style::Default);
     window.setVerticalSyncEnabled(true);
@@ -128,12 +129,15 @@ int main()
                     //if (isValidIP(inputText)) // Vérification de l'IP
                     //{
                         std::cout << "Adresse IP valide entree : " << inputText << std::endl;
-                        inputText = ""; // Effacer le champ
                     //}
                     //else
                     //{
                     //    std::cout << "Adresse IP invalide !" << std::endl;
                     //}
+
+                    server.connect(inputText.c_str());
+
+                    inputText.clear();
                 }
                 else if ((enteredChar >= '0' && enteredChar <= '9') || enteredChar == '.')
                 {

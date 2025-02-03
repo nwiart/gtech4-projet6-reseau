@@ -2,6 +2,10 @@
 #include <iostream>
 
 
+PCSTR network::serverAddress;
+struct sockaddr_in network::serverAddr;
+
+
 
 void network::initializeWinsock() {
     WSADATA wsaData;

@@ -15,6 +15,8 @@ public:
 	void createSocketTCP();
 
 	int connectTCP(const char* ip, uint16_t port);
+	int listenTCP(uint16_t port);
+	int acceptTCP();
 };
 
 #endif // SOCKET_H
