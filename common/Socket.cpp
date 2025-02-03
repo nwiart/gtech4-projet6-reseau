@@ -60,7 +60,7 @@ int Socket::acceptTCP()
 int Socket::bindUDP(uint16_t port)
 {
     sockaddr addr;
-    network::getServerAddressUDP(&addr, "127.0.0.1", port);
+    network::getServerAddressUDP(&addr, "0.0.0.0", port);
 
     if (bind(mSocket, &addr, sizeof(addr)) == SOCKET_ERROR) {
         std::cerr << "UDP Bind failed: " << WSAGetLastError() << std::endl;

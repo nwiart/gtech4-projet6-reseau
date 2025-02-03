@@ -4,9 +4,6 @@
 network::network()
 {
     initializeWinsock();
-    mSocketUDP.createSocketUDP();
-    mSocketTCP.createSocketTCP();
-    mSocketUDP.bindUDP(UDPPort);
 }
 
 network::~network()
