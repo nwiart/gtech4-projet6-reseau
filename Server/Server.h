@@ -28,13 +28,15 @@ public:
 	void open();
 
 	inline Socket& getListenSocket() { return m_socketListener; }
-
+	inline Socket& getUDPSocket() { return m_socketSender; }
 
 private:
 
 	static const uint16_t serverBasePort = 27014;
+	static const uint16_t serverSecondaryPort = 27015;
 
 	Socket m_socketListener;
+	Socket m_socketSender;
 	ClientConnection m_clients[MAX_CLIENTS];
-	Socket m_socketUDP;
+
 };
