@@ -7,19 +7,24 @@
 
 #include "Socket.h"
 
+
+#define UDPPort "27015"
+#define TCPPort "27014"
+
 //#define DEFAULT_BUFLEN 512
 
 class network {
 public:
-	std::string& serverAddress;
-	struct sockaddr_in* server;
+	static PCSTR serverAddress;
+	static struct sockaddr_in serverAddr;
 
 	static void initializeWinsock();
 	static void cleanupWinsock();
+
 	static int getServerAddressUDP(struct sockaddr* out, PCSTR PORT);
 	static int getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t port);
-	void sendSocketUDP();
-	void sendSocketTCP();
+	void sendSocketUDP(std::string message);
+	void sendSocketTCP(std::string message);
 };
 
 #endif // NETWORKING_H

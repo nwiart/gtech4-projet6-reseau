@@ -1,6 +1,8 @@
 #include "Networking.h"
 #include <iostream>
 
+
+
 void network::initializeWinsock() {
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -14,7 +16,8 @@ void network::cleanupWinsock() {
     WSACleanup();
 }
 
-int network::getServerAddressUDP(struct sockaddr* out, PCSTR PORT) {
+int network::getServerAddressUDP(struct sockaddr* out, PCSTR PORT)
+{
     struct addrinfo* result = nullptr, * ptr = nullptr, hints;
 
     // Set up hints for getaddrinfo
@@ -23,7 +26,7 @@ int network::getServerAddressUDP(struct sockaddr* out, PCSTR PORT) {
     hints.ai_socktype = SOCK_DGRAM;  // UDP
     hints.ai_protocol = IPPROTO_UDP;
 
-    int iResult = getaddrinfo(serverAddress, PORT, &hints, &result);
+    int iResult = getaddrinfo(serverAddress, UDPPort, &hints, &result);
     if (iResult != 0) {
         std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
         return SOCKET_ERROR;
@@ -56,7 +59,7 @@ int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t 
     hints.ai_socktype = SOCK_STREAM;  // UDP
     hints.ai_protocol = IPPROTO_TCP;
 
-    int iResult = getaddrinfo(serverAddress.c_str(), PORT, &hints, &result);
+    int iResult = getaddrinfo(serverAddress, TCPPort, &hints, &result);
     if (iResult != 0) {
         std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
         return SOCKET_ERROR;
@@ -70,13 +73,13 @@ int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t 
     return 0;*/
 }
 
-void network::sendSocketUDP()
+void network::sendSocketUDP(std::string message)
 {
     int iResult;
     Socket clientSocket;
     clientSocket.createSocketUDP();
 
-    iResult = sendto(clientSocket.mSocket, "Test", 5, 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    iResult = sendto(clientSocket.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (iResult == SOCKET_ERROR) {
         std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
         cleanupWinsock();
@@ -84,6 +87,16 @@ void network::sendSocketUDP()
     }
 }
 
-void network::sendSocketTCP()
+void network::sendSocketTCP(std::string message)
 {
+    int iResult;
+    Socket clientSocket;
+    clientSocket.createSocketUDP();
+
+    iResult = sendto(clientSocket.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    if (iResult == SOCKET_ERROR) {
+        std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
+        cleanupWinsock();
+        return;
+    }
 }
