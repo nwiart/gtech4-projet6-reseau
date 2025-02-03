@@ -1,5 +1,9 @@
 #ifndef SOCKET_H
-#define COCKET_H
+#define SOCKET_H
+
+#include <stdint.h>
+
+typedef uint64_t SOCKET;
 
 class Socket {
 public:
