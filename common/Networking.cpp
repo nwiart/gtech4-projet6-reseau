@@ -30,7 +30,7 @@ int network::getServerAddressUDP(PCSTR PORT) {
     }
 
     for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        memcpy(server, ptr->ai_addr, sizeof(*server));
+        memcpy(&serverAddr, ptr->ai_addr, sizeof(*(&serverAddr)));
     }
 
     freeaddrinfo(result);
@@ -47,27 +47,27 @@ int network::getServerAddressTCP(PCSTR PORT)
     hints.ai_socktype = SOCK_STREAM;  // UDP
     hints.ai_protocol = IPPROTO_TCP;
 
-    int iResult = getaddrinfo(serverAddress.c_str(), PORT, &hints, &result);
+    int iResult = getaddrinfo(serverAddress, PORT, &hints, &result);
     if (iResult != 0) {
         std::cerr << "getaddrinfo failed with error: " << iResult << std::endl;
         return SOCKET_ERROR;
     }
 
     for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        memcpy(server, ptr->ai_addr, sizeof(*server));
+        memcpy(&serverAddr, ptr->ai_addr, sizeof(*(&serverAddr)));
     }
 
     freeaddrinfo(result);
     return 0;
 }
 
-void network::sendSocketUDP()
+void network::sendSocketUDP(std::string message)
 {
     int iResult;
     Socket clientSocket;
     clientSocket.createSocketUDP();
 
-    iResult = sendto(clientSocket.mSocket, "Test", 5, 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    iResult = sendto(clientSocket.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (iResult == SOCKET_ERROR) {
         std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
         cleanupWinsock();
@@ -75,6 +75,16 @@ void network::sendSocketUDP()
     }
 }
 
-void network::sendSocketTCP()
+void network::sendSocketTCP(std::string message)
 {
+    int iResult;
+    Socket clientSocket;
+    clientSocket.createSocketUDP();
+
+    iResult = sendto(clientSocket.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    if (iResult == SOCKET_ERROR) {
+        std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
+        cleanupWinsock();
+        return;
+    }
 }

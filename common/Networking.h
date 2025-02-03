@@ -11,8 +11,8 @@
 
 class network {
 public:
-	std::string& serverAddress;
-	struct sockaddr_in* server;
+	static PCSTR serverAddress;
+	static struct sockaddr_in serverAddr;
 
 	static void initializeWinsock();
 	static void cleanupWinsock();
