@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 int main()
 {
@@ -16,6 +17,30 @@ int main()
 
     sf::RectangleShape rectangle2;
     rectangle2.setFillColor(sf::Color::Blue);
+
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf"))
+    {
+        std::cerr << "Erreur : Impossible de charger la police !" << std::endl;
+        return -1;
+    }
+
+    std::string inputText = "";
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::White);
+    text.setPosition(55, 110);
+
+    sf::RectangleShape inputBox(sf::Vector2f(400, 50));
+    inputBox.setFillColor(sf::Color(50, 50, 50));
+    inputBox.setOutlineColor(sf::Color::White);
+    inputBox.setOutlineThickness(2);
+    inputBox.setPosition(50, 100);
+
+    bool isActive = false;
+    bool showCursor = true;
+    sf::Clock cursorClock;
 
     while (window.isOpen())
     {
@@ -40,6 +65,64 @@ int main()
 
                 window.setVerticalSyncEnabled(true);
             }
+
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                if (inputBox.getGlobalBounds().contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+                {
+                    isActive = true;
+                    cursorClock.restart();
+                    showCursor = true;
+                }
+                else
+                {
+                    isActive = false;
+                }
+            }
+
+            if (isActive && event.type == sf::Event::TextEntered)
+            {
+                char enteredChar = static_cast<char>(event.text.unicode);
+
+                if (event.text.unicode == 8) // Touche Backspace
+                {
+                    if (!inputText.empty())
+                    {
+                        inputText.pop_back();
+                    }
+                }
+                else if (event.text.unicode == 13) // Touche Entrée
+                {
+                    //if (isValidIP(inputText)) // Vérification de l'IP
+                    //{
+                        std::cout << "Adresse IP valide entree : " << inputText << std::endl;
+                        inputText = ""; // Effacer le champ
+                    //}
+                    //else
+                    //{
+                    //    std::cout << "Adresse IP invalide !" << std::endl;
+                    //}
+                }
+                else if ((enteredChar >= '0' && enteredChar <= '9') || enteredChar == '.')
+                {
+                    if (inputText.size() < 15)
+                    {
+                        inputText += enteredChar;
+                    }
+                }
+            }
+
+            if (cursorClock.getElapsedTime().asSeconds() >= 0.5f)
+            {
+                showCursor = !showCursor;
+                cursorClock.restart();
+            }
+
+            if (isActive && showCursor)
+                text.setString(inputText + "|");
+            else
+                text.setString(inputText);
         }
 
         sf::Vector2u winSize = window.getSize();
@@ -67,6 +150,8 @@ int main()
         window.clear();
         window.draw(rectangle);
         window.draw(rectangle2);
+        window.draw(inputBox);
+        window.draw(text);
         window.display();
     }
 
