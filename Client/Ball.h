@@ -10,6 +10,7 @@ public:
     void draw(sf::RenderWindow& window);
     void reset(float startX, float startY);
     sf::Vector2f getPosition() const;
+    bool isOutOfBounds(sf::Vector2u windowSize, bool& scoredForPlayer1, bool& scoredForPlayer2);
 
 private:
     sf::CircleShape shape;

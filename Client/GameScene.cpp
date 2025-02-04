@@ -22,17 +22,41 @@ GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::
 void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window) {
     if (event.type == sf::Event::Closed)
         window.close();
+
+    if (event.type == sf::Event::Resized) {
+        player1.resize(window.getSize());
+        player2.resize(window.getSize());
+        score.update(score1, score2, window.getSize());
+
+        player1Text.setPosition(50, 20);
+        player2Text.setPosition(window.getSize().x - 200, 20);
+    }
 }
 
 void GameScene::update(sf::RenderWindow& window) {
     player1.update(window.getSize().y, window);
     player2.update(window.getSize().y, window);
+
+    bool scoredForPlayer1 = false, scoredForPlayer2 = false;
+    if (ball.isOutOfBounds(window.getSize(), scoredForPlayer1, scoredForPlayer2)) {
+        if (scoredForPlayer1) {
+            score1++;
+        }
+        if (scoredForPlayer2) {
+            score2++;
+        }
+
+        ball.reset(window.getSize().x / 2.f, window.getSize().y / 2.f);
+        score.update(score1, score2, window.getSize());
+    }
+
     ball.update(window, player1.getPaddle(), player2.getPaddle());
 }
 
 void GameScene::draw(sf::RenderWindow& window) {
     window.draw(player1Text);
     window.draw(player2Text);
+
     score.draw(window);
     player1.draw(window);
     player2.draw(window);
