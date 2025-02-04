@@ -1,7 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <SFML/Graphics.hpp>
+#include "SFMLInclude.h"
 
 class Scene {
 public:

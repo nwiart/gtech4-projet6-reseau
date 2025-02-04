@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+#include "SFMLInclude.h"
 #include "Scene.h"
 #include "MainMenu.h"
 #include "GameScene.h"
