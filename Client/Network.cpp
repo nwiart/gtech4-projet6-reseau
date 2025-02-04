@@ -45,7 +45,7 @@ int Network::connect(const char* ip,char playerName[32])
 
 int Network::sendPosition(float position)
 {
-    Client_PlayerMove packet{ m_playerID ,position };
+    Client_PlayerMove packet{ position };
 
     bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 
