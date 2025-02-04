@@ -69,3 +69,28 @@ void network::sendPacketTCP(std::string message)
         return;
     }
 }
+
+
+size_t network::sendPacketTCP(Socket& s, const void* buf, size_t size)
+{
+    int iResult;
+
+    iResult = send(s.mSocket, (const char*) buf, size, 0);
+    if (iResult == SOCKET_ERROR) {
+        return 0;
+    }
+
+    return size;
+}
+
+size_t network::sendPacketUDP(const sockaddr* addr, const void* buf, size_t size)
+{
+    int iResult;
+
+    iResult = sendto(mSocketUDP.mSocket, (const char*) buf, size, 0, addr, sizeof(sockaddr));
+    if (iResult == SOCKET_ERROR) {
+        return 0;
+    }
+
+    return size;
+}

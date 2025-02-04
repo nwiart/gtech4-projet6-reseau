@@ -4,23 +4,55 @@
 #include "GameMode.h"
 
 
+enum class ClientPackets : uint32_t
+{
+	PlayerConnect,
+	CreateLobby,
+	JoinLobby,
+
+	PlayerMove,
+};
+
+enum class ServerPackets : uint32_t
+{
+	ConnectResult,
+	LobbyCreation,
+	AcceptJoin,
+	DenyJoin,
+
+	PlayerMove,
+	BallInfo,
+	Score,
+};
+
+
+struct Client_PlayerConnect
+{
+	char playerName[32];
+};
+
 // Sent by client to create a new lobby.
 struct Client_CreateLobby
 {
 	GameMode gamemode;
-	char playerName[32];
+};
+
+// Sent by client to provide the info.
+struct Client_JoinLobby
+{
+	// TODO : define.
+};
+
+struct Server_ConnectResult
+{
+	uint32_t playerID;
+	bool success;
 };
 
 struct Server_LobbyCreation
 {
 	int playerID;  // Lobby creator's assigned ID (if successful).
 	bool success;
-};
-
-// Sent by client to provide the info.
-struct Client_PlayerJoin
-{
-	char playerName[32];
 };
 
 // Sent by server to a new player if their connection was successful.

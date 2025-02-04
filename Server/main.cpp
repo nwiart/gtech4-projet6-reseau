@@ -65,15 +65,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		{
 			Socket newClientSocket = server.getListenSocket().acceptTCP();
 			if (newClientSocket.mSocket != INVALID_SOCKET) {
-				std::string playerName = "Player";
-				ClientConnection* newClient = new ClientConnection();
-				newClient->connect(newClientSocket, playerName);
-				server.addClient(newClient);
+				server.notifyConnect(newClientSocket);
+				WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, 0);
 			}
 		}
 		return 0;
 
 	case MESSAGE_RECV:
+		{
+			SOCKET socket = (SOCKET)wparam;
+			server.notifyReceiveTCP(socket);
+		}
 		return 0;
 	}
 

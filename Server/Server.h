@@ -47,8 +47,12 @@ public:
 	inline Socket& getListenSocket() { return m_socketListener; }
 	inline Socket& getUDPSocket() { return m_socketSender; }
 
-	bool addClient(Socket clientSocketTCP, const std::string& name);
+	bool notifyConnect(Socket clientSocketTCP);
 	void notifyDisconnect(Socket clientSocketTCP);
+
+	uint32_t confirmClient(Socket clientSocketTCP, const std::string& playerName);
+
+	void notifyReceiveTCP(SOCKET clientSocketTCP);
 
 
 private:
