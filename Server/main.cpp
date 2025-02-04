@@ -5,7 +5,8 @@
 
 
 #define MESSAGE_ACCEPT (WM_USER)
-#define MESSAGE_UDP (WM_USER + 1)
+#define MESSAGE_UDP (WM_USER+1)
+#define MESSAGE_RECV (WM_USER+2)
 
 Server server;
 HWND hwnd;
@@ -61,13 +62,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	switch (msg)
 	{
 	case MESSAGE_ACCEPT:
-		Socket newClientSocket = server.getListenSocket().acceptTCP();
-		if (newClientSocket.mSocket != INVALID_SOCKET) {
-			std::string playerName = "Player";
-			ClientConnection* newClient = new ClientConnection();
-			newClient->connect(newClientSocket, playerName);
-			server.addClient(newClient);
+		{
+			Socket newClientSocket = server.getListenSocket().acceptTCP();
+			if (newClientSocket.mSocket != INVALID_SOCKET) {
+				std::string playerName = "Player";
+				ClientConnection* newClient = new ClientConnection();
+				newClient->connect(newClientSocket, playerName);
+				server.addClient(newClient);
+			}
 		}
+		return 0;
+
+	case MESSAGE_RECV:
 		return 0;
 	}
 

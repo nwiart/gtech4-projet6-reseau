@@ -9,6 +9,12 @@ Socket::Socket()
 
 }
 
+Socket::Socket(SOCKET s)
+    : mSocket(s)
+{
+
+}
+
 Socket::~Socket() {
     if (mSocket != INVALID_SOCKET) {
         closesocket(mSocket);
@@ -59,9 +65,7 @@ Socket Socket::acceptTCP()
         return Socket(); // Return an invalid socket
     }
 
-    Socket newSocket;
-    newSocket.mSocket = clientSocket;
-    return newSocket;
+    return clientSocket;
 }
 
 int Socket::bindUDP(uint16_t port)

@@ -11,6 +11,8 @@ public:
 	SOCKET mSocket;
 
 	Socket();
+	Socket(SOCKET s);
+
 	~Socket();
 
 	void createSocketUDP();

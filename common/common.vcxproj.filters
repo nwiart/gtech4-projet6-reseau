@@ -21,6 +21,9 @@
     <ClInclude Include="Networking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConnectionDenialReason.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Socket.cpp">
@@ -29,5 +32,8 @@
     <ClCompile Include="Networking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PongPackets.h" />
   </ItemGroup>
 </Project>
