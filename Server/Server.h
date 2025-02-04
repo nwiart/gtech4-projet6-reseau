@@ -1,31 +1,38 @@
 #pragma once
 
 #include "Socket.h"
-#include "PongPlayer.h"
 
-#define MAX_CLIENTS 4
+#include <vector>
+#include <map>
+
+class Lobby;
 
 
 class ClientConnection
 {
-public:
-	ClientConnection() : m_isConnected(false), m_player() {}
+	friend class Server;
 
-	bool isConnected() const { return m_isConnected; }
-	void connect(Socket socket, const std::string& playerName) {
+public:
+	ClientConnection() : m_id(-1), m_lobby(0)
+	{
+	}
+
+	void connect(Socket socket, const std::string& playerName)
+	{
 		m_socket = socket;
-		m_player.setName(playerName);
-		m_isConnected = true;
+		m_name = playerName;
 	}
 
 	Socket& getSocket() { return m_socket; }
-	PongPlayer& getPlayer() { return m_player; }
-	
+
 
 private:
-	bool m_isConnected;
-	PongPlayer m_player;
+
+	uint32_t m_id;
 	Socket m_socket;
+	std::string m_name;
+
+	Lobby* m_lobby;
 };
 
 
@@ -39,7 +46,10 @@ public:
 
 	inline Socket& getListenSocket() { return m_socketListener; }
 	inline Socket& getUDPSocket() { return m_socketSender; }
-	void addClient(ClientConnection* pClient);
+
+	bool addClient(Socket clientSocketTCP, const std::string& name);
+	void notifyDisconnect(Socket clientSocketTCP);
+
 
 private:
 
@@ -48,5 +58,8 @@ private:
 
 	Socket m_socketListener;
 	Socket m_socketSender;
-	ClientConnection* m_clients[MAX_CLIENTS];
+
+	uint32_t m_clientUID;
+	std::map<uint64_t, ClientConnection> m_clients;
+	std::vector<Lobby*> m_games;
 };

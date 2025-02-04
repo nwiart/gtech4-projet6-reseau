@@ -135,12 +135,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Games\LobbyPong.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pong\Ball.cpp" />
     <ClCompile Include="Pong\PongScene.cpp" />
     <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Games\Lobby.h" />
+    <ClInclude Include="Games\LobbyPong.h" />
     <ClInclude Include="Pong\PongPlayer.h" />
     <ClInclude Include="Pong\Ball.h" />
     <ClInclude Include="Pong\PongScene.h" />

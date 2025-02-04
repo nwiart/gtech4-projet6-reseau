@@ -1,7 +1,12 @@
 #include "Server.h"
 
+#include "Games/Lobby.h"
+
+#include <stdlib.h>
+
 
 Server::Server()
+	: m_clientUID(0)
 {
 
 }
@@ -15,15 +20,35 @@ void Server::open()
 	m_socketSender.bindUDP(serverSecondaryPort);
 }
 
-void Server::addClient(ClientConnection* pClient)
+bool Server::addClient(Socket clientSocketTCP, const std::string& name)
 {
-	for (int i = 0; i < MAX_CLIENTS; ++i) {
-		if (m_clients[i] == nullptr) {
-			m_clients[i] = pClient;
-			return;
-		}
+	if (m_clients.find(clientSocketTCP.mSocket) != m_clients.end()) {
+		return false;
 	}
-	return;
+
+	auto it = m_clients.insert(std::pair<uint64_t, ClientConnection>(clientSocketTCP.mSocket, ClientConnection()));
+	ClientConnection& conn = it.first->second;
+	conn.m_id = m_clientUID;
+	conn.connect(clientSocketTCP, name);
+
+	m_clientUID++;
+
+	return true;
 }
 
+void Server::notifyDisconnect(Socket clientSocketTCP)
+{
+	auto it = m_clients.find(clientSocketTCP.mSocket);
 
+	// No matching client! This is a critical error!
+	if (it == m_clients.end()) {
+		__debugbreak();
+	}
+
+	ClientConnection& conn = it->second;
+	conn.m_lobby->disconnectPlayer(conn.m_id);
+	
+	// TODO : close socket.
+
+	m_clients.erase(it);
+}
