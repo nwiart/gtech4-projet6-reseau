@@ -25,9 +25,10 @@ int Network::connect(const char* ip)
 int Network::sendPosition(std::string id, sf::Vector2i m_Position)
 {
     struct PositionPacket {
+        std::string id;
         int x;
         int y;
-    } packet{ m_Position.x, m_Position.y };
+    } packet{ id, m_Position.x, m_Position.y };
 
     bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<sockaddr*>(&serverUDPAddr), (uint32_t)ClientPackets::PlayerMove, packet);
 
