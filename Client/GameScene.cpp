@@ -22,15 +22,6 @@ GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::
 void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window) {
     if (event.type == sf::Event::Closed)
         window.close();
-
-    if (event.type == sf::Event::Resized) {
-        player1.resize(window.getSize());
-        player2.resize(window.getSize());
-        score.update(score1, score2, window.getSize());
-
-        player1Text.setPosition(50, 20);
-        player2Text.setPosition(window.getSize().x - 200, 20);
-    }
 }
 
 void GameScene::update(sf::RenderWindow& window) {

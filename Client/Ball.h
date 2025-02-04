@@ -1,7 +1,7 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include <SFML/Graphics.hpp>
+#include "SFMLInclude.h"
 
 class Ball {
 public:
