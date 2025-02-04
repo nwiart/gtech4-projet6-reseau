@@ -27,3 +27,10 @@ void Score::update(int score1, int score2, sf::Vector2u windowSize) {
 void Score::draw(sf::RenderWindow& window) {
     window.draw(scoreText);
 }
+
+void Score::setScore(int score1, int score2)
+{
+    scorePlayer1 = score1;
+    scorePlayer2 = score2;
+    update(scorePlayer1, scorePlayer2, windowSize);
+}

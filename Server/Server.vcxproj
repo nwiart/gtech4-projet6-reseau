@@ -139,6 +139,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pong\Ball.cpp" />
     <ClCompile Include="Pong\PongScene.cpp" />
+    <ClCompile Include="Score.cpp" />
     <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +148,7 @@
     <ClInclude Include="Pong\PongPlayer.h" />
     <ClInclude Include="Pong\Ball.h" />
     <ClInclude Include="Pong\PongScene.h" />
+    <ClInclude Include="Score.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
