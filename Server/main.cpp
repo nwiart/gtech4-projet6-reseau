@@ -66,7 +66,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			Socket newClientSocket = server.getListenSocket().acceptTCP();
 			if (newClientSocket.mSocket != INVALID_SOCKET) {
 				server.notifyConnect(newClientSocket);
-				WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, 0);
+				WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, FD_READ);
 			}
 		}
 		return 0;
