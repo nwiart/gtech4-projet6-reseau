@@ -8,7 +8,9 @@ MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)>
         std::string playerName = playerNameField.getInput();
         std::string ip = ipField.getInput();
         if (!playerName.empty() && !ip.empty()) {
-            int connectionResult = network.connect(ip.c_str());
+            char playerNameBuffer[32] = { 0 };
+            strncpy_s(playerNameBuffer, playerName.c_str(), sizeof(playerNameBuffer) - 1);
+            int connectionResult = network.connect(ip.c_str(), playerNameBuffer);
             if (connectionResult == 0) {  // Success
                 std::cout << "Connected to server successfully.\n";
                 isConnected = true;

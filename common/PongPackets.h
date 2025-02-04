@@ -71,6 +71,7 @@ struct Server_DenyJoin
 // Sent by client when they move their paddle.
 struct Client_PlayerMove
 {
+	int PlayerId;
 	float position;
 };
 

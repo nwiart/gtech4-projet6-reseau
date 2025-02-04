@@ -7,11 +7,12 @@ class Network
 {
 public:
 
-    Network() { }
+    Network(): m_playerID(-1) 
+    { }
 
-    int connect(const char* ip);
+    int connect(const char* ip,char playerName[32]);
 
-    int sendPosition(std::string id, sf::Vector2i m_Position);
+    int sendPosition(float posY);
 
 private:
 
@@ -21,4 +22,6 @@ private:
     Socket m_socketTCP;
     Socket m_socketUDP;
     sockaddr_in serverUDPAddr;
+    int m_playerID;
+
 };

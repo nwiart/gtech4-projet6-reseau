@@ -1,13 +1,33 @@
 #include "Network.h"
 #include "PongPackets.h"
 
-int Network::connect(const char* ip)
+int Network::connect(const char* ip,char playerName[32])
 {
     m_socketTCP.createSocketTCP();
     if (m_socketTCP.connectTCP(ip, serverBasePort) == SOCKET_ERROR) {
         std::cerr << "TCP connection failed.\n";
         return -1;
     }
+
+    Client_PlayerConnect packet{ *playerName };
+
+    bool success = network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::PlayerConnect, packet);
+    if (!success) {
+        return -1;
+    }
+
+    Server_ConnectResult connectResult;
+    recv(m_socketTCP.mSocket, (char*)&connectResult, sizeof(connectResult), 0);
+
+    if (!connectResult.success)
+    {
+        std::cerr << "Connection refused by server!" << std::endl;
+        return -1;
+    }
+
+    m_playerID = connectResult.playerID;
+
+
     m_socketUDP.createSocketUDP();
     if (m_socketUDP.bindUDP(0) == SOCKET_ERROR) {
         std::cerr << "UDP socket bind failed.\n";
@@ -19,24 +39,21 @@ int Network::connect(const char* ip)
     serverUDPAddr.sin_port = htons(serverSecondaryPort);
     inet_pton(AF_INET, ip, &serverUDPAddr.sin_addr);
 
+
     return 0;
 }
 
-int Network::sendPosition(std::string id, sf::Vector2i m_Position)
+int Network::sendPosition(float position)
 {
-    struct PositionPacket {
-        std::string id;
-        int x;
-        int y;
-    } packet{ id, m_Position.x, m_Position.y };
+    Client_PlayerMove packet{ m_playerID ,position };
 
-    bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<sockaddr*>(&serverUDPAddr), (uint32_t)ClientPackets::PlayerMove, packet);
+    bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 
-    if (!success) {
+    if (!success)
+    {
         std::cerr << "Failed to send position packet.\n";
         return -1;
     }
 
     return 0;
-    
 }

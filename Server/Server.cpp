@@ -19,8 +19,8 @@ void Server::open()
 	m_socketListener.createSocketTCP();
 	m_socketListener.listenTCP(serverBasePort);
 
-	m_socketSender.createSocketUDP();
-	m_socketSender.bindUDP(serverSecondaryPort);
+	m_socketUDP.createSocketUDP();
+	m_socketUDP.bindUDP(serverSecondaryPort);
 }
 
 bool Server::notifyConnect(Socket clientSocketTCP)
@@ -103,4 +103,49 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	case ClientPackets::PlayerMove:
 		break;
 	}
+}
+
+void Server::ReceiveUDP()
+{
+	sockaddr_in senderAddr;
+	int senderAddrSize = sizeof(senderAddr);
+	char buffer[MAX_PACKET_SIZE];
+
+	int bytesReceived = recvfrom(m_socketUDP.mSocket, buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr*>(&senderAddr), &senderAddrSize);
+
+	if (bytesReceived == SOCKET_ERROR)
+	{
+		int error = WSAGetLastError();
+		if (error != WSAEWOULDBLOCK)
+		{
+			std::cerr << "UDP receive failed: " << error << std::endl;
+		}
+		return;
+	}
+
+	if (bytesReceived < 4)
+		return;
+
+	uint32_t packetID = *((uint32_t*)buffer);
+	char* data = buffer + 4;
+	int dataSize = bytesReceived - 4;
+
+	// Process packet based on ID
+	switch ((ClientPackets)packetID)
+	{
+	case ClientPackets::PlayerConnect: {
+
+		break;
+	case ClientPackets::CreateLobby:
+		break;
+	case ClientPackets::JoinLobby:
+		break;
+	case ClientPackets::PlayerMove:
+
+		break;
+	default:
+		std::cerr << "Unknown UDP packet received! ID: " << packetID << std::endl;
+		break;
+	}
+}
 }

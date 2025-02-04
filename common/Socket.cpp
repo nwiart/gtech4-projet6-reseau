@@ -81,18 +81,18 @@ int Socket::bindUDP(uint16_t port)
     return 0;
 }
 
-std::string Socket::receiveUDP()
-{
-    char buffer[512];
-    sockaddr_in senderAddr;
-    int senderAddrSize = sizeof(senderAddr);
-
-    int bytesReceived = recvfrom(mSocket, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<sockaddr*>(&senderAddr), &senderAddrSize);
-    if (bytesReceived == SOCKET_ERROR) {
-        std::cerr << "UDP receive failed: " << WSAGetLastError() << std::endl;
-        return "SOCKET_ERROR";
-    }
-
-    buffer[bytesReceived] = '\0';
-    return std::string(buffer);
-}
+//std::string Socket::receiveUDP()
+//{
+//    char buffer[512];
+//    sockaddr_in senderAddr;
+//    int senderAddrSize = sizeof(senderAddr);
+//
+//    int bytesReceived = recvfrom(mSocket, buffer, sizeof(buffer) - 1, 0, reinterpret_cast<sockaddr*>(&senderAddr), &senderAddrSize);
+//    if (bytesReceived == SOCKET_ERROR) {
+//        std::cerr << "UDP receive failed: " << WSAGetLastError() << std::endl;
+//        return "SOCKET_ERROR";
+//    }
+//
+//    buffer[bytesReceived] = '\0';
+//    return std::string(buffer);
+//}
