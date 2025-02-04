@@ -9,7 +9,7 @@ int main()
     if (network::initializeWinsock() != 0) {
         std::cerr << "WSAStartup failed" << std::endl;
     }
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong Multiplayer", sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
     sf::Font font;
