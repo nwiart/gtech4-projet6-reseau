@@ -13,7 +13,7 @@ class ClientConnection
 	friend class Server;
 
 public:
-	ClientConnection() : m_id(-1), m_lobby(0),
+	ClientConnection() : m_id(-1), m_lobby(0)
 	{
 	}
 
