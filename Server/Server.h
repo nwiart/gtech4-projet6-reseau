@@ -13,18 +13,11 @@ class ClientConnection
 	friend class Server;
 
 public:
-	ClientConnection() : m_id(-1), m_lobby(0), m_hasUDP(false)
+	ClientConnection() : m_id(-1), m_lobby(0),
 	{
-	}
-
-	void connect(Socket socket, const std::string& playerName)
-	{
-		m_socket = socket;
-		m_name = playerName;
 	}
 
 	Socket& getSocket() { return m_socket; }
-	bool hasUDP() const { return m_hasUDP; }
 
 private:
 
@@ -33,8 +26,6 @@ private:
 	std::string m_name;
 
 	Lobby* m_lobby;
-
-	bool m_hasUDP;
 };
 
 
