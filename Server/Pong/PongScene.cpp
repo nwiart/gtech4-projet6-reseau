@@ -10,5 +10,5 @@ PongScene::PongScene(int sizeX, int sizeY)
 
 void PongScene::update(float dt)
 {
-	m_ball.update(dt, this);
+	//m_ball.update(dt, this);
 }
