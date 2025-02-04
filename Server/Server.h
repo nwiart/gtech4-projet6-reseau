@@ -40,15 +40,15 @@ public:
 	inline Socket& getListenSocket() { return m_socketListener; }
 	inline Socket& getUDPSocket() { return m_socketUDP; }
 
-	bool notifyConnect(Socket clientSocketTCP);
-	void notifyDisconnect(Socket clientSocketTCP);
+	bool notifyConnect(Socket& clientSocketTCP);
+	void notifyDisconnect(Socket& clientSocketTCP);
 
 	uint32_t confirmClient(Socket clientSocketTCP, const std::string& playerName);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void ReceiveUDP();
 
-
+	std::map<uint64_t, ClientConnection> m_clients; //public for debug purposes
 
 private:
 
@@ -59,6 +59,6 @@ private:
 	Socket m_socketUDP;
 
 	uint32_t m_clientUID;
-	std::map<uint64_t, ClientConnection> m_clients;
+	
 	std::vector<Lobby*> m_games;
 };

@@ -54,7 +54,7 @@ int Socket::listenTCP(uint16_t port)
     return listen(mSocket, SOMAXCONN);
 }
 
-Socket Socket::acceptTCP()
+void Socket::acceptTCP(Socket& outSocket)
 {
     sockaddr clientAddr;
     int addrLen = sizeof(clientAddr);
@@ -62,10 +62,12 @@ Socket Socket::acceptTCP()
     SOCKET clientSocket = accept(mSocket, &clientAddr, &addrLen);
     if (clientSocket == INVALID_SOCKET) {
         std::cerr << "TCP accept failed: " << WSAGetLastError() << std::endl;
-        return Socket(); // Return an invalid socket
+        outSocket.mSocket = INVALID_SOCKET;
+        return;
     }
 
-    return clientSocket;
+    std::cout << "Accepted new client socket: " << clientSocket << std::endl;
+    outSocket.mSocket = clientSocket; // Store the new socket
 }
 
 int Socket::bindUDP(uint16_t port)
@@ -79,6 +81,12 @@ int Socket::bindUDP(uint16_t port)
     }
 
     return 0;
+}
+
+
+bool Socket::isValid() const
+{
+    return mSocket != INVALID_SOCKET;
 }
 
 //std::string Socket::receiveUDP()

@@ -50,10 +50,21 @@ bool network::sendPacketTCP(Socket& s, uint32_t packetID, const T& data)
 	static_assert(sizeof(T) <= MAX_PACKET_SIZE - 4);
 
 	char buf[MAX_PACKET_SIZE];
-	*((uint32_t*) buf) = packetID;
+	*((uint32_t*)buf) = packetID;
 	memcpy(buf + 4, &data, sizeof(T));
 
-	return sendPacketTCP(s, buf, sizeof(T) + 4) != 0;
+	std::cout << "Sending Packet TCP: ID=" << packetID
+		<< ", Size=" << (sizeof(T) + 4)
+		<< ", Socket=" << s.mSocket << std::endl;
+
+	size_t bytesSent = sendPacketTCP(s, buf, sizeof(T) + 4);
+	if (bytesSent == 0) {
+		std::cerr << "sendPacketTCP() failed! WSA Error: " << WSAGetLastError() << std::endl;
+		return false;
+	}
+
+	std::cout << "Sent " << bytesSent << " bytes successfully." << std::endl;
+	return true;
 }
 
 template<typename T>

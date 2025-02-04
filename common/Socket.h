@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 #include <iostream>
-
-typedef uint64_t SOCKET;
+#include <winsock2.h>
 
 class Socket {
 public:
@@ -20,10 +19,18 @@ public:
 
 	int connectTCP(const char* ip, uint16_t port);
 	int listenTCP(uint16_t port);
-	Socket acceptTCP();
+	void acceptTCP(Socket& outSocket);
 
 	int bindUDP(uint16_t port);
-	std::string receiveUDP();
+	//std::string receiveUDP();
+
+	bool isValid() const;
+	Socket& operator=(const Socket& other) {
+		if (this != &other) {
+			this->mSocket = other.mSocket;
+		}
+		return *this;
+	}
 
 };
 
