@@ -46,11 +46,11 @@ int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t 
     return 0;
 }
 
-void network::sendPacketUDP(std::string message)
+void network::sendPacketUDP(Socket& s, std::string message)
 {
     int iResult;
 
-    iResult = sendto(mSocketUDP.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+    iResult = sendto(s.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     if (iResult == SOCKET_ERROR) {
         std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
         cleanupWinsock();
@@ -58,11 +58,11 @@ void network::sendPacketUDP(std::string message)
     }
 }
 
-void network::sendPacketTCP(std::string message)
+void network::sendPacketTCP(Socket& s, std::string message)
 {
     int iResult;
 
-    iResult = send(mSocketTCP.mSocket, message.c_str(), message.length(), 0);
+    iResult = send(s.mSocket, message.c_str(), message.length(), 0);
     if (iResult == SOCKET_ERROR) {
         std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
         cleanupWinsock();
@@ -83,11 +83,11 @@ size_t network::sendPacketTCP(Socket& s, const void* buf, size_t size)
     return size;
 }
 
-size_t network::sendPacketUDP(const sockaddr* addr, const void* buf, size_t size)
+size_t network::sendPacketUDP(Socket& s, const sockaddr* addr, const void* buf, size_t size)
 {
     int iResult;
 
-    iResult = sendto(mSocketUDP.mSocket, (const char*) buf, size, 0, addr, sizeof(sockaddr));
+    iResult = sendto(s.mSocket, (const char*) buf, size, 0, addr, sizeof(sockaddr));
     if (iResult == SOCKET_ERROR) {
         return 0;
     }
