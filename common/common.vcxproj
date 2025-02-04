@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConnectionDenialReason.h" />
+    <ClInclude Include="GameMode.h" />
     <ClInclude Include="Networking.h" />
     <ClInclude Include="Socket.h" />
   </ItemGroup>

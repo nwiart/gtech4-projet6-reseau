@@ -1,22 +1,23 @@
 #include "MainMenu.h"
 
-MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)> startGameCallback) : playerNameField(200, 100, font),
-                                                                                                      ipField(200, 170, font, true),
-                                                                                                      createButton(100, 250, "Créer Partie", font, [this]() { startGame(playerNameField.getInput(), "Serveur"); }),
-                                                                                                      joinButton(320, 250, "Rejoindre", font, [this]() {
-                                                                                                          std::string playerName = playerNameField.getInput();
-                                                                                                          std::string ip = ipField.getInput();
-                                                                                                          if (!playerName.empty() && !ip.empty()) {
-                                                                                                              int connectionResult = network.connect(ip.c_str());
-                                                                                                              if (connectionResult == 0) {  // Success
-                                                                                                                  std::cout << "Connected to server successfully.\n";
-                                                                                                                  isConnected = true;
-                                                                                                                  opponentName = "En attente...";
-                                                                                                                  startGame(playerName, opponentName);
-                                                                                                              }
-                                                                                                          }
-                                                                                                      }),
-                                                                                                      startGame(startGameCallback)
+MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)> startGameCallback)
+    : playerNameField(200, 100, font)
+    , ipField(200, 170, font, true)
+    , createButton(100, 250, "Créer Partie", font, [this]() { startGame(playerNameField.getInput(), "Serveur"); })
+    , joinButton(320, 250, "Rejoindre", font, [this]() {
+        std::string playerName = playerNameField.getInput();
+        std::string ip = ipField.getInput();
+        if (!playerName.empty() && !ip.empty()) {
+            int connectionResult = network.connect(ip.c_str());
+            if (connectionResult == 0) {  // Success
+                std::cout << "Connected to server successfully.\n";
+                isConnected = true;
+                opponentName = "En attente...";
+                startGame(playerName, opponentName);
+            }
+        }
+    })
+    , startGame(startGameCallback)
 {
     playerNameLabel.setFont(font);
     playerNameLabel.setCharacterSize(24);

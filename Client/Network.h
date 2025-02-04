@@ -13,7 +13,7 @@ public:
 private:
 
     static const uint16_t serverBasePort = 27014;
-    static const uint16_t serverSecondaryPort = 27015;
+    static const uint16_t serverSecondaryPort = serverBasePort+1;
 
     Socket m_serverTCP;
     Socket m_serverUDP;
