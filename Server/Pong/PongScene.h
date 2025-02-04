@@ -1,28 +1,37 @@
 #pragma once
 
 #include "Ball.h"
+#include "Score.h"
 
-
-class PongScene
-{
+class PongScene {
 public:
+    PongScene(int sizeX, int sizeY);
 
-	PongScene(int sizeX, int sizeY);
+    void update(float dt);
 
-	void update(float dt);
+    const Ball& getBall() const { return m_ball; }
 
-	inline const Ball& getBall() const { return m_ball; }
+    int getSizeX() const { return m_sizeX; }
+    int getSizeY() const { return m_sizeY; }
 
-	inline int getSizeX() const { return m_sizeX; }
-	inline int getSizeY() const { return m_sizeY; }
+    int getScoreP1() const { return scoreP1; }
+    int getScoreP2() const { return scoreP2; }
 
+    void setPaddlePositions(float paddle1Y, float paddle2Y);
 
 private:
+    Ball m_ball;
+    int m_sizeX;
+    int m_sizeY;
+    bool m_started;
 
-	Ball m_ball;
+    int scoreP1 = 0;
+    int scoreP2 = 0;
 
-	int m_sizeX;
-	int m_sizeY;
+    float paddle1Y;
+    float paddle2Y;
 
-	bool m_started;
+    Score score;
+
+    void checkCollisions();
 };
