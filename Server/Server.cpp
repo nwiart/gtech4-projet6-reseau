@@ -60,10 +60,16 @@ void Server::notifyDisconnect(Socket& clientSocketTCP)
 
 uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string& playerName)
 {
+	sockaddr_in addr;
+	int addrSize = sizeof(addr);
+	getpeername(clientSocketTCP.mSocket, (sockaddr*)&addr, &addrSize);
+	uint32_t clientIP = addr.sin_addr.s_addr;
+
 	ClientConnection& conn = m_clients.at(clientSocketTCP.mSocket);
 
 	conn.m_id = m_clientUID;
 	conn.m_name = playerName;
+	conn.setIP(clientIP);
 
 	m_clientUID++;
 
@@ -136,45 +142,44 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 
 	case ClientPackets::JoinLobby:
 		break;
-
-	case ClientPackets::PlayerMove:
-		break;
 	}
 }
 
-void Server::ReceiveUDP()
-{
+void Server::receiveUDPPackets() {
 	sockaddr_in senderAddr;
-	int senderAddrSize = sizeof(senderAddr);
-	char buffer[MAX_PACKET_SIZE];
+	uint32_t packetID;
 
-	int bytesReceived = recvfrom(m_socketUDP.mSocket, buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr*>(&senderAddr), &senderAddrSize);
+	while (network::receivePacketUDP(m_socketUDP, &senderAddr, packetID)) {
+		uint32_t senderIP = senderAddr.sin_addr.s_addr;
 
-	if (bytesReceived == SOCKET_ERROR)
-	{
-		int error = WSAGetLastError();
-		if (error != WSAEWOULDBLOCK)
-		{
-			std::cerr << "UDP receive failed: " << error << std::endl;
+		// Find the client that matches the IP
+		auto it = std::find_if(m_clients.begin(), m_clients.end(), [&](const auto& pair) {
+			return pair.second.getIP() == senderIP;
+			});
+
+		if (it == m_clients.end()) {
+			std::cerr << "Received UDP packet from unknown IP"  << "\n";
+			continue; // Ignore packets from unknown clients
 		}
-		return;
+
+		int playerID = it->second.m_id;
+		handleUDPPacket(packetID, playerID);
 	}
+}
 
-	if (bytesReceived < 4)
-		return;
+void Server::handleUDPPacket(uint32_t packetID, int playerID) {
+	switch (static_cast<ClientPackets>(packetID)) {
+	case ClientPackets::PlayerMove: {
+		Client_PlayerMove packet;
+		if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
+			std::cout << "Player " << playerID << " move to " << packet.position << std::endl;
+		}
+	} break;
 
-	uint32_t packetID = *((uint32_t*)buffer);
 
-	// Process packet based on ID
-	switch ((ClientPackets)packetID)
-	{
-	case ClientPackets::CreateLobby:
-		break;
-	case ClientPackets::JoinLobby:
-		break;
-	case ClientPackets::PlayerMove:
-
+	default:
+		std::cerr << "Unknown UDP packet received: " << packetID << std::endl;
 		break;
 	}
-
+	/////////ADD THEM ALL!!!!!///////// eventually
 }

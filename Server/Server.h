@@ -13,18 +13,18 @@ class ClientConnection
 	friend class Server;
 
 public:
-	ClientConnection() : m_id(-1), m_lobby(0)
-	{
-	}
+	ClientConnection() : m_id(-1), m_lobby(0), m_ip(0) {}
 
 	Socket& getSocket() { return m_socket; }
+	uint32_t getIP() const { return m_ip; }
+
+	void setIP(uint32_t ip) { m_ip = ip; }
 
 private:
-
 	uint32_t m_id;
 	Socket m_socket;
+	uint32_t m_ip;
 	std::string m_name;
-
 	Lobby* m_lobby;
 };
 
@@ -46,7 +46,9 @@ public:
 	uint32_t confirmClient(Socket clientSocketTCP, const std::string& playerName);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
-	void ReceiveUDP();
+	void receiveUDPPackets();
+
+	void handleUDPPacket(uint32_t packetID, int playerID);
 
 private:
 
