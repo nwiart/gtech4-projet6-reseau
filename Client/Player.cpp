@@ -34,3 +34,11 @@ void Player::resize(sf::Vector2u windowSize) {
 void Player::draw(sf::RenderWindow& window) {
     window.draw(paddle);
 }
+
+void Player::setPosition(float y) {
+    paddle.setPosition(paddle.getPosition().x, y);
+}
+
+float Player::getPositionY() const {
+    return paddle.getPosition().y;
+}

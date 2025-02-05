@@ -106,7 +106,7 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::ConnectResult, p);
 		std::cout << "Successfully connected Player" << playerID << std::endl;
 	}
-									 break;
+		break;
 
 	case ClientPackets::CreateLobby:
 		break;

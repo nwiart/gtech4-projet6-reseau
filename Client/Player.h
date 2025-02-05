@@ -6,10 +6,15 @@
 class Player {
 public:
     Player(float xRatio, float yRatio, sf::Keyboard::Key upKey, sf::Keyboard::Key downKey, bool useMouse = false);
+
     void update(float windowHeight, sf::RenderWindow& window);
     void resize(sf::Vector2u windowSize);
     void draw(sf::RenderWindow& window);
+
     sf::RectangleShape& getPaddle() { return paddle; }
+
+    void setPosition(float y);
+    float getPositionY() const;
 
 private:
     sf::RectangleShape paddle;
