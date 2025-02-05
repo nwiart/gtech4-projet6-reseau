@@ -9,7 +9,7 @@
 
 class GameScene : public Scene {
 public:
-    GameScene(sf::Font& font, const std::string& player1Name, const std::string& player2Name, Socket serverSocket);
+    GameScene(sf::Font& font, const std::string& player1Name, const std::string& player2Name);
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;

@@ -1,12 +1,12 @@
 #include "GameScene.h"
 #include "PongPackets.h"
 
-GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::string& player2Name, Socket serverSocket)
+GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::string& player2Name)
     : player1(0.02f, 0.5f, sf::Keyboard::W, sf::Keyboard::S, true),
     player2(0.96f, 0.5f, sf::Keyboard::Up, sf::Keyboard::Down, false),
     ball(640, 360),
-    score(font, sf::Vector2u(1280, 720)),
-    m_serverSocket(serverSocket)
+    score(font, sf::Vector2u(1280, 720))
+    /*m_serverSocket(serverSocket)*/
 {
     player1Text.setFont(font);
     player1Text.setCharacterSize(30);
