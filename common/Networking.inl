@@ -46,20 +46,13 @@ bool network::receivePacketUDP(Socket& s, sockaddr_in* senderAddr, T& data) {
 	char buffer[MAX_PACKET_SIZE];
 	int senderAddrSize = sizeof(sockaddr_in);
 
-	int bytesReceived = recvfrom(s.mSocket, buffer, sizeof(buffer), 0,
-		reinterpret_cast<sockaddr*>(senderAddr), &senderAddrSize);
+	int bytesReceived = recvfrom(s.mSocket, buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr*>(senderAddr), &senderAddrSize);
 
 	if (bytesReceived == SOCKET_ERROR) {
-		int error = WSAGetLastError();
-		if (error != WSAEWOULDBLOCK) {
-			std::cerr << "UDP receive failed! WSA Error: " << error << std::endl;
-		}
 		return false;
 	}
 
 	if (bytesReceived < sizeof(T)) {
-		std::cerr << "Incomplete UDP packet received! Expected: " << sizeof(T)
-			<< ", Received: " << bytesReceived << std::endl;
 		return false;
 	}
 

@@ -3,7 +3,24 @@
 MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)> startGameCallback)
     : playerNameField(200, 100, font)
     , ipField(200, 170, font, true)
-    , createButton(100, 250, "Créer Partie", font, [this]() { startGame(playerNameField.getInput(), "Serveur"); })
+    , createButton(100, 250, "Créer Partie", font, [this]() { 
+        std::string playerName = playerNameField.getInput();
+        std::string ip = ipField.getInput();
+        if (!playerName.empty() && !ip.empty()) {
+            showStatus = true;
+            statusLabel.setString("Connexion en cours...");
+
+            int connectionResult = network.connect(ip.c_str(), playerName.c_str());
+            if (connectionResult == 0) {  // Success
+                //std::cout << "Connected to server successfully. Creating a Lobby...";
+                //isConnected = true;
+                statusLabel.setString("Connexion au serveur reussi. Creation d'un lobby...");
+                opponentName = "En attente...";
+
+                //startGame(playerName, opponentName);
+            }
+        }
+    })
     , joinButton(320, 250, "Rejoindre", font, [this]() {
         std::string playerName = playerNameField.getInput();
         std::string ip = ipField.getInput();

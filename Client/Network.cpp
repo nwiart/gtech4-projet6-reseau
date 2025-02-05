@@ -12,6 +12,7 @@ void create_window();
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 Socket Network::m_socketTCP;
+Socket Network::m_socketUDP;
 
 void Network::init()
 {
@@ -25,6 +26,8 @@ void Network::pollEvents()
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
     }
+
+    receiveUDPPackets();
 }
 
 int Network::connect(const char* ip, const char* playerName)
@@ -93,7 +96,7 @@ int Network::sendPosition(float position)
     return 0;
 }
 
-void Network::handlePacket(uint32_t packetID)
+void Network::handleTCPPacket(uint32_t packetID)
 {
     char buf[1020];
 
@@ -155,7 +158,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
 
         if (received == sizeof(packetID)) {
-            Network::handlePacket(packetID);
+            Network::handleTCPPacket(packetID);
         }
         else {
             std::cerr << "Failed to receive valid packet ID.\n";
@@ -165,4 +168,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     }
 
     return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+void Network::receiveUDPPackets() {
+    sockaddr_in senderAddr;
+    uint32_t packetID;
+
+    while (network::receivePacketUDP(m_socketUDP, &senderAddr, packetID)) {
+        handleUDPPacket(packetID);
+    }
+}
+
+
+void Network::handleUDPPacket(uint32_t packetID) {
+    switch (static_cast<ServerPackets>(packetID)) {
+    case ServerPackets::PlayerMove: {
+        Server_PlayerMove packet;
+        if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
+            std::cout << "Player " << packet.playerID << " move to " << packet.position << std::endl;
+        }
+    } break;
+
+    case ServerPackets::BallInfo: {
+        Server_BallInfo packet;
+        if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
+            std::cout << "Ball position: (" << packet.xPos << ", " << packet.yPos << ")" << std::endl;
+        }
+    } break;
+
+    case ServerPackets::Score: {
+        Server_Score packet;
+        if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
+            std::cout << "Team " << packet.team << " scored!" << std::endl;
+        }
+    } break;
+
+    default:
+        std::cerr << "Unknown UDP packet received: " << packetID << std::endl;
+        break;
+    }
+    /////////ADD THEM ALL!!!!!///////// eventually
 }

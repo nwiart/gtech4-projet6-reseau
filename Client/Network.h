@@ -12,7 +12,11 @@ public:
     static void init();
     static void pollEvents();
 
-    static void handlePacket(uint32_t packetID);
+    static void handleTCPPacket(uint32_t packetID);
+
+    static void receiveUDPPackets();
+
+    static void handleUDPPacket(uint32_t packetID);
 
     int connect(const char* ip,const char* playerName);
 
@@ -26,7 +30,7 @@ private:
     static const uint16_t serverSecondaryPort = serverBasePort+1;
 
     static Socket m_socketTCP;
-    Socket m_socketUDP;
+    static Socket m_socketUDP;
     sockaddr_in serverUDPAddr;
     int m_playerID;
 

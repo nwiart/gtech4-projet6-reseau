@@ -164,15 +164,10 @@ void Server::ReceiveUDP()
 		return;
 
 	uint32_t packetID = *((uint32_t*)buffer);
-	char* data = buffer + 4;
-	int dataSize = bytesReceived - 4;
 
 	// Process packet based on ID
 	switch ((ClientPackets)packetID)
 	{
-	case ClientPackets::PlayerConnect: {
-
-		break;
 	case ClientPackets::CreateLobby:
 		break;
 	case ClientPackets::JoinLobby:
@@ -180,9 +175,6 @@ void Server::ReceiveUDP()
 	case ClientPackets::PlayerMove:
 
 		break;
-	default:
-		std::cerr << "Unknown UDP packet received! ID: " << packetID << std::endl;
-		break;
 	}
-}
+
 }
