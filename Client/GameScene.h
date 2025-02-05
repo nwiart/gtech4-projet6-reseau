@@ -14,7 +14,7 @@ public:
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
-    void receiveGameState();
+    void receiveGameStateUDP();
     void sendPlayerMove(sf::RenderWindow& window);
 private:
     Player player1;

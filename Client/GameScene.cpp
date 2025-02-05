@@ -30,10 +30,11 @@ void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window) {
 void GameScene::update(sf::RenderWindow& window) {
     player1.update(window.getSize().y, window);
     player2.update(window.getSize().y, window);
+
     ball.draw(window);
 
     sendPlayerMove(window);
-    receiveGameState();
+    receiveGameStateUDP();
 }
 
 void GameScene::draw(sf::RenderWindow& window) {
@@ -55,9 +56,11 @@ void GameScene::sendPlayerMove(sf::RenderWindow& window) {
     network::sendPacketTCP(m_serverSocket, (uint32_t)ClientPackets::PlayerMove, packet);
 }
 
-void GameScene::receiveGameState() {
+void GameScene::receiveGameStateUDP() {
+    sockaddr_in senderAddr;
     GameState state;
-    if (network::receivePacketTCP(m_serverSocket, state)) {
+
+    if (network::receivePacketUDP(m_serverSocket, &senderAddr, state)) {
         ball.setPosition(sf::Vector2f(state.ballX, state.ballY));
         score.update(state.scoreP1, state.scoreP2, sf::Vector2u(1280, 720));
         player1.setPosition(state.paddle1Y);
