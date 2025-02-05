@@ -3,24 +3,30 @@
 #include "Scene.h"
 #include "TextField.h"
 #include "Button.h"
+#include "Network.h"
 
-class MainMenu : public Scene {
+class ConnectScreen : public Scene
+{
 public:
-    MainMenu(sf::Font& font);
+    ConnectScreen(sf::Font& font);
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
-    void refreshLobbyList();
-    void listLobby(const char* name, int numPlayers, int maxPlayers);
-
 private:
-    Button createButton;
-    Button buttonRefresh;
-    sf::Font font;
-    std::vector<Button> lobbies;
+    TextField playerNameField;
+    TextField ipField;
+    Button buttonConnect;
+
     std::function<void(std::string, std::string)> startGame;
 
+    Network network;
+    bool showStatus = false;
     bool isConnected = false;
     std::string opponentName;
+
+    sf::Font font;
+    sf::Text playerNameLabel;
+    sf::Text ipLabel;
+    sf::Text statusLabel;
 };

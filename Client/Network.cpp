@@ -1,6 +1,8 @@
 #include "Network.h"
 #include "PongPackets.h"
 
+#include "MainMenu.h"
+
 #include <string.h>
 #include <iostream>
 
@@ -33,7 +35,7 @@ void Network::pollEvents()
 int Network::connect(const char* ip, const char* playerName)
 {
     m_socketTCP.createSocketTCP();
- 
+
 
     // Attempt to connect via TCP
     if (m_socketTCP.connectTCP(ip, serverBasePort) == SOCKET_ERROR) {
@@ -50,7 +52,11 @@ int Network::connect(const char* ip, const char* playerName)
 
     // Copy player name safely
     Client_PlayerConnect packet;
-    strncpy(packet.playerName, playerName, sizeof(packet.playerName) - 1);
+    int len = strlen(playerName);
+    if (len > sizeof(packet.playerName) - 1) {
+        len = sizeof(packet.playerName) - 1;
+    }
+    strncpy(packet.playerName, playerName, len);
     packet.playerName[sizeof(packet.playerName) - 1] = '\0';
 
     // Send the PlayerConnect packet
@@ -102,6 +108,16 @@ void Network::handleTCPPacket(uint32_t packetID)
 
     switch ((ServerPackets)packetID)
     {
+    case ServerPackets::GetLobbies:
+    {
+        MainMenu* menu = dynamic_cast<MainMenu*>(Scene::getCurrentScene());
+        if (menu) {
+            Server_GetLobbies& p = *reinterpret_cast<Server_GetLobbies*>(buf);
+            menu->listLobby(p.lobbyName, p.numPlayers, p.maxPlayers);
+        }
+    }
+    break;
+
     case ServerPackets::AcceptJoin:
     {
         int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_AcceptJoin), 0);
@@ -135,8 +151,7 @@ void create_window()
 
     HINSTANCE inst = GetModuleHandleA(0);
 
-    WNDCLASSEXA wcex;
-    ZeroMemory(&wcex, sizeof(WNDCLASSEXA));
+    WNDCLASSEXA wcex; ZeroMemory(&wcex, sizeof(WNDCLASSEXA));
     wcex.cbSize = sizeof(WNDCLASSEXA);
     wcex.hInstance = inst;
     wcex.lpszClassName = className;

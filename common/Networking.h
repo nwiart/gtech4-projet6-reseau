@@ -1,12 +1,10 @@
-#ifndef NETWORKING_H
-#define NETWORKING_H
+#pragma once
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
 #include <stdint.h>
-#pragma comment(lib, "Ws2_32.lib")
 
 #include "Socket.h"
 
@@ -51,5 +49,3 @@ private:
 
 
 #include "Networking.inl"
-
-#endif // NETWORKING_H

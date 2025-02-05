@@ -22,7 +22,7 @@ public:
 
     int sendPosition(float posY);
 
-    inline Socket& getServerTCP() { return m_socketTCP; }
+    static inline Socket& getServerTCP() { return m_socketTCP; }
 
 private:
 

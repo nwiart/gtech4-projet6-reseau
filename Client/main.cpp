@@ -1,7 +1,7 @@
 #include "SFMLInclude.h"
 #include "Scene.h"
+#include "ConnectScreen.h"
 #include "MainMenu.h"
-#include "GameScene.h"
 #include "Networking.h"
 
 int main()
@@ -19,16 +19,15 @@ int main()
         return -1;
     }
 
-    Scene* currentScene = nullptr;
-    MainMenu menu(font, [&](std::string p1, std::string p2) {
-        currentScene = new GameScene(font, p1, p2);
-        });
+    ConnectScreen* menu = new ConnectScreen(font);
 
-    currentScene = &menu;
+    Scene::setCurrentScene(menu);
 
     while (window.isOpen())
     {
         Network::pollEvents();
+
+        Scene* scene = Scene::getCurrentScene();
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -37,14 +36,14 @@ int main()
                 window.close();
             }
             else {
-                currentScene->handleEvent(event, window);
+                scene->handleEvent(event, window);
             }
         }
 
-        currentScene->update(window);
+        scene->update(window);
 
         window.clear();
-        currentScene->draw(window);
+        scene->draw(window);
         window.display();
     }
 

@@ -137,10 +137,12 @@
   <ItemGroup>
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="ConnectScreen.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Score.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="TextField.cpp" />
@@ -148,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Button.h" />
+    <ClInclude Include="ConnectScreen.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Player.h" />

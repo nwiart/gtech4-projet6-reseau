@@ -7,6 +7,7 @@
 enum class ClientPackets : uint32_t
 {
 	PlayerConnect,
+	GetLobbies,
 	CreateLobby,
 	JoinLobby,
 
@@ -16,6 +17,7 @@ enum class ClientPackets : uint32_t
 enum class ServerPackets : uint32_t
 {
 	ConnectResult,
+	GetLobbies,
 	LobbyCreation,
 	AcceptJoin,
 	DenyJoin,
@@ -29,6 +31,11 @@ enum class ServerPackets : uint32_t
 struct Client_PlayerConnect
 {
 	char playerName[32];
+};
+
+struct Client_GetLobbies
+{
+
 };
 
 // Sent by client to create a new lobby.
@@ -47,6 +54,14 @@ struct Server_ConnectResult
 {
 	uint32_t playerID;
 	bool success;
+};
+
+struct Server_GetLobbies
+{
+	char lobbyName[32];
+	short numPlayers;
+	short maxPlayers;
+	bool more;
 };
 
 struct Server_LobbyCreation

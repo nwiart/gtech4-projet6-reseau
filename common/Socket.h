@@ -1,9 +1,9 @@
-#ifndef SOCKET_H
-#define SOCKET_H
+#pragma once
 
 #include <stdint.h>
 #include <iostream>
-#include <winsock2.h>
+
+typedef uint64_t SOCKET;
 
 class Socket {
 public:
@@ -33,5 +33,3 @@ public:
 	}
 
 };
-
-#endif // SOCKET_H

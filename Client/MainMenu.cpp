@@ -1,67 +1,30 @@
 #include "MainMenu.h"
 
-MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)> startGameCallback)
-    : playerNameField(200, 100, font)
-    , ipField(200, 170, font, true)
-    , createButton(100, 250, "Créer Partie", font, [this]() { 
-        std::string playerName = playerNameField.getInput();
-        std::string ip = ipField.getInput();
-        if (!playerName.empty() && !ip.empty()) {
-            showStatus = true;
-            statusLabel.setString("Connexion en cours...");
+#include "Networking.h"   // Go figure
+#include "Network.h"      //
 
-            int connectionResult = network.connect(ip.c_str(), playerName.c_str());
-            if (connectionResult == 0) {  // Success
-                //std::cout << "Connected to server successfully. Creating a Lobby...";
-                //isConnected = true;
-                statusLabel.setString("Connexion au serveur reussi. Creation d'un lobby...");
-                opponentName = "En attente...";
+#include "PongPackets.h"
 
-                //startGame(playerName, opponentName);
-            }
-        }
+#include <sstream>
+
+MainMenu::MainMenu(sf::Font& font)
+    : createButton(100, 250, "Créer Partie", font, [this]() { 
+        
     })
-    , joinButton(320, 250, "Rejoindre", font, [this]() {
-        std::string playerName = playerNameField.getInput();
-        std::string ip = ipField.getInput();
-        if (!playerName.empty() && !ip.empty()) {
-            showStatus = true;
-            statusLabel.setString("Connexion en cours...");
-
-            int connectionResult = network.connect(ip.c_str(), playerName.c_str());
-            if (connectionResult == 0) {  // Success
-                //std::cout << "Connected to server successfully.\n";
-                //isConnected = true;
-                opponentName = "En attente...";
-                //startGame(playerName, opponentName);
-            }
-        }
+    , buttonRefresh(100, 250, "Actualiser", font, [this]() {
+        refreshLobbyList();
     })
-    , startGame(startGameCallback)
+    , font(font)
 {
-    playerNameLabel.setFont(font);
-    playerNameLabel.setCharacterSize(24);
-    playerNameLabel.setFillColor(sf::Color::White);
-    playerNameLabel.setString("Nom du joueur:");
-    playerNameLabel.setPosition(5, 110);
-
-    ipLabel.setFont(font);
-    ipLabel.setCharacterSize(24);
-    ipLabel.setFillColor(sf::Color::White);
-    ipLabel.setString("Adresse IP:");
-    ipLabel.setPosition(5, 180);
-
-    statusLabel.setFont(font);
-    statusLabel.setCharacterSize(24);
-    statusLabel.setFillColor(sf::Color::White);
-    statusLabel.setPosition(30, 680);
+    refreshLobbyList();
 }
 
 void MainMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
-    playerNameField.handleEvent(event, window);
-    ipField.handleEvent(event, window);
     createButton.handleEvent(event, window);
-    joinButton.handleEvent(event, window);
+
+    for (Button& b : lobbies) {
+        b.handleEvent(event, window);
+    }
 }
 
 void MainMenu::update(sf::RenderWindow& window) {
@@ -75,13 +38,27 @@ void MainMenu::update(sf::RenderWindow& window) {
 }
 
 void MainMenu::draw(sf::RenderWindow& window) {
-    window.draw(playerNameLabel);
-    window.draw(ipLabel);
-    if (showStatus)
-        window.draw(statusLabel);
-
-    playerNameField.draw(window);
-    ipField.draw(window);
     createButton.draw(window);
-    joinButton.draw(window);
+
+    for (Button& b : lobbies) {
+        b.draw(window);
+    }
+}
+
+void MainMenu::refreshLobbyList()
+{
+    lobbies.clear();
+
+    network::sendPacketTCP(Network::getServerTCP(), (uint32_t)ClientPackets::GetLobbies, Client_GetLobbies());
+}
+
+void MainMenu::listLobby(const char* name, int numPlayers, int maxPlayers)
+{
+    std::stringstream label;
+    label << name << " (" << numPlayers << '/' << maxPlayers << ")";
+
+    Button b(0, 0, label.str(), font, []() {
+
+    });
+    lobbies.push_back(b);
 }
