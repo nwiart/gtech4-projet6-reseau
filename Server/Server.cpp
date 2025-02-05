@@ -85,7 +85,36 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	uint32_t packetID;
 	char buf[1020];
 
-	recv(clientSocketTCP, (char*)&packetID, 4, 0);
+	if (clientSocketTCP == INVALID_SOCKET) {
+		std::cerr << "Error: Attempted to receive on an invalid socket!\n";
+		return;
+	}
+
+	int receivedBytes = recv(clientSocketTCP, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
+
+	if (receivedBytes == 0) {
+		std::cerr << "Client disconnected gracefully.\n";
+		notifyDisconnect(conn.getSocket());
+		return;
+	}
+	else if (receivedBytes == SOCKET_ERROR) {
+		int error = WSAGetLastError();
+		std::cerr << "Error receiving packet ID. WSA Error: " << error << std::endl;
+
+		if (error == WSAECONNRESET) {
+			std::cerr << "Client forcibly closed the connection.\n";
+		}
+		else if (error == WSAETIMEDOUT) {
+			std::cerr << "Connection timed out.\n";
+		}
+		else if (error == WSAENOTSOCK) {
+			std::cerr << "Invalid socket error (10038). Check if the socket is closed or uninitialized.\n";
+		}
+
+		notifyDisconnect(conn.getSocket());
+		return;
+	}
+
 	int e = WSAGetLastError();
 
 	switch ((ClientPackets)packetID)
