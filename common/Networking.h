@@ -45,7 +45,7 @@ public:
 	static bool receivePacketTCP(Socket& s, T& data);
 
 	template<typename T>
-	bool receivePacketUDP(Socket& s, sockaddr_in* senderAddr, T& data);
+	static bool receivePacketUDP(Socket& s, sockaddr_in* senderAddr, T& data);
 private:
 };
 
