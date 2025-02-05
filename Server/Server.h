@@ -48,13 +48,12 @@ public:
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void ReceiveUDP();
 
-	std::map<uint64_t, ClientConnection> m_clients; //public for debug purposes
-
 private:
 
 	static const uint16_t serverBasePort = 27014;
 	static const uint16_t serverSecondaryPort = serverBasePort+1;
 
+	std::map<uint64_t, ClientConnection> m_clients;
 	Socket m_socketListener;
 	Socket m_socketUDP;
 
