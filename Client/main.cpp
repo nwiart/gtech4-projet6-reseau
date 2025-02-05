@@ -21,7 +21,7 @@ int main()
 
     Scene* currentScene = nullptr;
     MainMenu menu(font, [&](std::string p1, std::string p2) {
-        currentScene = new GameScene(font, p1, p2, 0);
+        currentScene = new GameScene(font, p1, p2);
         });
 
     currentScene = &menu;
