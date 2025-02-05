@@ -21,11 +21,13 @@ private:
     std::function<void(std::string, std::string)> startGame;
 
     Network network;
+    bool showStatus = false;
     bool isConnected = false;
     std::string opponentName;
 
     sf::Text playerNameLabel;
     sf::Text ipLabel;
+    sf::Text statusLabel;
 };
 
 #endif

@@ -17,7 +17,7 @@ Socket::Socket(SOCKET s)
 
 Socket::~Socket() {
     if (mSocket != INVALID_SOCKET) {
-        closesocket(mSocket);
+        //closesocket(mSocket);
     }
 }
 

@@ -25,16 +25,11 @@ void Server::open()
 
 bool Server::notifyConnect(Socket& clientSocketTCP)
 {
-	std::cout << "Attempting to add socket to m_clients: " << clientSocketTCP.mSocket << std::endl;
-
 	if (m_clients.find(clientSocketTCP.mSocket) != m_clients.end()) {
-		std::cerr << "Socket already in clients map!" << std::endl;
 		return false;
 	}
 
-	std::cout << "Not already in map: Inserting..." << std::endl;
 	auto it = m_clients.insert(std::pair<uint64_t, ClientConnection>((uint64_t)clientSocketTCP.mSocket, ClientConnection()));
-	std::cout << "inserted successfully!" << std::endl;
 
 	ClientConnection& conn = it.first->second;
 	conn.m_id = -1;
@@ -81,8 +76,6 @@ uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string& player
 
 void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 {
-	std::cout << "Received message for socket: " << clientSocketTCP << std::endl;
-
 	if (m_clients.find(clientSocketTCP) == m_clients.end()) {
 		std::cerr << "Client socket not found in server!" << std::endl;
 		return;
@@ -93,6 +86,7 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	char buf[1020];
 
 	recv(clientSocketTCP, (char*)&packetID, 4, 0);
+	int e = WSAGetLastError();
 
 	switch ((ClientPackets)packetID)
 	{
@@ -104,7 +98,7 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		p.success = true;
 		p.playerID = playerID;
 		network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::ConnectResult, p);
-		std::cout << "Successfully connected Player" << playerID << std::endl;
+		std::cout << "Successfully connected Player " << playerID << " with name \"" << reinterpret_cast<Client_PlayerConnect*>(buf)->playerName << "\"." << std::endl;
 	}
 		break;
 

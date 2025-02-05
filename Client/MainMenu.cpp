@@ -8,14 +8,15 @@ MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)>
         std::string playerName = playerNameField.getInput();
         std::string ip = ipField.getInput();
         if (!playerName.empty() && !ip.empty()) {
-            char playerNameBuffer[32] = { 0 };
-            strncpy_s(playerNameBuffer, playerName.c_str(), sizeof(playerNameBuffer) - 1);
-            int connectionResult = network.connect(ip.c_str(), playerNameBuffer);
+            showStatus = true;
+            statusLabel.setString("Connexion en cours...");
+
+            int connectionResult = network.connect(ip.c_str(), playerName.c_str());
             if (connectionResult == 0) {  // Success
-                std::cout << "Connected to server successfully.\n";
-                isConnected = true;
+                //std::cout << "Connected to server successfully.\n";
+                //isConnected = true;
                 opponentName = "En attente...";
-                startGame(playerName, opponentName);
+                //startGame(playerName, opponentName);
             }
         }
     })
@@ -32,6 +33,11 @@ MainMenu::MainMenu(sf::Font& font, std::function<void(std::string, std::string)>
     ipLabel.setFillColor(sf::Color::White);
     ipLabel.setString("Adresse IP:");
     ipLabel.setPosition(5, 180);
+
+    statusLabel.setFont(font);
+    statusLabel.setCharacterSize(24);
+    statusLabel.setFillColor(sf::Color::White);
+    statusLabel.setPosition(30, 680);
 }
 
 void MainMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
@@ -54,6 +60,8 @@ void MainMenu::update(sf::RenderWindow& window) {
 void MainMenu::draw(sf::RenderWindow& window) {
     window.draw(playerNameLabel);
     window.draw(ipLabel);
+    if (showStatus)
+        window.draw(statusLabel);
 
     playerNameField.draw(window);
     ipField.draw(window);

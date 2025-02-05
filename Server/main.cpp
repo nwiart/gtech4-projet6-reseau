@@ -2,6 +2,7 @@
 #include "Server.h"
 
 #include <iostream>
+#include <sstream>
 
 
 #define MESSAGE_ACCEPT (WM_USER)
@@ -65,31 +66,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		Socket newClientSocket;
 		server.getListenSocket().acceptTCP(newClientSocket);
+		WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, FD_READ);
 
 		if (newClientSocket.mSocket == INVALID_SOCKET) {
-			std::cerr << "New client socket is invalid after accept!" << std::endl;
+			//std::cerr << "New client socket is invalid after accept!" << std::endl;
 		}
 		else {
-			std::cout << "New client socket accepted: " << newClientSocket.mSocket << std::endl;
+			std::stringstream ss;
+			sockaddr_in addr;
+			int len = sizeof(sockaddr_in);
+			getsockname(newClientSocket.mSocket, (sockaddr*) &addr, &len);
+
+			UCHAR* ipb = &addr.sin_addr.S_un.S_un_b.s_b1;
+			ss << (int) ipb[0] << '.' << (int)ipb[1] << '.' << (int)ipb[2] << '.' << (int)ipb[3] << ':' << (int)addr.sin_port;
+			std::cout << "New connection from " << ss.str() << std::endl;
 		}
 
 		server.notifyConnect(newClientSocket);
-
-		std::cout << "Socket before WSAAsyncSelect: " << newClientSocket.mSocket << std::endl;
-
-		if (WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, FD_READ) == SOCKET_ERROR) {
-			std::cerr << "WSAAsyncSelect failed! Error: " << WSAGetLastError() << " for socket " << newClientSocket.mSocket << std::endl;
-		}
-		else {
-			std::cout << "WSAAsyncSelect set up successfully for socket: " << newClientSocket.mSocket << std::endl;
-		}
 	}
-	return 0;
+	break;
 
 	case MESSAGE_RECV:
 		{
 			SOCKET socket = (SOCKET)wparam;
-			std::cout << "MESSAGE_RECV triggered for socket: " << socket << std::endl;
 			server.notifyReceiveTCP(socket);
 		}
 		return 0;
