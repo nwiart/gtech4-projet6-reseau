@@ -95,3 +95,9 @@ struct Server_Score
 {
 	int team;
 };
+
+struct GameState {
+	float ballX, ballY;
+	int scoreP1, scoreP2;
+	float paddle1Y, paddle2Y;
+};

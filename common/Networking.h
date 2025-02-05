@@ -40,6 +40,9 @@ public:
 
 	template<typename T>
 	static bool sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, const T& data);
+
+	template<typename T>
+	static bool receivePacketTCP(Socket& s, T& data);
 private:
 };
 
@@ -79,5 +82,16 @@ bool network::sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, 
 	return sendto(s.mSocket, buf, sizeof(T) + 4, 0, addr, sizeof(sockaddr)) != SOCKET_ERROR;
 }
 
+template<typename T>
+bool network::receivePacketTCP(Socket& s, T& data) {
+	int receivedBytes = recv(s.mSocket, reinterpret_cast<char*>(&data), sizeof(T), 0);
+
+	if (receivedBytes == SOCKET_ERROR) {
+		std::cerr << "Error receiving packet TCP! WSA Error: " << WSAGetLastError() << std::endl;
+		return false;
+	}
+
+	return receivedBytes == sizeof(T);
+}
 
 #endif // NETWORKING_H
