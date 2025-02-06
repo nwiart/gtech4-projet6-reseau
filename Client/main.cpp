@@ -5,6 +5,8 @@
 
 sf::Font font;
 
+int playerID;
+
 int main()
 {
     if (network::initializeWinsock() != 0) {

@@ -5,6 +5,9 @@
 #include "Network.h"
 
 
+extern int playerID;
+
+
 LobbyMenu::LobbyMenu(sf::Font& font)
     : font(font)
     , labelLobbyName("Salle Pong", this->font)
@@ -20,7 +23,7 @@ LobbyMenu::LobbyMenu(sf::Font& font)
 }
 
 void LobbyMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
-    buttonStart.handleEvent(event, window);
+    if (playerID == 0) buttonStart.handleEvent(event, window);
     buttonBack.handleEvent(event, window);
 }
 
@@ -29,7 +32,7 @@ void LobbyMenu::update(sf::RenderWindow& window) {
 }
 
 void LobbyMenu::draw(sf::RenderWindow& window) {
-    buttonStart.draw(window);
+    if (playerID == 0) buttonStart.draw(window);
     buttonBack.draw(window);
     window.draw(labelLobbyName);
 }

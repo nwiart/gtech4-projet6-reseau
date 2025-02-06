@@ -154,7 +154,8 @@ void Network::handleTCPPacket(uint32_t packetID)
     {
         int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_AcceptJoin), 0);
         if (received == sizeof(Server_AcceptJoin)) {
-            int playerID = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
+            extern int playerID;
+            playerID = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
             printf("Accepted! Player ID: %d\n", playerID);
 
             Scene::setCurrentScene(new LobbyMenu(font));
