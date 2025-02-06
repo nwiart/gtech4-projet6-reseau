@@ -9,6 +9,9 @@ class LobbyPong : public Lobby {
 public:
     LobbyPong();
 
+    virtual int getNumPlayers() const override { return m_players.size(); }
+    virtual int getMaxPlayers() const override { return 2; }
+
     void addPlayer(uint32_t playerID, Socket playerSocket);
     void startGame();
     void update(float dt);

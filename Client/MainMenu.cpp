@@ -1,5 +1,7 @@
 #include "MainMenu.h"
 
+#include "CreateLobbyMenu.h"
+
 #include "Networking.h"   // Go figure
 #include "Network.h"      //
 
@@ -8,10 +10,10 @@
 #include <sstream>
 
 MainMenu::MainMenu(sf::Font& font)
-    : createButton(100, 250, "Créer Partie", font, [this]() { 
-        
+    : createButton(100, 250, "Créer Partie", this->font, [this]() { 
+        Scene::setCurrentScene(new CreateLobbyMenu(this->font));
     })
-    , buttonRefresh(100, 250, "Actualiser", font, [this]() {
+    , buttonRefresh(100, 250, "Actualiser", this->font, [this]() {
         refreshLobbyList();
     })
     , font(font)
@@ -57,7 +59,8 @@ void MainMenu::listLobby(const char* name, int numPlayers, int maxPlayers)
     std::stringstream label;
     label << name << " (" << numPlayers << '/' << maxPlayers << ")";
 
-    Button b(0, 0, label.str(), font, []() {
+    int yPos = lobbies.size() * 60;
+    Button b(1000, yPos, label.str(), font, []() {
 
     });
     lobbies.push_back(b);

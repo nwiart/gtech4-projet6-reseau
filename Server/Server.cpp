@@ -140,9 +140,9 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	case ClientPackets::GetLobbies: {
 		for (Lobby* lobby : m_games) {
 			Server_GetLobbies p;
-			strcpy(p.lobbyName, "bitches");
-			p.numPlayers = 0;
-			p.maxPlayers = 2;
+			strcpy(p.lobbyName, lobby->getName().c_str());
+			p.numPlayers = lobby->getNumPlayers();
+			p.maxPlayers = lobby->getMaxPlayers();
 			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GetLobbies, p);
 		}
 	}

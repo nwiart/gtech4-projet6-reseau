@@ -3,16 +3,18 @@
 #include "ConnectScreen.h"
 #include "MainMenu.h"
 #include "Networking.h"
+#include "Network.h"
 
 int main()
 {
     if (network::initializeWinsock() != 0) {
         std::cerr << "WSAStartup failed" << std::endl;
     }
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong", sf::Style::Titlebar | sf::Style::Close);
-    window.setVerticalSyncEnabled(true);
 
     Network::init();
+
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong", sf::Style::Titlebar | sf::Style::Close);
+    window.setVerticalSyncEnabled(true);
 
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
@@ -27,8 +29,6 @@ int main()
     {
         Network::pollEvents();
 
-        Scene* scene = Scene::getCurrentScene();
-
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -36,14 +36,14 @@ int main()
                 window.close();
             }
             else {
-                scene->handleEvent(event, window);
+                Scene::getCurrentScene()->handleEvent(event, window);
             }
         }
 
-        scene->update(window);
+        Scene::getCurrentScene()->update(window);
 
         window.clear();
-        scene->draw(window);
+        Scene::getCurrentScene()->draw(window);
         window.display();
     }
 

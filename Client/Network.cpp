@@ -11,10 +11,11 @@
 static HWND hwnd;
 
 void create_window();
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 Socket Network::m_socketTCP;
 Socket Network::m_socketUDP;
+sockaddr_in Network::serverUDPAddr;
 
 void Network::init()
 {
@@ -29,7 +30,7 @@ void Network::pollEvents()
         DispatchMessageA(&msg);
     }
 
-    receiveUDPPackets();
+    //receiveUDPPackets();
 }
 
 int Network::connect(const char* ip, const char* playerName)
@@ -57,7 +58,7 @@ int Network::connect(const char* ip, const char* playerName)
         len = sizeof(packet.playerName) - 1;
     }
     strncpy(packet.playerName, playerName, len);
-    packet.playerName[sizeof(packet.playerName) - 1] = '\0';
+    packet.playerName[len] = '\0';
 
     // Send the PlayerConnect packet
     bool success = network::sendPacketTCP(m_socketTCP, static_cast<uint32_t>(ClientPackets::PlayerConnect), packet);
@@ -110,6 +111,7 @@ void Network::handleTCPPacket(uint32_t packetID)
     {
     case ServerPackets::GetLobbies:
     {
+        recv(m_socketTCP.mSocket, buf, sizeof(Server_GetLobbies), 0);
         MainMenu* menu = dynamic_cast<MainMenu*>(Scene::getCurrentScene());
         if (menu) {
             Server_GetLobbies& p = *reinterpret_cast<Server_GetLobbies*>(buf);
@@ -159,27 +161,27 @@ void create_window()
 
     RegisterClassExA(&wcex);
 
-    hwnd = CreateWindowA(className, "", 0, 0, 0, 100, 100, 0, 0, inst, 0);
+    hwnd = CreateWindowA(className, "Title", 0, 0, 0, 100, 100, 0, 0, inst, 0);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg)
     {
     case MESSAGE_RECV:
-    {
-        SOCKET socket = (SOCKET)wparam;
-        uint32_t packetID;
-        int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
+        {
+            SOCKET socket = (SOCKET)wparam;
+            uint32_t packetID;
+            int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
 
-        if (received == sizeof(packetID)) {
-            Network::handleTCPPacket(packetID);
+            if (received == sizeof(packetID)) {
+                Network::handleTCPPacket(packetID);
+            }
+            else {
+                std::cerr << "Failed to receive valid packet ID.\n";
+            }
         }
-        else {
-            std::cerr << "Failed to receive valid packet ID.\n";
-        }
-    }
-    return 0;
+        break;
     }
 
     return DefWindowProc(hwnd, msg, wparam, lparam);

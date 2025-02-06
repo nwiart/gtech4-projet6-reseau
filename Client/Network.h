@@ -18,7 +18,7 @@ public:
 
     static void handleUDPPacket(uint32_t packetID);
 
-    int connect(const char* ip,const char* playerName);
+    static int connect(const char* ip,const char* playerName);
 
     int sendPosition(float posY);
 
@@ -31,7 +31,7 @@ private:
 
     static Socket m_socketTCP;
     static Socket m_socketUDP;
-    sockaddr_in serverUDPAddr;
+    static sockaddr_in serverUDPAddr;
     int m_playerID;
 
 };

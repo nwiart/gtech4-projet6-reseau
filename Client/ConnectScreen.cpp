@@ -2,6 +2,8 @@
 
 #include "MainMenu.h"
 
+#include "Network.h"
+
 ConnectScreen::ConnectScreen(sf::Font& font)
     : playerNameField(200, 100, font)
     , font(font)
@@ -13,7 +15,7 @@ ConnectScreen::ConnectScreen(sf::Font& font)
             showStatus = true;
             statusLabel.setString("Connexion en cours...");
 
-            int connectionResult = network.connect(ip.c_str(), playerName.c_str());
+            int connectionResult = Network::connect(ip.c_str(), playerName.c_str());
             if (connectionResult == 0) {  // Success.
                 Scene::setCurrentScene(new MainMenu(this->font));
             }

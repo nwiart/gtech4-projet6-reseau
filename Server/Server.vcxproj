@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Games\Lobby.cpp" />
     <ClCompile Include="Games\LobbyPong.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Pong\Ball.cpp" />

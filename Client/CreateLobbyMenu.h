@@ -4,18 +4,19 @@
 #include "TextField.h"
 #include "Button.h"
 
-class ConnectScreen : public Scene
+class CreateLobbyMenu : public Scene
 {
 public:
-    ConnectScreen(sf::Font& font);
+    CreateLobbyMenu(sf::Font& font);
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
 private:
-    TextField playerNameField;
-    TextField ipField;
-    Button buttonConnect;
+    TextField fieldLobbyName;
+    Button buttonCreatePong1v1;
+    Button buttonCreatePong2v2;
+    Button buttonBack;
 
     std::function<void(std::string, std::string)> startGame;
 
@@ -24,7 +25,5 @@ private:
     std::string opponentName;
 
     sf::Font font;
-    sf::Text playerNameLabel;
-    sf::Text ipLabel;
-    sf::Text statusLabel;
+    sf::Text labelLobbyName;
 };

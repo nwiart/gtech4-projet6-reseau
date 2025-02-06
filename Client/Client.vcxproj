@@ -138,6 +138,7 @@
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="ConnectScreen.cpp" />
+    <ClCompile Include="CreateLobbyMenu.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="main.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ConnectScreen.h" />
+    <ClInclude Include="CreateLobbyMenu.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Player.h" />
