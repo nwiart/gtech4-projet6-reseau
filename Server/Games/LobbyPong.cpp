@@ -15,8 +15,8 @@ void LobbyPong::start()
     Server_GameStart p;
     p.started = true;
 
-    for (auto p : m_players) {
-        network::sendPacketTCP(p.second, (uint32_t)ServerPackets::GameStart, p);
+    for (auto pl : m_players) {
+        network::sendPacketTCP(pl.second, (uint32_t)ServerPackets::GameStart, p);
     }
 
     gameStarted = true;
