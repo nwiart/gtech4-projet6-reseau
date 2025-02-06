@@ -8,7 +8,7 @@
 #include <sstream>
 
 MainMenu::MainMenu(sf::Font& font)
-    : createButton(100, 250, "Créer une Partie", font, [this]() { 
+    : createButton(100, 250, "Creer une Partie", font, [this]() { 
         
     })
     , buttonRefresh(100, 250, "Actualiser", font, [this]() {
