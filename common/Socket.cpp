@@ -67,16 +67,24 @@ void Socket::acceptTCP(Socket& outSocket)
     }
 
     std::cout << "Accepted new client socket: " << clientSocket << std::endl;
-    outSocket.mSocket = clientSocket; // Store the new socket
+    outSocket.mSocket = clientSocket; 
 }
 
 int Socket::bindUDP(uint16_t port)
 {
-    sockaddr addr;
-    network::getServerAddressUDP(&addr, "0.0.0.0", port);
+    sockaddr_in addr = {};
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = htons(port);
 
-    if (bind(mSocket, &addr, sizeof(addr)) == SOCKET_ERROR) {
+    if (bind(mSocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR) {
         std::cerr << "UDP Bind failed: " << WSAGetLastError() << std::endl;
+        return SOCKET_ERROR;
+    }
+
+    u_long mode = 1;
+    if (ioctlsocket(mSocket, FIONBIO, &mode) == SOCKET_ERROR) {
+        std::cerr << "Failed to set non-blocking mode: " << WSAGetLastError() << std::endl;
         return SOCKET_ERROR;
     }
 
