@@ -211,6 +211,19 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 
 	case ClientPackets::JoinLobby:
 		break;
+
+	case ClientPackets::StartGame: {
+		// Not in lobby or not owner.
+		if (conn.getLobby() == 0 || conn.getLobby()->getPlayerID(clientSocketTCP) != 0) {
+			Server_GameStart p;
+			p.started = false;
+			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GameStart, p);
+			return;
+		}
+
+		conn.getLobby()->start();
+		}
+		break;
 	}
 }
 

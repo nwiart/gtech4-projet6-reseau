@@ -10,6 +10,7 @@ enum class ClientPackets : uint32_t
 	GetLobbies,
 	CreateLobby,
 	JoinLobby,
+	StartGame,
 
 	PlayerMove,
 };
@@ -21,6 +22,7 @@ enum class ServerPackets : uint32_t
 	LobbyCreation,
 	AcceptJoin,
 	DenyJoin,
+	GameStart,
 
 	PlayerMove,
 	BallInfo,
@@ -49,6 +51,11 @@ struct Client_CreateLobby
 struct Client_JoinLobby
 {
 	// TODO : define.
+};
+
+struct Client_StartGame
+{
+
 };
 
 struct Server_ConnectResult
@@ -81,6 +88,11 @@ struct Server_AcceptJoin
 struct Server_DenyJoin
 {
 	ConnectionDenialReason reason;
+};
+
+struct Server_GameStart
+{
+	bool started;
 };
 
 

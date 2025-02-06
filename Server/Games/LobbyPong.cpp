@@ -1,10 +1,26 @@
 #include "LobbyPong.h"
 
+#include "Networking.h"
+#include "PongPackets.h"
+
 
 LobbyPong::LobbyPong(bool twoPlayersTeam)
 	: m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam)
 {
 
+}
+
+void LobbyPong::start()
+{
+    Server_GameStart p;
+    p.started = true;
+
+    for (auto p : m_players) {
+        network::sendPacketTCP(p.second, (uint32_t)ServerPackets::GameStart, p);
+    }
+
+    gameStarted = true;
+    std::cout << "Le match de Pong commence !" << std::endl;
 }
 
 uint32_t LobbyPong::addPlayer(uint64_t id)
@@ -19,6 +35,14 @@ uint32_t LobbyPong::addPlayer(uint64_t id)
     return pid;
 }
 
+uint32_t LobbyPong::getPlayerID(uint64_t socket) const
+{
+    for (auto p : m_players) {
+        if (p.second.mSocket == socket) return p.first;
+    }
+    return -1;
+}
+
 void LobbyPong::addPlayer(uint32_t playerID, Socket playerSocket) {
     const int maxPlayers = this->getMaxPlayers();
     if (m_players.size() < maxPlayers) {
@@ -28,11 +52,6 @@ void LobbyPong::addPlayer(uint32_t playerID, Socket playerSocket) {
             startGame();
         }
     }
-}
-
-void LobbyPong::startGame() {
-    gameStarted = true;
-    std::cout << "Le match de Pong commence !" << std::endl;
 }
 
 void LobbyPong::update(float dt) {
@@ -51,4 +70,3 @@ void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {
         m_pong.setPaddlePositions(m_pong.getSizeY() / 2, positionY);
     }
 }
-

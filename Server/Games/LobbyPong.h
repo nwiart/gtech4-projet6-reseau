@@ -3,7 +3,7 @@
 #include "Lobby.h"
 #include "Pong/PongScene.h"
 #include <unordered_map>
-#include "Networking.h"
+#include "Socket.h"
 
 class LobbyPong : public Lobby {
 public:
@@ -12,7 +12,11 @@ public:
     virtual int getNumPlayers() const override { return m_players.size(); }
     virtual int getMaxPlayers() const override { return m_twoPlayerTeams ? 4 : 2; }
 
+    virtual void start() override;
+
     virtual uint32_t addPlayer(uint64_t id) override;
+
+    virtual uint32_t getPlayerID(uint64_t socket) const override;
 
     void addPlayer(uint32_t playerID, Socket playerSocket);
     void startGame();
