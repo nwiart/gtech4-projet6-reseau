@@ -2,15 +2,15 @@
 
 #include "CreateLobbyMenu.h"
 
-#include "Networking.h"   // Go figure
-#include "Network.h"      //
+#include "Networking.h"
+#include "Network.h"
 
 #include "PongPackets.h"
 
 #include <sstream>
 
 MainMenu::MainMenu(sf::Font& font)
-    : createButton(100, 250, "Créer Partie", this->font, [this]() { 
+    : createButton(100, 250, "Creer une Partie", this->font, [this]() { 
         Scene::setCurrentScene(new CreateLobbyMenu(this->font));
     })
     , buttonRefresh(100, 250, "Actualiser", this->font, [this]() {

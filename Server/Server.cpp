@@ -49,11 +49,15 @@ void Server::notifyDisconnect(Socket& clientSocketTCP)
 	}
 
 	ClientConnection& conn = it->second;
+
 	if (conn.m_lobby) {
 		conn.m_lobby->disconnectPlayer(conn.m_id);
 	}
-	
-	// TODO : close socket.
+
+	shutdown(clientSocketTCP.mSocket, SD_BOTH);
+	closesocket(clientSocketTCP.mSocket);
+
+	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") disconnected.\n";
 
 	m_clients.erase(it);
 }
