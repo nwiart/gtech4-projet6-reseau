@@ -114,11 +114,14 @@ void Server::createLobby(Socket initiator, const std::string& name, GameMode gm)
 
 	if (lobby) {
 		m_games.push_back(lobby);
+		it->second.m_lobby = lobby;
+		uint32_t pid = lobby->addPlayer(initiator.mSocket);
 
 		std::cout << "Player \"" << it->second.getName() << "\" created a new lobby \"" << lobby->getName() << "\".\n";
 
 		Server_LobbyCreation p;
 		p.success = true;
+		p.playerID = pid;
 		network::sendPacketTCP(initiator, (uint32_t)ServerPackets::LobbyCreation, p);
 	}
 	else {

@@ -7,11 +7,24 @@ LobbyPong::LobbyPong(bool twoPlayersTeam)
 
 }
 
+uint32_t LobbyPong::addPlayer(uint64_t id)
+{
+    if (m_players.size() >= this->getMaxPlayers()) {
+        return -1;
+    }
+
+    uint32_t pid = m_players.size();
+    m_players[pid] = id;
+
+    return pid;
+}
+
 void LobbyPong::addPlayer(uint32_t playerID, Socket playerSocket) {
-    if (m_players.size() < 2) {
+    const int maxPlayers = this->getMaxPlayers();
+    if (m_players.size() < maxPlayers) {
         m_players[playerID] = playerSocket;
 
-        if (m_players.size() == 2) {
+        if (m_players.size() == maxPlayers) {
             startGame();
         }
     }
