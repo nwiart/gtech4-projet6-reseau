@@ -63,8 +63,6 @@ void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxP
 
     int yPos = lobbies.size() * 60 + 40;
     Button b(1000, yPos, label.str(), font, [this, name]() {
-        extern int lobbyID;
-        lobbyID = 0;
         joinLobby(0, name);
         });
 
