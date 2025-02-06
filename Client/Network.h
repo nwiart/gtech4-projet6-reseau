@@ -2,6 +2,9 @@
 #include "Networking.h"
 #include "Socket.h"
 
+#include "GameMode.h"
+
+
 class Network
 {
 public:
@@ -19,10 +22,16 @@ public:
     static void handleUDPPacket(uint32_t packetID);
 
     static int connect(const char* ip,const char* playerName);
+    static void createLobbyPong1v1(const std::string& name);
+    static void createLobbyPong2v2(const std::string& name);
 
     int sendPosition(float posY);
 
     static inline Socket& getServerTCP() { return m_socketTCP; }
+
+private:
+
+    static void createLobby(GameMode gm, const std::string& name);
 
 private:
 

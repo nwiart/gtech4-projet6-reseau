@@ -1,8 +1,8 @@
 #include "LobbyPong.h"
 
 
-LobbyPong::LobbyPong()
-	: m_pong(1280, 720)
+LobbyPong::LobbyPong(bool twoPlayersTeam)
+	: m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam)
 {
 
 }

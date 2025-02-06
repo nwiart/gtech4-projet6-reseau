@@ -9,7 +9,7 @@ public:
     TextField(float x, float y, sf::Font& font, bool isIpField = false);
     void handleEvent(sf::Event event, sf::RenderWindow& window);
     void draw(sf::RenderWindow& window);
-    std::string getInput() const { return input; }
+    const std::string& getInput() const { return input; }
     void clear() { input.clear(); }
 
 private:

@@ -1,6 +1,9 @@
 #include "Server.h"
 
 #include "Games/Lobby.h"
+#include "Games/LobbyPong.h"
+
+#include "PongPackets.h"
 
 #include "Networking.h"
 
@@ -80,6 +83,51 @@ uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string& player
 	return conn.m_id;
 }
 
+void Server::createLobby(Socket initiator, const std::string& name, GameMode gm)
+{
+	Lobby* lobby = 0;
+
+	auto it = m_clients.find(initiator.mSocket);
+	if (it == m_clients.end() || it->second.getLobby() != 0) {
+		Server_LobbyCreation p;
+		p.success = false;
+		network::sendPacketTCP(initiator, (uint32_t)ServerPackets::LobbyCreation, p);
+
+		return;
+	}
+
+	switch (gm)
+	{
+	case GameMode::PONG_1v1: {
+		LobbyPong* pong = new LobbyPong(false);
+		pong->init(name);
+		lobby = pong;
+		}
+		break;
+	case GameMode::PONG_2v2: {
+		LobbyPong* pong = new LobbyPong(true);
+		pong->init(name);
+		lobby = pong;
+		}
+		break;
+	}
+
+	if (lobby) {
+		m_games.push_back(lobby);
+
+		std::cout << "Player \"" << it->second.getName() << "\" created a new lobby \"" << lobby->getName() << "\".\n";
+
+		Server_LobbyCreation p;
+		p.success = true;
+		network::sendPacketTCP(initiator, (uint32_t)ServerPackets::LobbyCreation, p);
+	}
+	else {
+		Server_LobbyCreation p;
+		p.success = false;
+		network::sendPacketTCP(initiator, (uint32_t)ServerPackets::LobbyCreation, p);
+	}
+}
+
 
 
 #include "PongPackets.h"
@@ -152,7 +200,10 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	}
 	break;
 
-	case ClientPackets::CreateLobby:
+	case ClientPackets::CreateLobby: {
+		recv(clientSocketTCP, buf, sizeof(Client_CreateLobby), 0);
+		createLobby(clientSocketTCP, reinterpret_cast<Client_CreateLobby*>(buf)->lobbyName, reinterpret_cast<Client_CreateLobby*>(buf)->gamemode);
+		}
 		break;
 
 	case ClientPackets::JoinLobby:
