@@ -114,7 +114,6 @@ void Server::createLobby(Socket initiator, const std::string& name, GameMode gm)
 
 	if (lobby) {
 		m_games.push_back(lobby);
-		std::cout << "[DEBUG] Nombre de lobbys actifs: " << m_games.size() << std::endl;
 
 		it->second.m_lobby = lobby;
 		uint32_t pid = lobby->addPlayer(initiator.mSocket);
@@ -215,9 +214,6 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		break;
 
 	case ClientPackets::StartGame: {
-		std::cout << "[DEBUG] Vérification avant lancement de partie : PlayerID = "
-			<< conn.getLobby()->getPlayerID(clientSocketTCP) << std::endl;
-
 		// Not in lobby or not owner.
 		if (conn.getLobby() == 0 || conn.getLobby()->getPlayerID(clientSocketTCP) != 0) {
 			Server_GameStart p;
@@ -227,7 +223,6 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		}
 
 		conn.getLobby()->start();
-		std::cout << "[DEBUG] Lobbys en mémoire après lancement : " << m_games.size() << std::endl;
 
 		}
 		break;

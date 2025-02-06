@@ -24,12 +24,12 @@ void Ball::resetPosition() {
     position.y = 360;
 
     float angle = ((rand() % 120) - 60) * (M_PI / 180.0f);
-    float speed = 300.0f;
+    float speed = 100.0f;
 
     velocity.x = cos(angle) * speed * ((rand() % 2 == 0) ? 1 : -1);
     velocity.y = sin(angle) * speed;
+    std::cout << "[DEBUG] Initial Ball Velocity - X: " << velocity.x << " | Y: " << velocity.y << std::endl;
 
-    std::cout << "[DEBUG] Nouvelle direction balle : X=" << velocity.x << " Y=" << velocity.y << std::endl;
 }
 
 void Ball::reverseX() {
