@@ -47,10 +47,6 @@ void LobbyPong::addPlayer(uint32_t playerID, Socket playerSocket) {
     const int maxPlayers = this->getMaxPlayers();
     if (m_players.size() < maxPlayers) {
         m_players[playerID] = playerSocket;
-
-        if (m_players.size() == maxPlayers) {
-            startGame();
-        }
     }
 }
 

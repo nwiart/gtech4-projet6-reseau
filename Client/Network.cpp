@@ -2,6 +2,7 @@
 #include "PongPackets.h"
 
 #include "MainMenu.h"
+#include "GameScene.h"
 
 #include <string.h>
 #include <iostream>
@@ -173,6 +174,13 @@ void Network::handleTCPPacket(uint32_t packetID)
         else {
             std::cerr << "Failed to receive LobbyCreation packet. Eroor:" << WSAGetLastError() << std::endl;
         }
+    }
+    break;
+
+    case ServerPackets::GameStart:
+    {
+        recv(m_socketTCP.mSocket, buf, sizeof(Server_GameStart), 0);
+        Scene::setCurrentScene(new GameScene());
     }
     break;
     }

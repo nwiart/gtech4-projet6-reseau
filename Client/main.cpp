@@ -5,6 +5,8 @@
 #include "Networking.h"
 #include "Network.h"
 
+sf::Font font;
+
 int main()
 {
     if (network::initializeWinsock() != 0) {
@@ -16,7 +18,6 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
-    sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
         return -1;
     }

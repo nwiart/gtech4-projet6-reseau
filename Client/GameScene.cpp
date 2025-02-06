@@ -2,7 +2,9 @@
 #include "PongPackets.h"
 #include "Network.h"
 
-GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::string& player2Name)
+extern sf::Font font;
+
+GameScene::GameScene()
     : player1(0.02f, 0.5f, sf::Keyboard::W, sf::Keyboard::S, true),
     player2(0.96f, 0.5f, sf::Keyboard::Up, sf::Keyboard::Down, false),
     ball(640, 360),
@@ -12,13 +14,13 @@ GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::
     player1Text.setFont(font);
     player1Text.setCharacterSize(30);
     player1Text.setFillColor(sf::Color::White);
-    player1Text.setString(player1Name);
+    player1Text.setString("player1Name");
     player1Text.setPosition(50, 20);
 
     player2Text.setFont(font);
     player2Text.setCharacterSize(30);
     player2Text.setFillColor(sf::Color::White);
-    player2Text.setString(player2Name);
+    player2Text.setString("player2Name");
     player2Text.setPosition(1100, 20);
 }
 
