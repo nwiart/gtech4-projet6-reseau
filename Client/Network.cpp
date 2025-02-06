@@ -109,7 +109,7 @@ void Network::createLobby(GameMode gm, const std::string& name)
     network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::CreateLobby, p);
 }
 
-int Network::sendPosition(float position)
+int Network::sendPosition(int posY)
 {
     Client_PlayerMove packet{ posY };
 
