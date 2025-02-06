@@ -1,4 +1,5 @@
 ﻿#include "PongScene.h"
+#include "Server.h"
 #include <iostream>
 #include <cmath>
 
@@ -12,12 +13,12 @@ void PongScene::startGame() {
     m_started = true;
 }
 
-
 void PongScene::update(float dt) {
     if (!m_started) return;
 
     m_ball.update(dt, this);
     checkCollisions();
+
 }
 
 void PongScene::checkCollisions() {
@@ -58,4 +59,13 @@ void PongScene::resetBall() {
 void PongScene::setPaddlePositions(float p1, float p2) {
     paddle1Y = p1;
     paddle2Y = p2;
+}
+
+void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
+    if (playerID == 0) {
+        paddle1Y = positionY;
+    }
+    else if (playerID == 1) {
+        paddle2Y = positionY;
+    }
 }

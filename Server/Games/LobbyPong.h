@@ -22,6 +22,8 @@ public:
     void update(float dt) override;
     void receivePlayerMove(uint32_t playerID, float positionY);
 
+    void sendGameState();
+
 private:
     PongScene m_pong;
     Ball m_ball;

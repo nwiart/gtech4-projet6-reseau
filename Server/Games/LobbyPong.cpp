@@ -75,3 +75,29 @@ void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {
         m_pong.setPaddlePositions(m_pong.getSizeY() / 2, positionY);
     }
 }
+
+void LobbyPong::sendGameState() {
+    for (auto& player : m_players) {
+        // Get player-specific address and send the necessary packets
+
+
+        // For example, send PlayerMove
+        Server_PlayerMove playerMovePacket;
+        playerMovePacket.playerID = player.first; // Player ID
+        playerMovePacket.position = player.second.getPosition(); // Player's paddle position
+        network::sendPacketUDP(player.second, &player.second.mSocket, (uint32_t)ServerPackets::PlayerMove, playerMovePacket);
+
+        // Send Ball info
+        Server_BallInfo ballInfoPacket;
+        ballInfoPacket.xPos = m_pong.getBall().getPosition().x;
+        ballInfoPacket.yPos = m_pong.getBall().getPosition().y;
+        ballInfoPacket.xVel = m_pong.getBall().getVelocity().x;
+        ballInfoPacket.yVel = m_pong.getBall().getVelocity().y;
+        network::sendPacketUDP(player.second, &player.second.mSocket, (uint32_t)ServerPackets::BallInfo, ballInfoPacket);
+
+        // Send Score
+        Server_Score scorePacket;
+        scorePacket.team = m_pong.getScoreP1();  // Or use appropriate score calculation
+        network::sendPacketUDP(player.second, &player.second.mSocket, (uint32_t)ServerPackets::Score, scorePacket);
+    }
+}

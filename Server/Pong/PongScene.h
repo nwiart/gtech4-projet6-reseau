@@ -2,18 +2,17 @@
 
 #include "Ball.h"
 #include "Score.h"
-
+#include "Networking.h"
+#include "PongPackets.h"
 
 class PongScene {
 public:
     PongScene(int sizeX, int sizeY);
 
     void startGame();
-
     void update(float dt);
 
     const Ball& getBall() const { return m_ball; }
-
     int getSizeX() const { return m_sizeX; }
     int getSizeY() const { return m_sizeY; }
 
@@ -22,6 +21,8 @@ public:
 
     void setPaddlePositions(float paddle1Y, float paddle2Y);
     void resetBall();
+
+    void receivePlayerMove(uint32_t playerID, float positionY);
 
 private:
     Ball m_ball;
