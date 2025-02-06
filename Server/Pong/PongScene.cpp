@@ -1,13 +1,16 @@
-#include "PongScene.h"
+﻿#include "PongScene.h"
 #include <iostream>
+#include <cmath>
 
 PongScene::PongScene(int sizeX, int sizeY)
     : m_sizeX(sizeX), m_sizeY(sizeY), m_started(false), paddle1Y(sizeY / 2), paddle2Y(sizeY / 2)
 {
-    m_ball.reset(sizeX / 2, sizeY / 2);
+    m_ball.resetPosition();
 }
 
 void PongScene::update(float dt) {
+    if (!m_started) return;
+
     m_ball.update(dt, this);
     checkCollisions();
 }
@@ -16,29 +19,42 @@ void PongScene::checkCollisions() {
     float ballX = m_ball.getPosition().x;
     float ballY = m_ball.getPosition().y;
 
-    if (ballY <= 0 || ballY >= m_sizeY) {
+    float ballRadius = m_ball.getRadius();
+    float paddleWidth = 10;
+    float paddleHeight = 100;
+
+    if (ballY - ballRadius <= 0 || ballY + ballRadius >= m_sizeY) {
+        std::cout << "[DEBUG] La balle a touché le mur haut/bas. Rebond." << std::endl;
         m_ball.reverseY();
     }
 
-    if ((ballX <= 30 && ballY >= paddle1Y && ballY <= paddle1Y + 100) ||
-        (ballX >= m_sizeX - 30 && ballY >= paddle2Y && ballY <= paddle2Y + 100)) {
+    if ((ballX - ballRadius <= paddleWidth && ballY >= paddle1Y && ballY <= paddle1Y + paddleHeight) ||
+        (ballX + ballRadius >= m_sizeX - paddleWidth && ballY >= paddle2Y && ballY <= paddle2Y + paddleHeight)) {
+        std::cout << "[DEBUG] Collision balle avec une raquette. Rebond X." << std::endl;
         m_ball.reverseX();
     }
 
-    if (ballX < 0) {
+    if (ballX < 0) { // Joueur 2 marque
+        std::cout << "[DEBUG] Joueur 2 marque un point !" << std::endl;
         score.addPointPlayer2();
-        m_ball.reset(m_sizeX / 2, m_sizeY / 2);
+        resetBall();
     }
-    if (ballX > m_sizeX) {
+    else if (ballX > m_sizeX) { // Joueur 1 marque
+        std::cout << "[DEBUG] Joueur 1 marque un point !" << std::endl;
         score.addPointPlayer1();
-        m_ball.reset(m_sizeX / 2, m_sizeY / 2);
+        resetBall();
     }
 
     if (score.isGameOver()) {
+        std::cout << "[DEBUG] Fin de partie. Réinitialisation des scores." << std::endl;
         score.reset();
     }
 }
 
+void PongScene::resetBall() {
+    std::cout << "[DEBUG] Réinitialisation de la balle au centre." << std::endl;
+    m_ball.resetPosition();
+}
 
 void PongScene::setPaddlePositions(float p1, float p2) {
     paddle1Y = p1;

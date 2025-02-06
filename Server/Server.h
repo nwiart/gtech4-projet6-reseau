@@ -55,6 +55,7 @@ public:
 
 	void handleUDPPacket(uint32_t packetID, int playerID);
 
+	void updateGames(float dt);
 private:
 
 	static const uint16_t serverBasePort = 27014;

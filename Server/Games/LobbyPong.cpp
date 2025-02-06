@@ -43,17 +43,24 @@ uint32_t LobbyPong::getPlayerID(uint64_t socket) const
     return -1;
 }
 
-void LobbyPong::addPlayer(uint32_t playerID, Socket playerSocket) {
-    const int maxPlayers = this->getMaxPlayers();
-    if (m_players.size() < maxPlayers) {
-        m_players[playerID] = playerSocket;
-    }
-}
-
 void LobbyPong::update(float dt) {
-    if (!gameStarted) return;
+    std::cout << "[DEBUG] gameStarted l'update est arrêtée !" << gameStarted << std::endl;
+
+    if (!gameStarted) {
+       std::cout << "[DEBUG] gameStarted est FAUX, l'update est arrêtée !" << std::endl;
+       return;
+    }
+    std::cout << "[DEBUG] gameStarted est VRAI, update continue." << std::endl;
 
     m_pong.update(dt);
+    m_ball.update(dt, &m_pong);
+    int scoreJ1 = m_pong.getScoreP1();
+    int scoreJ2 = m_pong.getScoreP2();
+    std::cout << "[INFO] Score - Joueur 1 : " << scoreJ1
+        << " | Joueur 2 : " << scoreJ2 << std::endl;
+
+    std::cout << "[INFO] Position balle : X=" << m_ball.getPosition().x
+        << " | Y=" << m_ball.getPosition().y << std::endl;
 }
 
 void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {

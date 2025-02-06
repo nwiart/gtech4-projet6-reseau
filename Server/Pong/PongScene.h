@@ -3,6 +3,7 @@
 #include "Ball.h"
 #include "Score.h"
 
+
 class PongScene {
 public:
     PongScene(int sizeX, int sizeY);
@@ -18,6 +19,7 @@ public:
     int getScoreP2() const { return scoreP2; }
 
     void setPaddlePositions(float paddle1Y, float paddle2Y);
+    void resetBall();
 
 private:
     Ball m_ball;

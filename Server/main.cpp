@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <chrono>
 
 
 #define MESSAGE_ACCEPT (WM_USER)
@@ -30,9 +31,18 @@ int main(int argc, const char** argv)
 	std::cout << "Server started.\n";
 
 	MSG msg;
-	while (GetMessage(&msg, hwnd, 0, 0)) {
-		DispatchMessage(&msg);
-		TranslateMessage(&msg);
+
+	while (1)
+	{
+		while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
+			DispatchMessage(&msg);
+			TranslateMessage(&msg);
+
+		}
+
+		float dt = 1.0f / 60.0f;
+		server.updateGames(dt);
+		std::chrono::milliseconds(10);
 	}
 
 	network::cleanupWinsock();

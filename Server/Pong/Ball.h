@@ -9,11 +9,15 @@ class Ball {
 public:
     Ball();
 
+    void resetPosition();
     void update(float dt, PongScene* scene);
-    void reset(float startX, float startY);
 
     const sf::Vector2f& getPosition() const { return position; }
     const sf::Vector2f& getVelocity() const { return velocity; }
+    const float getRadius() const { return radius;  }
+
+    void setPosition(float x, float y);
+    void setVelocity(float x, float y);
 
     void reverseX();
     void reverseY();
@@ -21,6 +25,7 @@ public:
 private:
     sf::Vector2f position;
     sf::Vector2f velocity;
+    float radius;
 };
 
 #endif
