@@ -1,7 +1,7 @@
 #include "MainMenu.h"
 
-#include "Networking.h"   // Go figure
-#include "Network.h"      //
+#include "Networking.h"
+#include "Network.h"
 
 #include "PongPackets.h"
 
