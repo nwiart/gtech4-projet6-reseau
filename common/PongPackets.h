@@ -23,6 +23,7 @@ enum class ServerPackets : uint32_t
 	AcceptJoin,
 	DenyJoin,
 	GameStart,
+	PlayerJoined,
 
 	PlayerMove,
 	BallInfo,
@@ -81,6 +82,12 @@ struct Server_LobbyCreation
 
 // Sent by server to a new player if their connection was successful.
 struct Server_AcceptJoin
+{
+	int playerID;
+};
+
+// Sent by server to a new player if their connection was successful.
+struct Server_PlayerJoined
 {
 	int playerID;
 };
