@@ -88,7 +88,28 @@ int Network::connect(const char* ip, const char* playerName)
     return 0;
 }
 
-int Network::sendPosition(int posY)
+void Network::createLobbyPong1v1(const std::string& name)
+{
+    Network::createLobby(GameMode::PONG_1v1, name);
+}
+
+void Network::createLobbyPong2v2(const std::string& name)
+{
+    Network::createLobby(GameMode::PONG_2v2, name);
+}
+
+void Network::createLobby(GameMode gm, const std::string& name)
+{
+    int namelen = name.size() > 31 ? 31 : name.size();
+
+    Client_CreateLobby p;
+    memcpy(p.lobbyName, name.c_str(), namelen); p.lobbyName[namelen] = 0;
+    p.gamemode = gm;
+
+    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::CreateLobby, p);
+}
+
+int Network::sendPosition(float position)
 {
     Client_PlayerMove packet{ posY };
 

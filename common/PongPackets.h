@@ -41,6 +41,7 @@ struct Client_GetLobbies
 // Sent by client to create a new lobby.
 struct Client_CreateLobby
 {
+	char lobbyName[32];
 	GameMode gamemode;
 };
 

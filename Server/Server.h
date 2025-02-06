@@ -2,6 +2,8 @@
 
 #include "Socket.h"
 
+#include "GameMode.h"
+
 #include <vector>
 #include <map>
 
@@ -17,6 +19,8 @@ public:
 
 	Socket& getSocket() { return m_socket; }
 	uint32_t getIP() const { return m_ip; }
+	const std::string& getName() const { return m_name; }
+	Lobby* getLobby() const { return m_lobby; }
 
 	void setIP(uint32_t ip) { m_ip = ip; }
 
@@ -44,6 +48,7 @@ public:
 	void notifyDisconnect(Socket& clientSocketTCP);
 
 	uint32_t confirmClient(Socket clientSocketTCP, const std::string& playerName);
+	void createLobby(Socket initiator, const std::string& name, GameMode gm);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void receiveUDPPackets();

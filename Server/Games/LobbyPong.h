@@ -7,10 +7,12 @@
 
 class LobbyPong : public Lobby {
 public:
-    LobbyPong();
+    LobbyPong(bool twoPlayersTeam);
 
     virtual int getNumPlayers() const override { return m_players.size(); }
-    virtual int getMaxPlayers() const override { return 2; }
+    virtual int getMaxPlayers() const override { return m_twoPlayerTeams ? 4 : 2; }
+
+    virtual uint32_t addPlayer(uint64_t id) override;
 
     void addPlayer(uint32_t playerID, Socket playerSocket);
     void startGame();
@@ -20,5 +22,6 @@ public:
 private:
     PongScene m_pong;
     std::unordered_map<uint32_t, Socket> m_players;
+    bool m_twoPlayerTeams;
     bool gameStarted = false;
 };
