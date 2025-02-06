@@ -164,6 +164,17 @@ void Network::handleTCPPacket(uint32_t packetID)
         }
     }
     break;
+    case ServerPackets::LobbyCreation:
+    {
+        int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_LobbyCreation), 0);
+        if (received == sizeof(Server_LobbyCreation)) {
+            std::cout << "Successfully created Lobby" << std::endl;
+        }
+        else {
+            std::cerr << "Failed to receive LobbyCreation packet. Eroor:" << WSAGetLastError() << std::endl;
+        }
+    }
+    break;
     }
 }
 
