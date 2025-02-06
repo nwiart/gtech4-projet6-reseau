@@ -20,7 +20,7 @@ public:
 
     static int connect(const char* ip,const char* playerName);
 
-    int sendPosition(float posY);
+    static int sendPosition(int posY);
 
     static inline Socket& getServerTCP() { return m_socketTCP; }
 

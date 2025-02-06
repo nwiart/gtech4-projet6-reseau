@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "PongPackets.h"
+#include "Network.h"
 
 GameScene::GameScene(sf::Font& font, const std::string& player1Name, const std::string& player2Name)
     : player1(0.02f, 0.5f, sf::Keyboard::W, sf::Keyboard::S, true),
@@ -48,12 +49,9 @@ void GameScene::draw(sf::RenderWindow& window) {
 
 void GameScene::sendPlayerMove(sf::RenderWindow& window) {
     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    float paddleY = static_cast<float>(mousePos.y);
+    int paddleY = mousePos.y;
 
-    Client_PlayerMove packet;
-    packet.position = paddleY;
-
-    network::sendPacketTCP(m_serverSocket, (uint32_t)ClientPackets::PlayerMove, packet);
+    Network::sendPosition(paddleY);
 }
 
 void GameScene::receiveGameStateUDP() {

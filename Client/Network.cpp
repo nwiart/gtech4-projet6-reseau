@@ -88,15 +88,14 @@ int Network::connect(const char* ip, const char* playerName)
     return 0;
 }
 
-int Network::sendPosition(float position)
+int Network::sendPosition(int posY)
 {
-    Client_PlayerMove packet{ position };
+    Client_PlayerMove packet{ posY };
 
-    bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<sockaddr*>(&serverUDPAddr),
-        static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
+    bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 
     if (!success) {
-        std::cerr << "Failed to send position packet.\n";
+        std::cerr << "Failed to send PlayerMove UDP packet!" << std::endl;
         return -1;
     }
 

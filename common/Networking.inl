@@ -22,10 +22,10 @@ bool network::sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, 
 	static_assert(sizeof(T) <= MAX_PACKET_SIZE - 4);
 
 	char buf[MAX_PACKET_SIZE];
-	*((uint32_t*)buf) = packetID;
+	*reinterpret_cast<uint32_t*>(buf) = packetID;
 	memcpy(buf + 4, &data, sizeof(T));
 
-	return sendto(s.mSocket, buf, sizeof(T) + 4, 0, addr, sizeof(sockaddr)) != SOCKET_ERROR;
+	return sendto(s.mSocket, buf, sizeof(T) + 4, 0, addr, sizeof(sockaddr_in)) != SOCKET_ERROR;
 }
 
 template<typename T>
