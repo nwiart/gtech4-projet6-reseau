@@ -8,6 +8,11 @@ PongScene::PongScene(int sizeX, int sizeY)
     m_ball.resetPosition();
 }
 
+void PongScene::startGame() {
+    m_started = true;
+}
+
+
 void PongScene::update(float dt) {
     if (!m_started) return;
 

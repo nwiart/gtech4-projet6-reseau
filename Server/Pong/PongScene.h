@@ -8,6 +8,8 @@ class PongScene {
 public:
     PongScene(int sizeX, int sizeY);
 
+    void startGame();
+
     void update(float dt);
 
     const Ball& getBall() const { return m_ball; }
