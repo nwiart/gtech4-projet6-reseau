@@ -24,6 +24,5 @@ private:
     bool isConnected = false;
     std::string opponentName;
 
-    sf::Font font;
     sf::Text labelLobbyName;
 };

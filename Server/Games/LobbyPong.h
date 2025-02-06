@@ -8,7 +8,7 @@
 
 class LobbyPong : public Lobby {
 public:
-    LobbyPong(bool twoPlayersTeam);
+    LobbyPong(uint32_t id, bool twoPlayersTeam);
 
     virtual int getNumPlayers() const override { return m_players.size(); }
     virtual int getMaxPlayers() const override { return m_twoPlayerTeams ? 4 : 2; }

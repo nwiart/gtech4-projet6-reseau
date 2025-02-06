@@ -145,7 +145,7 @@ void Network::handleTCPPacket(uint32_t packetID)
         MainMenu* menu = dynamic_cast<MainMenu*>(Scene::getCurrentScene());
         if (menu) {
             Server_GetLobbies& p = *reinterpret_cast<Server_GetLobbies*>(buf);
-            menu->listLobby(p.lobbyName, p.numPlayers, p.maxPlayers);
+            menu->listLobby(p.lobbyID, p.lobbyName, p.numPlayers, p.maxPlayers);
         }
     }
     break;

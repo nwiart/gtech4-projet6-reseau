@@ -4,6 +4,8 @@
 #include "TextField.h"
 #include "Button.h"
 
+#include <map>
+
 class MainMenu : public Scene {
 public:
     MainMenu(sf::Font& font);
@@ -12,14 +14,14 @@ public:
     void draw(sf::RenderWindow& window) override;
 
     void refreshLobbyList();
-    void listLobby(const char* name, int numPlayers, int maxPlayers);
-    void joinLobby(const std::string& lobbyName);
+    void listLobby(uint32_t id, const char* name, int numPlayers, int maxPlayers);
+    void joinLobby(uint32_t lobbyID, const std::string& lobbyName);
 
 private:
     Button createButton;
     Button buttonRefresh;
     sf::Font font;
-    std::vector<Button> lobbies;
+    std::map<uint32_t, Button> lobbies;
     std::function<void(std::string, std::string)> startGame;
 
     bool isConnected = false;

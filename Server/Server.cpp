@@ -12,7 +12,7 @@
 
 
 Server::Server()
-	: m_clientUID(0)
+	: m_lobbyUID(0), m_clientUID(0)
 {
 
 }
@@ -96,21 +96,24 @@ void Server::createLobby(Socket initiator, const std::string& name, GameMode gm)
 		return;
 	}
 
+	uint32_t id = m_lobbyUID;
 	switch (gm)
 	{
 	case GameMode::PONG_1v1: {
-		LobbyPong* pong = new LobbyPong(false);
+		LobbyPong* pong = new LobbyPong(id, false);
 		pong->init(name);
 		lobby = pong;
 		}
 		break;
 	case GameMode::PONG_2v2: {
-		LobbyPong* pong = new LobbyPong(true);
+		LobbyPong* pong = new LobbyPong(id, true);
 		pong->init(name);
 		lobby = pong;
 		}
 		break;
 	}
+
+	m_lobbyUID++;
 
 	if (lobby) {
 		m_games.push_back(lobby);
@@ -132,9 +135,24 @@ void Server::createLobby(Socket initiator, const std::string& name, GameMode gm)
 	}
 }
 
+void Server::joinLobby(Socket player, Lobby* l)
+{
+	ClientConnection& conn = m_clients[player.mSocket];
+	if (l == 0) {
+		return;
+	}
+	if (conn.getLobby()) {
+		return;
+	}
 
+	uint32_t playerID = l->addPlayer(player.mSocket);
+	conn.m_lobby = l;
 
-#include "PongPackets.h"
+	Server_AcceptJoin p;
+	p.playerID = playerID;
+	network::sendPacketTCP(player, (uint32_t)ServerPackets::AcceptJoin, p);
+}
+
 
 void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 {
@@ -199,6 +217,7 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 			strcpy(p.lobbyName, lobby->getName().c_str());
 			p.numPlayers = lobby->getNumPlayers();
 			p.maxPlayers = lobby->getMaxPlayers();
+			p.lobbyID = lobby->getLobbyID();
 			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GetLobbies, p);
 		}
 	}
@@ -210,7 +229,10 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		}
 		break;
 
-	case ClientPackets::JoinLobby:
+	case ClientPackets::JoinLobby: {
+		recv(clientSocketTCP, buf, sizeof(Client_JoinLobby), 0);
+		joinLobby(conn.getSocket(), getLobbyByID(reinterpret_cast<Client_JoinLobby*>(buf)->lobbyID));
+	}
 		break;
 
 	case ClientPackets::StartGame: {
@@ -272,4 +294,14 @@ void Server::updateGames(float dt) {
 	for (Lobby* game : m_games) {
 		game->update(dt);
 	}
+}
+
+Lobby* Server::getLobbyByID(uint32_t id) const
+{
+	for (Lobby* l : m_games) {
+		if (l->getLobbyID() == id) {
+			return l;
+		}
+	}
+	return 0;
 }

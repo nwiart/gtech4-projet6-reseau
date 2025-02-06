@@ -6,6 +6,7 @@ class Scene {
 private:
 
     static Scene* m_currentScene;
+    static Scene* m_nextScene;
 
 public:
     virtual ~Scene() = default;
@@ -15,4 +16,6 @@ public:
 
     static inline Scene* getCurrentScene() { return m_currentScene; }
     static void setCurrentScene(Scene* s);
+
+    static void sceneSwitch();
 };

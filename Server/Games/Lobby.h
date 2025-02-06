@@ -9,7 +9,7 @@ class Lobby
 {
 public:
 
-	Lobby() { }
+	Lobby(uint32_t id) : m_lobbyID(id) { }
 
 	void init(const std::string& name);
 	virtual void update(float dt) = 0;
@@ -23,11 +23,13 @@ public:
 	virtual void disconnectPlayer(uint32_t playerID) { }
 
 	virtual uint32_t getPlayerID(uint64_t socket) const { return -1; }
+	uint32_t getLobbyID() const { return m_lobbyID; }
 
 	inline const std::string& getName() const { return m_name; }
 
 
 private:
 
+	uint32_t m_lobbyID;
 	std::string m_name;
 };

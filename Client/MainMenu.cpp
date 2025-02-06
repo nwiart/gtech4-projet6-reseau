@@ -24,8 +24,8 @@ MainMenu::MainMenu(sf::Font& font)
 void MainMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
     createButton.handleEvent(event, window);
 
-    for (Button& b : lobbies) {
-        b.handleEvent(event, window);
+    for (auto& p : lobbies) {
+        p.second.handleEvent(event, window);
     }
 }
 
@@ -42,8 +42,8 @@ void MainMenu::update(sf::RenderWindow& window) {
 void MainMenu::draw(sf::RenderWindow& window) {
     createButton.draw(window);
 
-    for (Button& b : lobbies) {
-        b.draw(window);
+    for (auto& p : lobbies) {
+        p.second.draw(window);
     }
 }
 
@@ -54,27 +54,23 @@ void MainMenu::refreshLobbyList()
     network::sendPacketTCP(Network::getServerTCP(), (uint32_t)ClientPackets::GetLobbies, Client_GetLobbies());
 }
 
-void MainMenu::listLobby(const char* name, int numPlayers, int maxPlayers)
+void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxPlayers)
 {
     std::stringstream label;
     label << name << " (" << numPlayers << '/' << maxPlayers << ")";
 
     int yPos = lobbies.size() * 60;
     Button b(1000, yPos, label.str(), font, [this, name]() {
-        joinLobby(name);
+        joinLobby(0, name);
         });
 
-    lobbies.push_back(b);
+    lobbies.insert(std::pair<uint32_t, Button>(id, b));
 }
 
-void MainMenu::joinLobby(const std::string& playerName)
+void MainMenu::joinLobby(uint32_t lobbyID, const std::string& playerName)
 {
-    std::cout << "[INFO] Demande de rejoindre un lobby avec le pseudo : " << playerName << std::endl;
-
     Client_JoinLobby packet;
-    std::memset(packet.playerName, 0, sizeof(packet.playerName));
-    std::strncpy(packet.playerName, playerName.c_str(), sizeof(packet.playerName) - 1);
+    packet.lobbyID = lobbyID;
 
     network::sendPacketTCP(Network::getServerTCP(), (uint32_t)ClientPackets::JoinLobby, packet);
 }
-

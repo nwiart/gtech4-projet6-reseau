@@ -50,7 +50,7 @@ struct Client_CreateLobby
 // Sent by client to provide the info.
 struct Client_JoinLobby
 {
-	char playerName[32];
+	int lobbyID;
 };
 
 struct Client_StartGame
@@ -69,6 +69,7 @@ struct Server_GetLobbies
 	char lobbyName[32];
 	short numPlayers;
 	short maxPlayers;
+	int lobbyID;
 	bool more;
 };
 

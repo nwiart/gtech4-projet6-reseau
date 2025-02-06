@@ -49,6 +49,7 @@ public:
 
 	uint32_t confirmClient(Socket clientSocketTCP, const std::string& playerName);
 	void createLobby(Socket initiator, const std::string& name, GameMode gm);
+	void joinLobby(Socket player, Lobby* l);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void receiveUDPPackets();
@@ -56,6 +57,9 @@ public:
 	void handleUDPPacket(uint32_t packetID, int playerID);
 
 	void updateGames(float dt);
+
+	Lobby* getLobbyByID(uint32_t id) const;
+
 private:
 
 	static const uint16_t serverBasePort = 27014;
@@ -65,6 +69,7 @@ private:
 	Socket m_socketListener;
 	Socket m_socketUDP;
 
+	uint32_t m_lobbyUID;
 	uint32_t m_clientUID;
 	
 	std::vector<Lobby*> m_games;

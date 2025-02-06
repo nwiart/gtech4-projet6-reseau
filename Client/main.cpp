@@ -1,7 +1,5 @@
 #include "SFMLInclude.h"
-#include "Scene.h"
 #include "ConnectScreen.h"
-#include "MainMenu.h"
 #include "Networking.h"
 #include "Network.h"
 
@@ -28,6 +26,9 @@ int main()
 
     while (window.isOpen())
     {
+        Scene::sceneSwitch();
+        Scene* s = Scene::getCurrentScene();
+
         Network::pollEvents();
 
         sf::Event event;
@@ -37,14 +38,14 @@ int main()
                 window.close();
             }
             else {
-                Scene::getCurrentScene()->handleEvent(event, window);
+                s->handleEvent(event, window);
             }
         }
 
-        Scene::getCurrentScene()->update(window);
+        s->update(window);
 
         window.clear();
-        Scene::getCurrentScene()->draw(window);
+        s->draw(window);
         window.display();
     }
 

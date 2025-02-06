@@ -4,8 +4,8 @@
 #include "PongPackets.h"
 
 
-LobbyPong::LobbyPong(bool twoPlayersTeam)
-	: m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam)
+LobbyPong::LobbyPong(uint32_t id, bool twoPlayersTeam)
+	: Lobby(id), m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam)
 {
 
 }
