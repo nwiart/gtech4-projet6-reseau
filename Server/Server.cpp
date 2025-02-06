@@ -103,12 +103,16 @@ void Server::createLobby(Socket initiator, const std::string& name, GameMode gm)
 		LobbyPong* pong = new LobbyPong(id, false);
 		pong->init(name);
 		lobby = pong;
+		ClientConnection& conn = m_clients[initiator.mSocket];
+		conn.m_lobby = lobby;
 		}
 		break;
 	case GameMode::PONG_2v2: {
 		LobbyPong* pong = new LobbyPong(id, true);
 		pong->init(name);
 		lobby = pong;
+		ClientConnection& conn = m_clients[initiator.mSocket];
+		conn.m_lobby = lobby;
 		}
 		break;
 	}
