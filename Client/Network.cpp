@@ -2,6 +2,7 @@
 #include "PongPackets.h"
 
 #include "MainMenu.h"
+#include "LobbyMenu.h"
 #include "GameScene.h"
 
 #include <string.h>
@@ -17,6 +18,8 @@ static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 Socket Network::m_socketTCP;
 Socket Network::m_socketUDP;
 sockaddr_in Network::serverUDPAddr;
+
+extern sf::Font font;
 
 void Network::init()
 {
@@ -99,6 +102,12 @@ void Network::createLobbyPong2v2(const std::string& name)
     Network::createLobby(GameMode::PONG_2v2, name);
 }
 
+void Network::startGame()
+{
+    Client_StartGame p;
+    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::StartGame, p);
+}
+
 void Network::createLobby(GameMode gm, const std::string& name)
 {
     int namelen = name.size() > 31 ? 31 : name.size();
@@ -174,6 +183,8 @@ void Network::handleTCPPacket(uint32_t packetID)
         else {
             std::cerr << "Failed to receive LobbyCreation packet. Eroor:" << WSAGetLastError() << std::endl;
         }
+
+        Scene::setCurrentScene(new LobbyMenu(font));
     }
     break;
 

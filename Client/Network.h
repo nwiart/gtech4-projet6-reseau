@@ -24,6 +24,7 @@ public:
     static int connect(const char* ip,const char* playerName);
     static void createLobbyPong1v1(const std::string& name);
     static void createLobbyPong2v2(const std::string& name);
+    static void startGame();
 
     static int sendPosition(int posY);
 
