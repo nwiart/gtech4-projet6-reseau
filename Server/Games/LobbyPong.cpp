@@ -54,11 +54,11 @@ void LobbyPong::update(float dt) {
 
     int scoreJ1 = m_pong.getScoreP1();
     int scoreJ2 = m_pong.getScoreP2();
-    std::cout << "[INFO] Score - Joueur 1 : " << scoreJ1
-        << " | Joueur 2 : " << scoreJ2 << std::endl;
+    //std::cout << "[INFO] Score - Joueur 1 : " << scoreJ1
+    //    << " | Joueur 2 : " << scoreJ2 << std::endl;
 
-    std::cout << "[INFO] Position balle : X=" << m_pong.getBall().getPosition().x
-        << " | Y=" << m_pong.getBall().getPosition().y << std::endl;
+    //std::cout << "[INFO] Position balle : X=" << m_pong.getBall().getPosition().x
+    //    << " | Y=" << m_pong.getBall().getPosition().y << std::endl;
 }
 
 void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {

@@ -50,7 +50,7 @@ struct Client_CreateLobby
 // Sent by client to provide the info.
 struct Client_JoinLobby
 {
-	// TODO : define.
+	char playerName[32];
 };
 
 struct Client_StartGame

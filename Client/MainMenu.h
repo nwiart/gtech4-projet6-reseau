@@ -13,6 +13,7 @@ public:
 
     void refreshLobbyList();
     void listLobby(const char* name, int numPlayers, int maxPlayers);
+    void joinLobby(const std::string& lobbyName);
 
 private:
     Button createButton;

@@ -60,8 +60,21 @@ void MainMenu::listLobby(const char* name, int numPlayers, int maxPlayers)
     label << name << " (" << numPlayers << '/' << maxPlayers << ")";
 
     int yPos = lobbies.size() * 60;
-    Button b(1000, yPos, label.str(), font, []() {
+    Button b(1000, yPos, label.str(), font, [this, name]() {
+        joinLobby(name);
+        });
 
-    });
     lobbies.push_back(b);
 }
+
+void MainMenu::joinLobby(const std::string& playerName)
+{
+    std::cout << "[INFO] Demande de rejoindre un lobby avec le pseudo : " << playerName << std::endl;
+
+    Client_JoinLobby packet;
+    std::memset(packet.playerName, 0, sizeof(packet.playerName));
+    std::strncpy(packet.playerName, playerName.c_str(), sizeof(packet.playerName) - 1);
+
+    network::sendPacketTCP(Network::getServerTCP(), (uint32_t)ClientPackets::JoinLobby, packet);
+}
+
