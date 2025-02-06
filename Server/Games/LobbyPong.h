@@ -26,6 +26,7 @@ private:
     PongScene m_pong;
     Ball m_ball;
     std::unordered_map<uint32_t, Socket> m_players;
+    std::unordered_map<uint64_t, uint32_t> m_paddles;
     bool m_twoPlayerTeams;
     bool gameStarted = false;
 };

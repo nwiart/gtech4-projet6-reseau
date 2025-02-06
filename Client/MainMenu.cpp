@@ -59,7 +59,7 @@ void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxP
     std::stringstream label;
     label << name << " (" << numPlayers << '/' << maxPlayers << ")";
 
-    int yPos = lobbies.size() * 60;
+    int yPos = lobbies.size() * 60 + 40;
     Button b(1000, yPos, label.str(), font, [this, name]() {
         joinLobby(0, name);
         });

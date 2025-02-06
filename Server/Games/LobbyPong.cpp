@@ -25,17 +25,21 @@ void LobbyPong::start()
     std::cout << "Le match de Pong commence !" << std::endl;
 }
 
-uint32_t LobbyPong::addPlayer(uint64_t id)
-{
+uint32_t LobbyPong::addPlayer(uint64_t playerSocket) {
     if (m_players.size() >= this->getMaxPlayers()) {
         return -1;
     }
 
-    uint32_t pid = m_players.size();
-    m_players[pid] = id;
+    uint32_t playerID = m_players.size();
 
-    return pid;
+    m_players[playerID] = playerSocket;
+    m_paddles[playerSocket] = playerID;
+
+    std::cout << "Joueur " << playerSocket << " assigné au paddle " << playerID << std::endl;
+
+    return playerID;
 }
+
 
 uint32_t LobbyPong::getPlayerID(uint64_t socket) const
 {

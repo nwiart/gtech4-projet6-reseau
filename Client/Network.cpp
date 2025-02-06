@@ -156,6 +156,8 @@ void Network::handleTCPPacket(uint32_t packetID)
         if (received == sizeof(Server_AcceptJoin)) {
             int playerID = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
             printf("Accepted! Player ID: %d\n", playerID);
+
+            Scene::setCurrentScene(new LobbyMenu(font));
         }
         else {
             std::cerr << "Failed to receive AcceptJoin packet.\n";
