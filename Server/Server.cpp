@@ -282,19 +282,31 @@ void Server::handleUDPPacket(uint32_t packetID, int playerID) {
 	case ClientPackets::PlayerMove: {
 		Client_PlayerMove packet;
 		if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
-			std::cout << "Player " << playerID << " move to " << packet.position << std::endl;
+			std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
+
+			for (Lobby* game : m_games) {
+				LobbyPong* pongGame = dynamic_cast<LobbyPong*>(game);
+				if (pongGame) {
+					if (pongGame->getPlayerID(playerID) != -1) {
+						pongGame->receivePlayerMove(playerID, packet.position);
+						return;
+					}
+				}
+			}
+
+			//std::cerr << "Warning: Player " << playerID << " sent movement but is not in a lobby!" << std::endl;
 		}
 	} break;
-
 
 	default:
 		std::cerr << "Unknown UDP packet received: " << packetID << std::endl;
 		break;
 	}
-	/////////ADD THEM ALL!!!!!///////// eventually
 }
 
 void Server::updateGames(float dt) {
+	receiveUDPPackets();
+
 	for (Lobby* game : m_games) {
 		game->update(dt);
 	}
