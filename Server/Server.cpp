@@ -274,15 +274,7 @@ void Server::handleUDPPacket(uint32_t packetID, int playerID) {
 }
 
 void Server::updateGames(float dt) {
-	std::cout << "[DEBUG] Nombre de lobbys avant update : " << m_games.size() << std::endl;
-
 	for (Lobby* game : m_games) {
-		if (game) {
-			std::cout << "[DEBUG] Appel de update() sur " << game->getName() << std::endl;
-			game->update(dt);
-		}
+		game->update(dt);
 	}
-
-	std::cout << "[DEBUG] Nombre de lobbys après update : " << m_games.size() << std::endl;
 }
-

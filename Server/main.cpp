@@ -30,19 +30,28 @@ int main(int argc, const char** argv)
 
 	std::cout << "Server started.\n";
 
-	MSG msg;
-
+	auto start = std::chrono::high_resolution_clock().now();
+	auto last = start;
+	std::chrono::high_resolution_clock::duration elapsed(std::chrono::nanoseconds(0));
 	while (1)
 	{
+		MSG msg;
 		while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
 			DispatchMessage(&msg);
 			TranslateMessage(&msg);
-
 		}
 
-		float dt = 1.0f / 60.0f;
-		server.updateGames(dt);
-		std::chrono::milliseconds(10);
+		auto now = std::chrono::high_resolution_clock().now();
+		elapsed += (now - last);
+		last = now;
+
+		const double dt = 1.0 / 60.0;
+		while (elapsed.count() / 1000000000.0 >= dt) {
+			elapsed -= std::chrono::nanoseconds(1000000000 / 60);
+			server.updateGames(dt);
+		}
+
+		Sleep(1);
 	}
 
 	network::cleanupWinsock();
