@@ -312,14 +312,9 @@ void Server::notifyReceiveUDP()
 {
 	uint32_t packetID;
 	sockaddr clientAddr;
-<<<<<<< HEAD
 	int addrlen = sizeof(clientAddr);
 	int rec = recvfrom(m_socketUDP.mSocket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0, &clientAddr, &addrlen);
-=======
-	int addrlen = sizeof(sockaddr);
-	int rec = recvfrom(m_socketUDP.mSocket, (char*)  & packetID, 4, 0, &clientAddr, &addrlen);
 	int error = WSAGetLastError();
->>>>>>> 2864387ceaf466d3ac09a581e98ad0908a401ad2
 
 	if (rec != sizeof(packetID)) {
 		std::cerr << "Received UDP packet of unexpected size." << std::endl;
