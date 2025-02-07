@@ -34,11 +34,11 @@ void PongScene::setPaddlePositions(float newPaddle1Y, float newPaddle2Y) {
 }
 
 void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
-    if (playerID == 1) {
+    if (playerID == 0) {
         if (positionY >= 0 && positionY <= sizeY - 100)
             paddle1Y = positionY;
     }
-    else if (playerID == 2) {
+    else if (playerID == 1) {
         if (positionY >= 0 && positionY <= sizeY - 100)
             paddle2Y = positionY;
     }
