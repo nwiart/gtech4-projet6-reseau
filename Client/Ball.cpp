@@ -1,18 +1,14 @@
 #include "Ball.h"
 
-Ball::Ball(float startX, float startY) {
-    shape.setRadius(10.f);
+Ball::Ball() {
     shape.setFillColor(sf::Color::White);
     shape.setOrigin(10.f, 10.f);
-    shape.setPosition(startX, startY);
 }
 
-void Ball::setPosition(const sf::Vector2f& pos) {
-    shape.setPosition(pos);
-}
-
-sf::Vector2f Ball::getPosition() const {
-    return shape.getPosition();
+void Ball::updateFromServer(float x, float y, float r) {
+    shape.setRadius(r);
+    shape.setOrigin(r, r);
+    shape.setPosition(x, y);
 }
 
 void Ball::draw(sf::RenderWindow& window) {

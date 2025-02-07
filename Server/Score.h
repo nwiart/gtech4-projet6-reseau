@@ -5,20 +5,15 @@ class Score {
 public:
     Score();
 
-    void addPointPlayer1();
-    void addPointPlayer2();
-    void reset();
+    void addPoint(bool player1Scored);
+    int getScore1() const;
+    int getScore2() const;
 
-    int getScorePlayer1() const { return scorePlayer1; }
-    int getScorePlayer2() const { return scorePlayer2; }
-
-    bool isGameOver() const;
+    void getNetworkData(int& score1, int& score2) const;
 
 private:
     int scorePlayer1;
     int scorePlayer2;
-
-    const int maxScore = 99;
 };
 
 #endif

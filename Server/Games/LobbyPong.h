@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "Socket.h"
 #include "Pong/Ball.h"
+#include "PongPackets.h"
 
 class LobbyPong : public Lobby {
 public:
@@ -14,19 +15,18 @@ public:
     virtual int getMaxPlayers() const override { return m_twoPlayerTeams ? 4 : 2; }
 
     virtual void start() override;
-
     virtual uint32_t addPlayer(uint64_t id) override;
-
     virtual uint32_t getPlayerID(uint64_t socket) const override;
 
     void update(float dt) override;
     void receivePlayerMove(uint32_t playerID, float positionY);
-
     void sendGameState();
+    void getGameState(float& ballX, float& ballY, float& ballRadius,
+        float& paddle1Y, float& paddle2Y,
+        int& score1, int& score2) const;
 
 private:
     PongScene m_pong;
-    Ball m_ball;
     std::unordered_map<uint32_t, Socket> m_players;
     std::unordered_map<uint64_t, uint32_t> m_paddles;
     bool m_twoPlayerTeams;

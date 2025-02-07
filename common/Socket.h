@@ -2,34 +2,35 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <winsock2.h>
 
-typedef uint64_t SOCKET;
+#pragma comment(lib, "ws2_32.lib")
 
 class Socket {
 public:
-	SOCKET mSocket;
+    SOCKET mSocket;
 
-	Socket();
-	Socket(SOCKET s);
+    Socket();
+    Socket(SOCKET s);
+    ~Socket();
 
-	~Socket();
+    void createSocketUDP();
+    void createSocketTCP();
 
-	void createSocketUDP();
-	void createSocketTCP();
+    int connectTCP(const char* ip, uint16_t port);
+    int listenTCP(uint16_t port);
+    bool acceptTCP(Socket& outSocket);
 
-	int connectTCP(const char* ip, uint16_t port);
-	int listenTCP(uint16_t port);
-	void acceptTCP(Socket& outSocket);
+    int bindUDP(uint16_t port);
 
-	int bindUDP(uint16_t port);
-	//std::string receiveUDP();
+    int sendData(const void* data, int dataSize);
+    int receiveData(void* buffer, int bufferSize);
 
-	bool isValid() const;
-	Socket& operator=(const Socket& other) {
-		if (this != &other) {
-			this->mSocket = other.mSocket;
-		}
-		return *this;
-	}
+    int sendUDP(const void* data, int dataSize, sockaddr_in& destAddr);
+    int receiveUDP(void* buffer, int bufferSize, sockaddr_in& senderAddr);
 
+    bool isValid() const;
+    void closeSocket();
+
+    Socket& operator=(const Socket& other);
 };

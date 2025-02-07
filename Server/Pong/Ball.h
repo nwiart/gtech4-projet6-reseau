@@ -1,7 +1,7 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include <SFML/System/Vector2.hpp>
+#include <SFML/System.hpp>
 
 class PongScene;
 
@@ -9,18 +9,22 @@ class Ball {
 public:
     Ball();
 
-    void resetPosition();
     void update(float dt, PongScene* scene);
-
-    const sf::Vector2f& getPosition() const { return position; }
-    const sf::Vector2f& getVelocity() const { return velocity; }
-    const float getRadius() const { return radius;  }
-
-    void setPosition(float x, float y);
-    void setVelocity(float x, float y);
+    void resetPosition();
 
     void reverseX();
     void reverseY();
+
+    void setPosition(float x, float y);
+    void setVelocity(float vx, float vy);
+    void setRadius(float r);
+
+    sf::Vector2f getPosition() const;
+    sf::Vector2f getVelocity() const;
+    float getRadius() const;
+
+    // Fonction pour envoyer les données aux clients
+    void getNetworkData(float& x, float& y, float& r) const;
 
 private:
     sf::Vector2f position;

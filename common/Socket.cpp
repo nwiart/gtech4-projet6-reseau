@@ -1,98 +1,108 @@
 #include "Socket.h"
-#include "Networking.h"
-#include <iostream>
 
+Socket::Socket() : mSocket(INVALID_SOCKET) {}
 
-Socket::Socket()
-    : mSocket(INVALID_SOCKET)
-{
-
-}
-
-Socket::Socket(SOCKET s)
-    : mSocket(s)
-{
-
-}
+Socket::Socket(SOCKET s) : mSocket(s) {}
 
 Socket::~Socket() {
-    if (mSocket != INVALID_SOCKET) {
-        //closesocket(mSocket);
-    }
+    closeSocket();
 }
 
-void Socket::createSocketUDP()
-{
-    mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (mSocket == INVALID_SOCKET) {
-        std::cerr << "Error creating socket: " << WSAGetLastError() << std::endl;
-    }
-}
-
-void Socket::createSocketTCP()
-{
+void Socket::createSocketTCP() {
     mSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (mSocket == INVALID_SOCKET) {
-        std::cerr << "Error creating socket: " << WSAGetLastError() << std::endl;
+        std::cerr << "Erreur: Impossible de créer un socket TCP" << std::endl;
     }
 }
 
-int Socket::connectTCP(const char* ip, uint16_t port)
-{
-    sockaddr addr;
-    network::getServerAddressTCP(&addr, ip, port);
-
-    return connect(mSocket, &addr, sizeof(sockaddr));
+void Socket::createSocketUDP() {
+    mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (mSocket == INVALID_SOCKET) {
+        std::cerr << "Erreur: Impossible de créer un socket UDP" << std::endl;
+    }
 }
 
-int Socket::listenTCP(uint16_t port)
-{
-    sockaddr addr;
-    network::getServerAddressTCP(&addr, "127.0.0.1", port);
+int Socket::connectTCP(const char* ip, uint16_t port) {
+    sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+    serverAddr.sin_addr.s_addr = inet_addr(ip);
 
-    bind(mSocket, &addr, sizeof(sockaddr));
+    return connect(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
+}
+
+int Socket::listenTCP(uint16_t port) {
+    sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "Erreur: Bind du socket échoué !" << std::endl;
+        return SOCKET_ERROR;
+    }
+
     return listen(mSocket, SOMAXCONN);
 }
 
-void Socket::acceptTCP(Socket& outSocket)
-{
-    sockaddr clientAddr;
-    int addrLen = sizeof(clientAddr);
+bool Socket::acceptTCP(Socket& outSocket) {
+    sockaddr_in clientAddr;
+    int addrSize = sizeof(clientAddr);
 
-    SOCKET clientSocket = accept(mSocket, &clientAddr, &addrLen);
+    SOCKET clientSocket = accept(mSocket, (sockaddr*)&clientAddr, &addrSize);
     if (clientSocket == INVALID_SOCKET) {
-        std::cerr << "TCP accept failed: " << WSAGetLastError() << std::endl;
-        outSocket.mSocket = INVALID_SOCKET;
-        return;
+        std::cerr << "Erreur: Échec de l'acceptation de la connexion" << std::endl;
+        return false;
     }
 
-    std::cout << "Accepted new client socket: " << clientSocket << std::endl;
-    outSocket.mSocket = clientSocket; 
+    outSocket.mSocket = clientSocket;
+    return true;
 }
 
-int Socket::bindUDP(uint16_t port)
-{
-    sockaddr_in addr = {};
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(port);
+int Socket::bindUDP(uint16_t port) {
+    sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(mSocket, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == SOCKET_ERROR) {
-        std::cerr << "UDP Bind failed: " << WSAGetLastError() << std::endl;
-        return SOCKET_ERROR;
-    }
-
-    u_long mode = 1;
-    if (ioctlsocket(mSocket, FIONBIO, &mode) == SOCKET_ERROR) {
-        std::cerr << "Failed to set non-blocking mode: " << WSAGetLastError() << std::endl;
-        return SOCKET_ERROR;
-    }
-
-    return 0;
+    return bind(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
 }
 
+int Socket::sendData(const void* data, int dataSize) {
+    return send(mSocket, reinterpret_cast<const char*>(data), dataSize, 0);
+}
 
-bool Socket::isValid() const
-{
+int Socket::receiveData(void* buffer, int bufferSize) {
+    return recv(mSocket, reinterpret_cast<char*>(buffer), bufferSize, 0);
+}
+
+int Socket::sendUDP(const void* data, int dataSize, sockaddr_in& destAddr) {
+    return sendto(mSocket, reinterpret_cast<const char*>(data), dataSize, 0,
+        (sockaddr*)&destAddr, sizeof(destAddr));
+}
+
+int Socket::receiveUDP(void* buffer, int bufferSize, sockaddr_in& senderAddr) {
+    int senderAddrSize = sizeof(senderAddr);
+    return recvfrom(mSocket, reinterpret_cast<char*>(buffer), bufferSize, 0,
+        (sockaddr*)&senderAddr, &senderAddrSize);
+}
+
+bool Socket::isValid() const {
     return mSocket != INVALID_SOCKET;
+}
+
+// Fermeture propre du socket
+void Socket::closeSocket() {
+    if (isValid()) {
+        closesocket(mSocket);
+        mSocket = INVALID_SOCKET;
+    }
+}
+
+Socket& Socket::operator=(const Socket& other) {
+    if (this != &other) {
+        closeSocket();
+        this->mSocket = other.mSocket;
+    }
+    return *this;
 }

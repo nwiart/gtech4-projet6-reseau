@@ -24,10 +24,9 @@ enum class ServerPackets : uint32_t
 	DenyJoin,
 	GameStart,
 	PlayerJoined,
+	GameState,
 
-	PlayerMove,
-	BallInfo,
-	Score,
+	PlayerMove
 };
 
 
@@ -117,23 +116,8 @@ struct Server_PlayerMove
 	float position;
 };
 
-// Sent by server to update the ball's position and velocity.
-struct Server_BallInfo
-{
-	float xPos;
-	float yPos;
-	float xVel;
-	float yVel;
-};
-
-// Sent by server when a team scores a point.
-struct Server_Score
-{
-	int team;
-};
-
-struct GameState {
-	float ballX, ballY;
+struct Server_GameState {
+	float ballX, ballY, ballRadius;
 	int scoreP1, scoreP2;
 	float paddle1Y, paddle2Y;
 };

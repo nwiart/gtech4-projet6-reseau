@@ -5,11 +5,10 @@
 
 class Ball {
 public:
-    Ball(float startX, float startY);
+    Ball();
 
+    void updateFromServer(float x, float y, float r);
     void draw(sf::RenderWindow& window);
-    void setPosition(const sf::Vector2f& pos);
-    sf::Vector2f getPosition() const;
 
 private:
     sf::CircleShape shape;
