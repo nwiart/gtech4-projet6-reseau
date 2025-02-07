@@ -235,13 +235,14 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
     return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void Network::receiveUDPPackets() {
+uint32_t Network::receiveUDPPackets() {
     sockaddr_in senderAddr;
     uint32_t packetID;
 
-    while (network::receivePacketUDP(m_socketUDP, &senderAddr, packetID)) {
-        handleUDPPacket(packetID);
-    }
+    if (network::receivePacketUDP(m_socketUDP, &senderAddr, packetID)) { return packetID; }
+
+   return 0;
+
 }
 
 

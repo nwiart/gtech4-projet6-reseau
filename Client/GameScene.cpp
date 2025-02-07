@@ -53,6 +53,7 @@ void GameScene::sendPlayerMove(sf::RenderWindow& window) {
 
 void GameScene::receiveGameStateUDP() {
     sockaddr_in senderAddr;
+<<<<<<< Updated upstream
     Server_GameState state;
 
     if (network::receivePacketUDP(m_serverSocket, &senderAddr, state)) {
@@ -60,5 +61,17 @@ void GameScene::receiveGameStateUDP() {
         score.update(state.scoreP1, state.scoreP2, sf::Vector2u(1280, 720));
         player1.updateFromServer(state.paddle1Y);
         player2.updateFromServer(state.paddle2Y);
+=======
+    auto packetID = static_cast<ServerPackets>(Network::receiveUDPPackets());
+    
+    switch (packetID) {
+    case ServerPackets::GameState: {
+        Server_GameState packet;
+        player1.setPosition(packet.paddle1Y);
+        player2.setPosition(packet.paddle2Y);
+        ball.updateFromServer(packet.ballX, packet.ballY, packet.ballRadius);
+        score.setScore(packet.scoreP1, packet.scoreP2);
+    } break;
+>>>>>>> Stashed changes
     }
 }

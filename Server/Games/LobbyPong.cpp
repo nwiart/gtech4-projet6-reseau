@@ -62,7 +62,7 @@ void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {
             continue;
         }
         const sockaddr* clientAddr = reinterpret_cast<const sockaddr*>(&clientConn->getAddr());
-        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, static_cast<uint32_t>(ServerPackets::PlayerMove), updatePacket);
+        network::sendPacketUDP(clientConn->getSocket(), clientAddr, static_cast<uint32_t>(ServerPackets::PlayerMove), updatePacket);
     }
 }
 
@@ -75,9 +75,13 @@ void LobbyPong::sendGameState() {
 
     const sf::Vector2f& p = m_pong.getBall().getPosition();
     const sf::Vector2f& v = m_pong.getBall().getVelocity();
-    Server_BallInfo packet;
-    packet.xPos = p.x; packet.yPos = p.y;
-    packet.xVel = v.x; packet.yVel = v.y;
+    Server_GameState packet;
+    packet.ballX = p.x; packet.ballY = p.y;
+    packet.ballRadius = m_pong.getBall().getRadius();
+    packet.paddle1Y = m_pong.getPaddle1Y();
+    packet.paddle2Y = m_pong.getPaddle2Y();
+    packet.scoreP1 = m_pong.getScore().getScore1();
+    packet.scoreP2 = m_pong.getScore().getScore2();
 
     for (auto& player : m_players) {
         ClientConnection* clientConn = Server::m_instance->getClientBySocket(player.second.mSocket);
@@ -86,7 +90,7 @@ void LobbyPong::sendGameState() {
             continue;
         }
         const sockaddr* clientAddr = reinterpret_cast<const sockaddr*>(&clientConn->getAddr());
-        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::BallInfo, packet);
+        network::sendPacketUDP(clientConn->getSocket(), clientAddr, (uint32_t)ServerPackets::GameState, packet);
     }
 }
 
