@@ -75,21 +75,14 @@ uint32_t Server::confirmClient(Socket& clientSocketTCP, const std::string& playe
 {
 	sockaddr_in addr;
 	int addrSize = sizeof(addr);
-
-	if (getpeername(clientSocketTCP.mSocket, (sockaddr*)&addr, &addrSize) == SOCKET_ERROR) {
-		std::cerr << "Erreur: Impossible de récupérer l'adresse du client." << std::endl;
-		return -1;
+	if (getpeername(clientSocketTCP.mSocket, reinterpret_cast<sockaddr*>(&addr), &addrSize) == SOCKET_ERROR) {
+		std::cerr << "getpeername failed with error: " << WSAGetLastError() << std::endl;
 	}
 
 	uint32_t clientIP = addr.sin_addr.s_addr;
 
-	auto it = m_clients.find(clientSocketTCP.mSocket);
-	if (it == m_clients.end()) {
-		std::cerr << "Erreur: Tentative de confirmation d'un client inconnu !" << std::endl;
-		return -1;
-	}
+	ClientConnection& conn = m_clients.at(clientSocketTCP.mSocket);
 
-	ClientConnection& conn = it->second;
 	conn.m_id = m_clientUID;
 	conn.m_name = playerName;
 	conn.setIP(addr);
@@ -319,16 +312,17 @@ void Server::notifyReceiveUDP()
 {
 	uint32_t packetID;
 	sockaddr clientAddr;
-	int addrlen;
-	int rec = recvfrom(m_socketUDP.mSocket, (char*)  & packetID, 4, 0, &clientAddr, &addrlen);
+	int addrlen = sizeof(clientAddr);
+	int rec = recvfrom(m_socketUDP.mSocket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0, &clientAddr, &addrlen);
 
-	if (rec != 4) {
+	if (rec != sizeof(packetID)) {
+		std::cerr << "Received UDP packet of unexpected size." << std::endl;
 		return;
 	}
 
 	ClientConnection* conn = getClientByAddress(clientAddr);
 	if (!conn) {
-		std::cout << "Received UDP data, but the client could not be resolved...\n";
+		std::cout << "Received UDP data, but the client could not be resolved..." << std::endl;
 		return;
 	}
 
@@ -393,9 +387,10 @@ ClientConnection* Server::getClientBySocket(SOCKET s)
 
 ClientConnection* Server::getClientByAddress(const sockaddr& addr)
 {
-	const sockaddr_in& inetaddr = reinterpret_cast<const sockaddr_in&>(addr);
-	for (auto &p : m_clients) {
-		if (p.second.m_addr.sin_addr.s_addr == inetaddr.sin_addr.s_addr && p.second.m_addr.sin_port == inetaddr.sin_port) {
+	const sockaddr_in& inetAddr = reinterpret_cast<const sockaddr_in&>(addr);
+	for (auto& p : m_clients) {
+		if (p.second.getAddr().sin_addr.s_addr == inetAddr.sin_addr.s_addr &&
+			p.second.getAddr().sin_port == inetAddr.sin_port) {
 			return &p.second;
 		}
 	}

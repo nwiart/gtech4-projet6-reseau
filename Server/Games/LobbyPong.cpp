@@ -65,12 +65,18 @@ void LobbyPong::update(float dt) {
 void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {
     m_pong.receivePlayerMove(playerID, positionY);
 
-    Server_PlayerMove p;
-    p.playerID = playerID;
-    p.position = positionY;
+    Server_PlayerMove updatePacket;
+    updatePacket.playerID = playerID;
+    updatePacket.position = positionY;
+
     for (auto& p : m_players) {
-        const sockaddr* clientAddr = Server::m_instance->getClientBySocket(p.second.mSocket)->getIP();
-        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::PlayerMove, p);
+        ClientConnection* clientConn = Server::m_instance->getClientBySocket(p.second.mSocket);
+        if (!clientConn) {
+            std::cerr << "Client connection not found for socket: " << p.second.mSocket << std::endl;
+            continue;
+        }
+        const sockaddr* clientAddr = reinterpret_cast<const sockaddr*>(&clientConn->getAddr());
+        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, static_cast<uint32_t>(ServerPackets::PlayerMove), updatePacket);
     }
 }
 
@@ -88,7 +94,12 @@ void LobbyPong::sendGameState() {
     packet.xVel = v.x; packet.yVel = v.y;
 
     for (auto& player : m_players) {
-        const sockaddr* clientAddr = Server::m_instance->getClientBySocket(player.second.mSocket)->getIP();
+        ClientConnection* clientConn = Server::m_instance->getClientBySocket(player.second.mSocket);
+        if (!clientConn) {
+            std::cerr << "Client connection not found for socket: " << player.second.mSocket << std::endl;
+            continue;
+        }
+        const sockaddr* clientAddr = reinterpret_cast<const sockaddr*>(&clientConn->getAddr());
         network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::BallInfo, packet);
     }
 }
