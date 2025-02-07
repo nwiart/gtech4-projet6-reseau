@@ -8,7 +8,7 @@ Socket::Socket(SOCKET s) : mSocket(s) {}
 
 Socket::~Socket()
 {
-    closeSocket();
+    //closeSocket();
 }
 
 void Socket::createSocketTCP()
