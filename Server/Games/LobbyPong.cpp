@@ -44,6 +44,14 @@ void LobbyPong::start() {
     if (gameStarted) return;
     gameStarted = true;
     m_pong.startGame();
+
+    // Signal everyone that the game has started.
+    Server_GameStart packet;
+    packet.started = true;
+    for (auto& p : m_players) {
+        network::sendPacketTCP(p.second, (uint32_t)ServerPackets::GameStart, packet);
+    }
+
     std::cout << "La partie commence !" << std::endl;
 }
 
