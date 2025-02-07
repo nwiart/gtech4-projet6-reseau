@@ -29,5 +29,12 @@ public:
     bool isValid() const;
     void closeSocket();
 
-    Socket& operator=(const Socket& other);
+    Socket(const Socket&) = delete;
+    Socket& operator=(const Socket&) = delete;
+
+    Socket(Socket&& other) noexcept;
+    Socket& operator=(Socket&& other) noexcept;
+
+private:
+    sockaddr_in address;
 };
