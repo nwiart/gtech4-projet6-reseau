@@ -319,8 +319,9 @@ void Server::notifyReceiveUDP()
 {
 	uint32_t packetID;
 	sockaddr clientAddr;
-	int addrlen;
+	int addrlen = sizeof(sockaddr);
 	int rec = recvfrom(m_socketUDP.mSocket, (char*)  & packetID, 4, 0, &clientAddr, &addrlen);
+	int error = WSAGetLastError();
 
 	if (rec != 4) {
 		return;
