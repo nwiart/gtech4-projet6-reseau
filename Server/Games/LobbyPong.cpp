@@ -23,10 +23,6 @@ uint32_t LobbyPong::addPlayer(uint64_t socket) {
 
     std::cout << "Joueur " << playerID << " ajouté !" << std::endl;
 
-    if (m_players.size() == getMaxPlayers()) {
-        start();
-    }
-
     return playerID;
 }
 
