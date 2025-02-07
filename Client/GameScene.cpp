@@ -5,10 +5,7 @@
 extern sf::Font font;
 
 GameScene::GameScene()
-    : player1(0.02f, 0.5f, sf::Keyboard::W, sf::Keyboard::S, true),
-    player2(0.96f, 0.5f, sf::Keyboard::Up, sf::Keyboard::Down, false),
-    ball(640, 360),
-    score(font, sf::Vector2u(1280, 720))
+    : score(font, sf::Vector2u(1280, 720))
 {
     player1Text.setFont(font);
     player1Text.setCharacterSize(30);
@@ -23,22 +20,21 @@ GameScene::GameScene()
     player2Text.setPosition(1100, 20);
 }
 
-
-void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window) {
+void GameScene::handleEvent(sf::Event event, sf::RenderWindow &window)
+{
     if (event.type == sf::Event::Closed)
         window.close();
 }
 
-void GameScene::update(sf::RenderWindow& window) {
-    player1.update(window.getSize().y, window);
-    player2.update(window.getSize().y, window);
+void GameScene::update(sf::RenderWindow &window)
+{
 
-    ball.draw(window);
-
-    sendPlayerMove(window);
+    receiveGameStateUDP();
+    sendPlayerMove();
 }
 
-void GameScene::draw(sf::RenderWindow& window) {
+void GameScene::draw(sf::RenderWindow &window)
+{
     window.draw(player1Text);
     window.draw(player2Text);
 
@@ -47,21 +43,36 @@ void GameScene::draw(sf::RenderWindow& window) {
     player2.draw(window);
 }
 
-void GameScene::sendPlayerMove(sf::RenderWindow& window) {
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    int paddleY = mousePos.y;
+void GameScene::sendPlayerMove()
+{
+    int paddleY = player1.getPositionY();
+
+    if (sf::Keyboard::isKeyPressed(player1.getUpKey()))
+    {
+        paddleY -= 7;
+    }
+    else if (sf::Keyboard::isKeyPressed(player1.getDownKey()))
+    {
+        paddleY += 7;
+    }
+    else
+    {
+        return;
+    }
 
     Network::sendPosition(paddleY);
 }
 
-void GameScene::receiveGameStateUDP() {
+void GameScene::receiveGameStateUDP()
+{
     sockaddr_in senderAddr;
-    GameState state;
+    Server_GameState state;
 
-    if (network::receivePacketUDP(m_serverSocket, &senderAddr, state)) {
-        ball.setPosition(sf::Vector2f(state.ballX, state.ballY));
+    if (network::receivePacketUDP(m_serverSocket, &senderAddr, state))
+    {
+        ball.updateFromServer(state.ballX, state.ballY, state.ballRadius);
         score.update(state.scoreP1, state.scoreP2, sf::Vector2u(1280, 720));
-        player1.setPosition(state.paddle1Y);
-        player2.setPosition(state.paddle2Y);
+        player1.updateFromServer(state.paddle1Y);
+        player2.updateFromServer(state.paddle2Y);
     }
 }

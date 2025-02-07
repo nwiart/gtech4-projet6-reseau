@@ -245,19 +245,11 @@ void Network::handleUDPPacket(uint32_t packetID) {
         }
     } break;
 
-    case ServerPackets::BallInfo: {
-        Server_BallInfo packet;
-        if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
-            std::cout << "Ball position: (" << packet.xPos << ", " << packet.yPos << ")" << std::endl;
-        }
+    case ServerPackets::GameState: {
+        Server_GameState packet;
+        network::receivePacketUDP(m_socketUDP, nullptr, packet);
     } break;
 
-    case ServerPackets::Score: {
-        Server_Score packet;
-        if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
-            std::cout << "Team " << packet.team << " scored!" << std::endl;
-        }
-    } break;
 
     default:
         std::cerr << "Unknown UDP packet received: " << packetID << std::endl;

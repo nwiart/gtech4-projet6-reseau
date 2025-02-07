@@ -29,19 +29,19 @@ void Server::open()
 	m_socketUDP.bindUDP(serverSecondaryPort);
 }
 
-bool Server::notifyConnect(Socket &clientSocketTCP)
+bool Server::notifyConnect(Socket& clientSocketTCP)
 {
 	if (m_clients.find(clientSocketTCP.mSocket) != m_clients.end())
 	{
 		return false;
 	}
 
-	auto it = m_clients.insert(std::pair<uint64_t, ClientConnection>((uint64_t)clientSocketTCP.mSocket, ClientConnection()));
+	auto it = m_clients.emplace(clientSocketTCP.mSocket, ClientConnection());
+	ClientConnection& conn = it.first->second;
 
-	ClientConnection &conn = it.first->second;
 	conn.m_id = -1;
 	conn.m_name = "PLAYER_CONNECTING";
-	conn.m_socket = clientSocketTCP;
+	conn.m_socket = std::move(clientSocketTCP);
 
 	return true;
 }
@@ -58,26 +58,38 @@ void Server::notifyDisconnect(Socket& clientSocketTCP) {
 
 	if (conn.m_lobby) {
 		conn.m_lobby->disconnectPlayer(conn.m_id);
-		std::cout << "Joueur " << conn.m_id << " retire du lobby " << conn.m_lobby->getLobbyID() << std::endl;
+		std::cout << "Joueur " << conn.m_id << " retiré du lobby " << conn.m_lobby->getLobbyID() << std::endl;
 	}
 
 	shutdown(clientSocketTCP.mSocket, SD_BOTH);
 	closesocket(clientSocketTCP.mSocket);
 
-	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") deconnecte.\n";
+	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") déconnecté.\n";
 
+	conn.m_socket.closeSocket();
 	m_clients.erase(it);
 }
 
-uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string &playerName)
+
+uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string& playerName)
 {
 	sockaddr_in addr;
 	int addrSize = sizeof(addr);
-	getpeername(clientSocketTCP.mSocket, (sockaddr *)&addr, &addrSize);
+
+	if (getpeername(clientSocketTCP.mSocket, (sockaddr*)&addr, &addrSize) == SOCKET_ERROR) {
+		std::cerr << "Erreur: Impossible de récupérer l'adresse du client." << std::endl;
+		return -1;
+	}
+
 	uint32_t clientIP = addr.sin_addr.s_addr;
 
-	ClientConnection &conn = m_clients.at(clientSocketTCP.mSocket);
+	auto it = m_clients.find(clientSocketTCP.mSocket);
+	if (it == m_clients.end()) {
+		std::cerr << "Erreur: Tentative de confirmation d'un client inconnu !" << std::endl;
+		return -1;
+	}
 
+	ClientConnection& conn = it->second;
 	conn.m_id = m_clientUID;
 	conn.m_name = playerName;
 	conn.setIP(addr);
@@ -86,6 +98,7 @@ uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string &player
 
 	return conn.m_id;
 }
+
 
 void Server::createLobby(Socket initiator, const std::string &name, GameMode gm)
 {
