@@ -17,7 +17,7 @@ uint32_t LobbyPong::addPlayer(uint64_t socket) {
         return -1;
     }
 
-    uint32_t playerID = m_players.size() + 1;
+    uint32_t playerID = m_players.size();
     m_players[playerID] = Socket(socket);
     m_paddles[socket] = playerID;
 
