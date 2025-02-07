@@ -21,6 +21,7 @@ public:
 
 	Socket& getSocket() { return m_socket; }
 	const sockaddr* getIP() const { return (const sockaddr*) & m_addr; }
+	const sockaddr* getUDPAddr() const { return (const sockaddr*)&m_udpAddr; }
 	const std::string& getName() const { return m_name; }
 	Lobby* getLobby() const { return m_lobby; }
 
@@ -30,6 +31,7 @@ private:
 	uint32_t m_id;
 	Socket m_socket;
 	sockaddr_in m_addr;
+	sockaddr_in m_udpAddr;
 	std::string m_name;
 	Lobby* m_lobby;
 };
@@ -60,11 +62,13 @@ public:
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void notifyReceiveUDP();
 
-	void handleUDPPacket(uint32_t packetID, ClientConnection* conn);
+	void handleUDPPacket(uint32_t packetID, char* buf, sockaddr* addr);
 
 	void updateGames(float dt);
 
 	Lobby* getLobbyByID(uint32_t id) const;
+
+	ClientConnection* getClientByID(uint32_t id);
 
 	ClientConnection* getClientBySocket(SOCKET s);
 

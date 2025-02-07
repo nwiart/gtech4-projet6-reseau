@@ -7,6 +7,7 @@
 enum class ClientPackets : uint32_t
 {
 	PlayerConnect,
+	PlayerConnectUDP,
 	GetLobbies,
 	CreateLobby,
 	JoinLobby,
@@ -34,6 +35,11 @@ enum class ServerPackets : uint32_t
 struct Client_PlayerConnect
 {
 	char playerName[32];
+};
+
+struct Client_PlayerConnectUDP
+{
+	int playerID;
 };
 
 struct Client_GetLobbies
@@ -107,6 +113,7 @@ struct Server_GameStart
 // Sent by client when they move their paddle.
 struct Client_PlayerMove
 {
+	int playerID;
 	float position;
 };
 

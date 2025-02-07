@@ -16,6 +16,7 @@ public:
     static void pollEvents();
 
     static void handleTCPPacket(uint32_t packetID);
+    static void handleUDPPacket();
 
     static void receiveUDPPackets();
 

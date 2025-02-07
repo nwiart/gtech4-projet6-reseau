@@ -22,7 +22,7 @@ void Socket::createSocketTCP()
 
 void Socket::createSocketUDP()
 {
-    mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    mSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (mSocket == INVALID_SOCKET)
     {
         std::cerr << "Erreur: Impossible de cr�er un socket UDP" << std::endl;

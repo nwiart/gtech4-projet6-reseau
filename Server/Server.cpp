@@ -26,7 +26,7 @@ void Server::open()
 	m_socketListener.listenTCP(serverBasePort);
 
 	m_socketUDP.createSocketUDP();
-	m_socketUDP.bindUDP(serverSecondaryPort);
+	m_socketUDP.bindUDP(serverSecondaryPort-1);
 }
 
 bool Server::notifyConnect(Socket& clientSocketTCP)
@@ -284,7 +284,6 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		createLobby(playerSocket,
 			reinterpret_cast<Client_CreateLobby*>(buf)->lobbyName,
 			reinterpret_cast<Client_CreateLobby*>(buf)->gamemode);
-
 	}
 	break;
 
@@ -293,7 +292,6 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		recv(clientSocketTCP, buf, sizeof(Client_JoinLobby), 0);
 		Socket& playerSocket = conn.getSocket();
 		joinLobby(playerSocket, getLobbyByID(reinterpret_cast<Client_JoinLobby*>(buf)->lobbyID));
-
 	}
 	break;
 
@@ -317,36 +315,46 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 
 void Server::notifyReceiveUDP()
 {
-	uint32_t packetID;
-	sockaddr clientAddr;
-	int addrlen;
-	int rec = recvfrom(m_socketUDP.mSocket, (char*)  & packetID, 4, 0, &clientAddr, &addrlen);
+	char buf[MAX_PACKET_SIZE];
+	sockaddr_in clientAddr;
+	int addrlen = sizeof(sockaddr);
 
-	if (rec != 4) {
-		return;
-	}
+	int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, (sockaddr*)  & clientAddr, &addrlen);
+	int error = WSAGetLastError();
 
-	ClientConnection* conn = getClientByAddress(clientAddr);
+	std::cout << "Receive port " << clientAddr.sin_port << '\n';
+
+	/*ClientConnection* conn = getClientByAddress(*(sockaddr*)&clientAddr);
 	if (!conn) {
 		std::cout << "Received UDP data, but the client could not be resolved...\n";
 		return;
-	}
+	}*/
 
-	handleUDPPacket(packetID, conn);
+	uint32_t packetID = *((uint32_t*) buf);
+	handleUDPPacket(packetID, buf + 4, (sockaddr*) & clientAddr);
 }
 
-void Server::handleUDPPacket(uint32_t packetID, ClientConnection* conn)
+void Server::handleUDPPacket(uint32_t packetID, char* buf, sockaddr* addr)
 {
 	switch (static_cast<ClientPackets>(packetID))
 	{
+	case ClientPackets::PlayerConnectUDP:
+	{
+		uint32_t id = ((Client_PlayerConnectUDP*)buf)->playerID;
+		getClientByID(id)->m_udpAddr = *(sockaddr_in*)addr;
+	}
+	break;
 	case ClientPackets::PlayerMove:
 	{
-		Client_PlayerMove packet;
-		network::receivePacketUDP(m_socketUDP, nullptr, packet);
+		Client_PlayerMove* packet = reinterpret_cast<Client_PlayerMove*>(buf);
 		//std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
 
+		std::cout << packet->playerID << " : " << packet->position << '\n';
+
+		ClientConnection* conn = getClientByID(packet->playerID);
+
 		LobbyPong* pong = dynamic_cast<LobbyPong*>(conn->getLobby());
-		pong->receivePlayerMove(pong->getPlayerID(conn->getSocket().mSocket), packet.position);
+		pong->receivePlayerMove(pong->getPlayerID(conn->getSocket().mSocket), packet->position);
 	}
 	break;
 
@@ -379,6 +387,16 @@ Lobby *Server::getLobbyByID(uint32_t id) const
 		if (l->getLobbyID() == id)
 		{
 			return l;
+		}
+	}
+	return 0;
+}
+
+ClientConnection* Server::getClientByID(uint32_t id)
+{
+	for (auto& p : m_clients) {
+		if (p.second.m_id == id) {
+			return &p.second;
 		}
 	}
 	return 0;

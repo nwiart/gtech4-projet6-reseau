@@ -8,7 +8,8 @@
 #include <string.h>
 #include <iostream>
 
-#define MESSAGE_RECV (WM_USER + 1)  // Ensure a unique user-defined message
+#define MESSAGE_RECV (WM_USER + 1)
+#define MESSAGE_UDP (WM_USER+2)
 
 static HWND hwnd;
 
@@ -55,34 +56,48 @@ int Network::connect(const char* ip, const char* playerName)
         return -1;
     }
 
+    // UDP Initialization
+    m_socketUDP.createSocketUDP();
+
+    /*if (m_socketUDP.bindUDP(0) == SOCKET_ERROR) {
+        std::cerr << "UDP socket bind failed.\n";
+        return -1;
+    }*/
+
+    /*sockaddr_in ua;
+    ua.sin_family = AF_INET;
+    ua.sin_port = 27014;
+    ua.sin_addr.s_addr = inet_addr(ip);
+    ::connect(m_socketUDP.mSocket, (sockaddr*) &ua, sizeof(sockaddr));*/
+
+    bool t = true;
+    setsockopt(m_socketUDP.mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&t, 1);
+
+    sockaddr_in ua;
+    int len = sizeof(sockaddr);
+    getpeername(m_socketUDP.mSocket, (sockaddr*) &ua, &len);
+
     // Copy player name safely
     Client_PlayerConnect packet;
-    int len = strlen(playerName);
+    len = strlen(playerName);
     if (len > sizeof(packet.playerName) - 1) {
         len = sizeof(packet.playerName) - 1;
     }
     strncpy(packet.playerName, playerName, len);
     packet.playerName[len] = '\0';
 
-    // Send the PlayerConnect packet
     bool success = network::sendPacketTCP(m_socketTCP, static_cast<uint32_t>(ClientPackets::PlayerConnect), packet);
     if (!success) {
         std::cerr << "Failed to send PlayerConnect packet.\n";
         return -1;
     }
 
-    // UDP Initialization
-    m_socketUDP.createSocketUDP();
-
-    if (m_socketUDP.bindUDP(0) == SOCKET_ERROR) {
-        std::cerr << "UDP socket bind failed.\n";
-        return -1;
-    }
+    WSAAsyncSelect(m_socketUDP.mSocket, hwnd, MESSAGE_UDP, FD_READ);
 
     // Setup server UDP address
     memset(&serverUDPAddr, 0, sizeof(serverUDPAddr));
     serverUDPAddr.sin_family = AF_INET;
-    serverUDPAddr.sin_port = htons(serverSecondaryPort);
+    serverUDPAddr.sin_port = htons(serverSecondaryPort-1);
 
     if (inet_pton(AF_INET, ip, &serverUDPAddr.sin_addr) <= 0) {
         std::cerr << "Invalid IP address format.\n";
@@ -121,7 +136,9 @@ void Network::createLobby(GameMode gm, const std::string& name)
 
 int Network::sendPosition(int posY)
 {
-    Client_PlayerMove packet{ posY };
+    extern int playerID;
+    std::cout << playerID << " : " << posY << '\n';
+    Client_PlayerMove packet{ playerID, posY };
 
     network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 
@@ -134,6 +151,18 @@ void Network::handleTCPPacket(uint32_t packetID)
 
     switch ((ServerPackets)packetID)
     {
+    case ServerPackets::ConnectResult:
+    {
+        extern int playerID;
+        recv(m_socketTCP.mSocket, buf, sizeof(Server_ConnectResult), 0);
+        playerID = ((Server_ConnectResult*) buf)->playerID;
+
+        Client_PlayerConnectUDP p;
+        p.playerID = playerID;
+        network::sendPacketUDP(m_socketUDP, (sockaddr*) & serverUDPAddr, (uint32_t)ClientPackets::PlayerConnectUDP, p);
+    }
+    break;
+
     case ServerPackets::GetLobbies:
     {
         recv(m_socketTCP.mSocket, buf, sizeof(Server_GetLobbies), 0);
@@ -186,6 +215,27 @@ void Network::handleTCPPacket(uint32_t packetID)
     }
 }
 
+void Network::handleUDPPacket()
+{
+    sockaddr_in addr;
+    int addrlen = sizeof(sockaddr);
+    char buf[MAX_PACKET_SIZE];
+    int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, (sockaddr*) & addr, &addrlen);
+
+    uint32_t packetID = *((uint32_t*) buf);
+
+    switch ((ServerPackets) packetID)
+    {
+    case ServerPackets::PlayerMove: {
+        Server_PlayerMove* packet = (Server_PlayerMove*) (buf + 4);
+        GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
+        std::cout << "received : " << packet->playerID << " : " << packet->position << '\n';
+        scene->setPlayerPos(packet->position);
+    }
+        break;
+    }
+}
+
 void create_window()
 {
     static const char className[] = "ClientWnd";
@@ -220,6 +270,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
                 std::cerr << "Failed to receive valid packet ID.\n";
             }
         }
+        break;
+    case MESSAGE_UDP:
+        Network::handleUDPPacket();
         break;
     }
 
