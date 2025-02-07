@@ -335,29 +335,6 @@ void Server::notifyReceiveUDP()
 	handleUDPPacket(packetID, conn);
 }
 
-void Server::receiveUDPPackets() {
-	sockaddr_in senderAddr;
-	uint32_t packetID;
-
-	while (network::receivePacketUDP(m_socketUDP, &senderAddr, packetID))
-	{
-		uint32_t senderIP = senderAddr.sin_addr.s_addr;
-
-		// Find the client that matches the IP
-		/*auto it = std::find_if(m_clients.begin(), m_clients.end(), [&](const auto& pair)
-							   { return pair.second.getIP() == senderIP; });
-
-		if (it == m_clients.end())
-		{
-			std::cerr << "Received UDP packet from unknown IP" << "\n";
-			continue; // Ignore packets from unknown clients
-		}
-
-		int playerID = it->second.m_id;
-		handleUDPPacket(packetID, 0);*/
-	}
-}
-
 void Server::handleUDPPacket(uint32_t packetID, ClientConnection* conn)
 {
 	switch (static_cast<ClientPackets>(packetID))

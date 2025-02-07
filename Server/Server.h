@@ -59,7 +59,6 @@ public:
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void notifyReceiveUDP();
-	void receiveUDPPackets();
 
 	void handleUDPPacket(uint32_t packetID, ClientConnection* conn);
 
