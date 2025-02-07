@@ -37,6 +37,11 @@ void GameScene::setPlayerPos(int p)
     player1.setPosition(p);
 }
 
+void GameScene::setBallInfo(const sf::Vector2f& pos, const sf::Vector2f& vel)
+{
+    ball.setPosition(pos.x, pos.y);
+}
+
 
 void GameScene::draw(sf::RenderWindow &window)
 {
@@ -46,6 +51,7 @@ void GameScene::draw(sf::RenderWindow &window)
     score.draw(window);
     player1.draw(window);
     player2.draw(window);
+    ball.draw(window);
 }
 
 void GameScene::sendPlayerMove()
