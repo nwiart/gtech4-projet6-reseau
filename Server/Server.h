@@ -16,7 +16,7 @@ class ClientConnection
 	friend class Server;
 
 public:
-	ClientConnection() : m_id(-1), m_lobby(0), m_ip(0) {}
+	ClientConnection() : m_id(-1), m_lobby(0) {}
 
 	Socket &getSocket() { return m_socket; }
 	const sockaddr *getIP() const { return (const sockaddr *)&m_addr; }
@@ -26,7 +26,6 @@ public:
 
 	void setIP(const sockaddr_in &addr)
 	{
-		m_ip = addr.sin_addr.s_addr;
 		m_addr = addr;
 	}
 
@@ -39,7 +38,6 @@ private:
 	sockaddr_in m_udpAddr;
 	std::string m_name;
 	Lobby *m_lobby;
-	sockaddr_in m_addr;
 };
 
 class Server
