@@ -123,12 +123,7 @@ int Network::sendPosition(int posY)
 {
     Client_PlayerMove packet{ posY };
 
-    bool success = network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
-
-    if (!success) {
-        std::cerr << "Failed to send PlayerMove UDP packet!" << std::endl;
-        return -1;
-    }
+    network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 
     return 0;
 }

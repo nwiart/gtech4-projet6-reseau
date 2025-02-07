@@ -9,7 +9,6 @@ GameScene::GameScene()
     player2(0.96f, 0.5f, sf::Keyboard::Up, sf::Keyboard::Down, false),
     ball(640, 360),
     score(font, sf::Vector2u(1280, 720))
-    /*m_serverSocket(serverSocket)*/
 {
     player1Text.setFont(font);
     player1Text.setCharacterSize(30);
@@ -37,7 +36,6 @@ void GameScene::update(sf::RenderWindow& window) {
     ball.draw(window);
 
     sendPlayerMove(window);
-    receiveGameStateUDP();
 }
 
 void GameScene::draw(sf::RenderWindow& window) {

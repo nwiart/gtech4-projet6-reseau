@@ -23,9 +23,6 @@ public:
 
     int bindUDP(uint16_t port);
 
-    int sendData(const void* data, int dataSize);
-    int receiveData(void* buffer, int bufferSize);
-
     int sendUDP(const void* data, int dataSize, sockaddr_in& destAddr);
     int receiveUDP(void* buffer, int bufferSize, sockaddr_in& senderAddr);
 

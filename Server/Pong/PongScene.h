@@ -17,6 +17,8 @@ public:
         int& score1, int& score2) const;
     void resetPaddles();
 
+    inline Ball& getBall() { return m_ball; }
+
 private:
     Ball m_ball;
     Score m_score;

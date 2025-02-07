@@ -10,9 +10,14 @@
 #include <WinSock2.h>
 #include <stdlib.h>
 
+
+Server* Server::m_instance = 0;
+
+
 Server::Server()
 	: m_lobbyUID(0), m_clientUID(0)
 {
+	m_instance = this;
 }
 
 void Server::open()
@@ -75,7 +80,7 @@ uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string &player
 
 	conn.m_id = m_clientUID;
 	conn.m_name = playerName;
-	conn.setIP(clientIP);
+	conn.setIP(addr);
 
 	m_clientUID++;
 
@@ -277,8 +282,28 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	}
 }
 
-void Server::receiveUDPPackets()
+
+void Server::notifyReceiveUDP()
 {
+	uint32_t packetID;
+	sockaddr clientAddr;
+	int addrlen;
+	int rec = recvfrom(m_socketUDP.mSocket, (char*)  & packetID, 4, 0, &clientAddr, &addrlen);
+
+	if (rec != 4) {
+		return;
+	}
+
+	ClientConnection* conn = getClientByAddress(clientAddr);
+	if (!conn) {
+		std::cout << "Received UDP data, but the client could not be resolved...\n";
+		return;
+	}
+
+	handleUDPPacket(packetID, conn);
+}
+
+void Server::receiveUDPPackets() {
 	sockaddr_in senderAddr;
 	uint32_t packetID;
 
@@ -287,7 +312,7 @@ void Server::receiveUDPPackets()
 		uint32_t senderIP = senderAddr.sin_addr.s_addr;
 
 		// Find the client that matches the IP
-		auto it = std::find_if(m_clients.begin(), m_clients.end(), [&](const auto &pair)
+		/*auto it = std::find_if(m_clients.begin(), m_clients.end(), [&](const auto& pair)
 							   { return pair.second.getIP() == senderIP; });
 
 		if (it == m_clients.end())
@@ -297,36 +322,22 @@ void Server::receiveUDPPackets()
 		}
 
 		int playerID = it->second.m_id;
-		handleUDPPacket(packetID, playerID);
+		handleUDPPacket(packetID, 0);*/
 	}
 }
 
-void Server::handleUDPPacket(uint32_t packetID, int playerID)
+void Server::handleUDPPacket(uint32_t packetID, ClientConnection* conn)
 {
 	switch (static_cast<ClientPackets>(packetID))
 	{
 	case ClientPackets::PlayerMove:
 	{
 		Client_PlayerMove packet;
-		if (network::receivePacketUDP(m_socketUDP, nullptr, packet))
-		{
-			std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
+		network::receivePacketUDP(m_socketUDP, nullptr, packet);
+		//std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
 
-			for (Lobby *game : m_games)
-			{
-				LobbyPong *pongGame = dynamic_cast<LobbyPong *>(game);
-				if (pongGame)
-				{
-					if (pongGame->getPlayerID(playerID) != -1)
-					{
-						pongGame->receivePlayerMove(playerID, packet.position);
-						return;
-					}
-				}
-			}
-
-			// std::cerr << "Warning: Player " << playerID << " sent movement but is not in a lobby!" << std::endl;
-		}
+		LobbyPong* pong = dynamic_cast<LobbyPong*>(conn->getLobby());
+		pong->receivePlayerMove(pong->getPlayerID(conn->getSocket().mSocket), packet.position);
 	}
 	break;
 
@@ -359,6 +370,24 @@ Lobby *Server::getLobbyByID(uint32_t id) const
 		if (l->getLobbyID() == id)
 		{
 			return l;
+		}
+	}
+	return 0;
+}
+
+ClientConnection* Server::getClientBySocket(SOCKET s)
+{
+	auto it = m_clients.find(s);
+	if (it == m_clients.end()) return 0;
+	return &it->second;
+}
+
+ClientConnection* Server::getClientByAddress(const sockaddr& addr)
+{
+	const sockaddr_in& inetaddr = reinterpret_cast<const sockaddr_in&>(addr);
+	for (auto &p : m_clients) {
+		if (p.second.m_addr.sin_addr.s_addr == inetaddr.sin_addr.s_addr && p.second.m_addr.sin_port == inetaddr.sin_port) {
+			return &p.second;
 		}
 	}
 	return 0;

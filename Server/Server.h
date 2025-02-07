@@ -4,6 +4,8 @@
 
 #include "GameMode.h"
 
+#include <WinSock2.h>
+
 #include <vector>
 #include <map>
 
@@ -15,19 +17,19 @@ class ClientConnection
 	friend class Server;
 
 public:
-	ClientConnection() : m_id(-1), m_lobby(0), m_ip(0) {}
+	ClientConnection() : m_id(-1), m_lobby(0) {}
 
 	Socket& getSocket() { return m_socket; }
-	uint32_t getIP() const { return m_ip; }
+	const sockaddr* getIP() const { return (const sockaddr*) & m_addr; }
 	const std::string& getName() const { return m_name; }
 	Lobby* getLobby() const { return m_lobby; }
 
-	void setIP(uint32_t ip) { m_ip = ip; }
+	void setIP(const sockaddr_in& a) { m_addr = a; }
 
 private:
 	uint32_t m_id;
 	Socket m_socket;
-	uint32_t m_ip;
+	sockaddr_in m_addr;
 	std::string m_name;
 	Lobby* m_lobby;
 };
@@ -35,6 +37,10 @@ private:
 
 class Server
 {
+public:
+
+	static Server* m_instance;
+
 public:
 
 	Server();
@@ -52,13 +58,19 @@ public:
 	void joinLobby(Socket player, Lobby* l);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
+	void notifyReceiveUDP();
 	void receiveUDPPackets();
 
-	void handleUDPPacket(uint32_t packetID, int playerID);
+	void handleUDPPacket(uint32_t packetID, ClientConnection* conn);
 
 	void updateGames(float dt);
 
 	Lobby* getLobbyByID(uint32_t id) const;
+
+	ClientConnection* getClientBySocket(SOCKET s);
+
+	// Used to identify who sent data over UDP.
+	ClientConnection* getClientByAddress(const sockaddr& addr);
 
 private:
 

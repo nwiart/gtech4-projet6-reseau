@@ -19,8 +19,8 @@ public:
     void setVelocity(float vx, float vy);
     void setRadius(float r);
 
-    sf::Vector2f getPosition() const;
-    sf::Vector2f getVelocity() const;
+    const sf::Vector2f& getPosition() const { return position; }
+    const sf::Vector2f& getVelocity() const { return velocity; }
     float getRadius() const;
 
     // Fonction pour envoyer les données aux clients

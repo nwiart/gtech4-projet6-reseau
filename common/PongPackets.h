@@ -26,7 +26,8 @@ enum class ServerPackets : uint32_t
 	PlayerJoined,
 	GameState,
 
-	PlayerMove
+	PlayerMove,
+	BallInfo,
 };
 
 
@@ -114,6 +115,12 @@ struct Server_PlayerMove
 {
 	int playerID;
 	float position;
+};
+
+struct Server_BallInfo
+{
+	float xPos, yPos;
+	float xVel, yVel;
 };
 
 struct Server_GameState {

@@ -46,14 +46,6 @@ void Ball::setRadius(float r) {
     radius = r;
 }
 
-sf::Vector2f Ball::getPosition() const {
-    return position;
-}
-
-sf::Vector2f Ball::getVelocity() const {
-    return velocity;
-}
-
 float Ball::getRadius() const {
     return radius;
 }

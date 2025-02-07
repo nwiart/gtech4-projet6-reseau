@@ -27,6 +27,7 @@ int main(int argc, const char** argv)
 	server.open();
 
 	WSAAsyncSelect(server.getListenSocket().mSocket, hwnd, MESSAGE_ACCEPT, FD_ACCEPT);
+	WSAAsyncSelect(server.getUDPSocket().mSocket, hwnd, MESSAGE_UDP, FD_READ);
 
 	std::cout << "Server started.\n";
 
@@ -111,6 +112,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			server.notifyReceiveTCP(socket);
 		}
 		return 0;
+
+	case MESSAGE_UDP:
+		server.notifyReceiveUDP();
+		break;
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);

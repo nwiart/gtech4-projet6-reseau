@@ -1,6 +1,13 @@
 #include "LobbyPong.h"
 #include <iostream>
 
+#include "Networking.h"
+#include "Server.h"
+
+#include "PongPackets.h"
+#include "Pong/Ball.h"
+
+
 LobbyPong::LobbyPong(uint32_t id, bool twoPlayersTeam)
     : Lobby(id), m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam) {}
 
@@ -47,6 +54,14 @@ void LobbyPong::update(float dt) {
 
 void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY) {
     m_pong.receivePlayerMove(playerID, positionY);
+
+    Server_PlayerMove p;
+    p.playerID = playerID;
+    p.position = positionY;
+    for (auto& p : m_players) {
+        const sockaddr* clientAddr = Server::m_instance->getClientBySocket(p.second.mSocket)->getIP();
+        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::PlayerMove, p);
+    }
 }
 
 void LobbyPong::sendGameState() {
@@ -56,16 +71,15 @@ void LobbyPong::sendGameState() {
 
     getGameState(ballX, ballY, ballRadius, paddle1Y, paddle2Y, score1, score2);
 
-    for (auto& player : m_players) {
-        Socket& socket = player.second;
+    const sf::Vector2f& p = m_pong.getBall().getPosition();
+    const sf::Vector2f& v = m_pong.getBall().getVelocity();
+    Server_BallInfo packet;
+    packet.xPos = p.x; packet.yPos = p.y;
+    packet.xVel = v.x; packet.yVel = v.y;
 
-        socket.sendData(&ballX, sizeof(ballX));
-        socket.sendData(&ballY, sizeof(ballY));
-        socket.sendData(&ballRadius, sizeof(ballRadius));
-        socket.sendData(&paddle1Y, sizeof(paddle1Y));
-        socket.sendData(&paddle2Y, sizeof(paddle2Y));
-        socket.sendData(&score1, sizeof(score1));
-        socket.sendData(&score2, sizeof(score2));
+    for (auto& player : m_players) {
+        const sockaddr* clientAddr = Server::m_instance->getClientBySocket(player.second.mSocket)->getIP();
+        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::BallInfo, packet);
     }
 }
 

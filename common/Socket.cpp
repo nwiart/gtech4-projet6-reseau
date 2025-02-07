@@ -1,3 +1,4 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "Socket.h"
 
 Socket::Socket() : mSocket(INVALID_SOCKET) {}
@@ -66,14 +67,6 @@ int Socket::bindUDP(uint16_t port) {
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     return bind(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
-}
-
-int Socket::sendData(const void* data, int dataSize) {
-    return send(mSocket, reinterpret_cast<const char*>(data), dataSize, 0);
-}
-
-int Socket::receiveData(void* buffer, int bufferSize) {
-    return recv(mSocket, reinterpret_cast<char*>(buffer), bufferSize, 0);
 }
 
 int Socket::sendUDP(const void* data, int dataSize, sockaddr_in& destAddr) {
