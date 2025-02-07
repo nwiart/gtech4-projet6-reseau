@@ -1,19 +1,19 @@
 #include "GameScene.h"
 #include "PongPackets.h"
-#include "Network.h"
 
-extern sf::Font font;
+#include "Client.h"
+
 
 GameScene::GameScene()
-    : score(font, sf::Vector2u(1280, 720))
+    : score(getGlobalFont(), sf::Vector2u(1280, 720))
 {
-    player1Text.setFont(font);
+    player1Text.setFont(getGlobalFont());
     player1Text.setCharacterSize(30);
     player1Text.setFillColor(sf::Color::White);
     player1Text.setString("player1Name");
     player1Text.setPosition(50, 20);
 
-    player2Text.setFont(font);
+    player2Text.setFont(getGlobalFont());
     player2Text.setCharacterSize(30);
     player2Text.setFillColor(sf::Color::White);
     player2Text.setString("player2Name");
@@ -28,10 +28,9 @@ void GameScene::handleEvent(sf::Event event, sf::RenderWindow &window)
 
 void GameScene::update(sf::RenderWindow &window)
 {
-
-    //receiveGameStateUDP();
-    sendPlayerMove();
+    updatePlayerMovement();
 }
+
 void GameScene::setPlayerPos(int p)
 {
     player1.setPosition(p);
@@ -54,7 +53,7 @@ void GameScene::draw(sf::RenderWindow &window)
     ball.draw(window);
 }
 
-void GameScene::sendPlayerMove()
+void GameScene::updatePlayerMovement()
 {
     int paddleY = player1.getPositionY();
 
@@ -71,19 +70,5 @@ void GameScene::sendPlayerMove()
         return;
     }
 
-    Network::sendPosition(paddleY);
-}
-
-void GameScene::receiveGameStateUDP()
-{
-    sockaddr_in senderAddr;
-    Server_GameState state;
-
-    if (network::receivePacketUDP(m_serverSocket, &senderAddr, state))
-    {
-        ball.updateFromServer(state.ballX, state.ballY, state.ballRadius);
-        score.update(state.scoreP1, state.scoreP2, sf::Vector2u(1280, 720));
-        player1.updateFromServer(state.paddle1Y);
-        player2.updateFromServer(state.paddle2Y);
-    }
+    Client::getInstance().sendPosition(paddleY);
 }

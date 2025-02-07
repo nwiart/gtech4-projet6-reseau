@@ -135,34 +135,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Ball.cpp" />
-    <ClCompile Include="Button.cpp" />
-    <ClCompile Include="ConnectScreen.cpp" />
-    <ClCompile Include="CreateLobbyMenu.cpp" />
-    <ClCompile Include="GameScene.cpp" />
-    <ClCompile Include="LobbyMenu.cpp" />
-    <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="Lobby.cpp" />
+    <ClCompile Include="Pong\Ball.cpp" />
+    <ClCompile Include="Widget\Button.cpp" />
+    <ClCompile Include="Scene\ConnectScreen.cpp" />
+    <ClCompile Include="Scene\CreateLobbyMenu.cpp" />
+    <ClCompile Include="Pong\GameScene.cpp" />
+    <ClCompile Include="Scene\LobbyMenu.cpp" />
+    <ClCompile Include="Scene\MainMenu.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Score.cpp" />
-    <ClCompile Include="Network.cpp" />
-    <ClCompile Include="TextField.cpp" />
+    <ClCompile Include="Pong\Player.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Widget\Score.cpp" />
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Widget\TextField.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Ball.h" />
-    <ClInclude Include="Button.h" />
-    <ClInclude Include="ConnectScreen.h" />
-    <ClInclude Include="CreateLobbyMenu.h" />
-    <ClInclude Include="GameScene.h" />
-    <ClInclude Include="LobbyMenu.h" />
-    <ClInclude Include="MainMenu.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Score.h" />
-    <ClInclude Include="Network.h" />
+    <ClInclude Include="Lobby.h" />
+    <ClInclude Include="Pong\Ball.h" />
+    <ClInclude Include="Widget\Button.h" />
+    <ClInclude Include="Scene\ConnectScreen.h" />
+    <ClInclude Include="Scene\CreateLobbyMenu.h" />
+    <ClInclude Include="Pong\GameScene.h" />
+    <ClInclude Include="Scene\LobbyMenu.h" />
+    <ClInclude Include="Scene\MainMenu.h" />
+    <ClInclude Include="Pong\Player.h" />
+    <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="Widget\Score.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="SFMLInclude.h" />
-    <ClInclude Include="TextField.h" />
+    <ClInclude Include="Widget\TextField.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Client.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

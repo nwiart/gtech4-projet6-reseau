@@ -1,26 +1,29 @@
 #pragma once
 
 #include "Scene.h"
-#include "TextField.h"
-#include "Button.h"
+
+#include "Widget/TextField.h"
+#include "Widget/Button.h"
 
 class LobbyMenu : public Scene
 {
 public:
-    LobbyMenu(sf::Font& font);
+    LobbyMenu();
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
+
+    void listPlayer(uint32_t playerID, const std::string& name);
+    void removePlayer(uint32_t playerID);
 
 private:
     Button buttonStart;
     Button buttonBack;
 
-    std::vector<sf::Text> playerNames;
+    std::map<uint32_t, sf::Text> m_playersInLobby;
 
     int maxPlayers;
 
-    sf::Font font;
     sf::Text labelLobbyName;
     sf::Text labelNumPlayers;
 };

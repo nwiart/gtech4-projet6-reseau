@@ -2,23 +2,20 @@
 
 #include "MainMenu.h"
 
-#include "Network.h"
+#include "Client.h"
 
 
-extern sf::Font font;
-
-
-CreateLobbyMenu::CreateLobbyMenu(sf::Font& f)
-    : labelLobbyName("Nom de la salle", font)
-    , fieldLobbyName(600, 260, font)
-    , buttonCreatePong1v1(400, 500, "Create Pong (1v1)", font, [this]() {
-        Network::createLobbyPong1v1(fieldLobbyName.getInput());
+CreateLobbyMenu::CreateLobbyMenu()
+    : labelLobbyName("Nom de la salle", getGlobalFont())
+    , fieldLobbyName(600, 260, getGlobalFont())
+    , buttonCreatePong1v1(400, 500, "Create Pong (1v1)", getGlobalFont(), [this]() {
+        Client::getInstance().createLobbyPong1v1(fieldLobbyName.getInput());
     })
-    , buttonCreatePong2v2(700, 500, "Create Pong (2v2)", font, [this]() {
-        Network::createLobbyPong2v2(fieldLobbyName.getInput());
+    , buttonCreatePong2v2(700, 500, "Create Pong (2v2)", getGlobalFont(), [this]() {
+        Client::getInstance().createLobbyPong2v2(fieldLobbyName.getInput());
     })
-    , buttonBack(80, 80, "Retour", font, [this]() {
-        Scene::setCurrentScene(new MainMenu(font));
+    , buttonBack(80, 80, "Retour", getGlobalFont(), [this]() {
+        Scene::setCurrentScene(new MainMenu());
     })
 {
     labelLobbyName.setPosition(600, 200);

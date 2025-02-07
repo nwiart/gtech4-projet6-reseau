@@ -1,9 +1,10 @@
-#include "Network.h"
+#include "Client.h"
 #include "PongPackets.h"
 
-#include "MainMenu.h"
-#include "LobbyMenu.h"
-#include "GameScene.h"
+#include "Scene/MainMenu.h"
+#include "Scene/LobbyMenu.h"
+
+#include "Pong/GameScene.h"
 
 #include <string.h>
 #include <iostream>
@@ -11,37 +12,37 @@
 #define MESSAGE_RECV (WM_USER + 1)
 #define MESSAGE_UDP (WM_USER+2)
 
+
 static HWND hwnd;
 
 void create_window();
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-Socket Network::m_socketTCP;
-Socket Network::m_socketUDP;
-sockaddr_in Network::serverUDPAddr;
+Socket Client::m_socketTCP;
+Socket Client::m_socketUDP;
+sockaddr_in Client::serverUDPAddr;
+
 
 extern sf::Font font;
 
-void Network::init()
+
+void Client::init()
 {
     create_window();
 }
 
-void Network::pollEvents()
+void Client::pollEvents()
 {
     MSG msg;
     while (PeekMessageA(&msg, hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
     }
-
-    //receiveUDPPackets();
 }
 
-int Network::connect(const char* ip, const char* playerName)
+int Client::connect(const char* ip, const char* playerName)
 {
     m_socketTCP.createSocketTCP();
-
 
     // Attempt to connect via TCP
     if (m_socketTCP.connectTCP(ip, serverBasePort) == SOCKET_ERROR) {
@@ -107,23 +108,36 @@ int Network::connect(const char* ip, const char* playerName)
     return 0;
 }
 
-void Network::createLobbyPong1v1(const std::string& name)
+void Client::createLobbyPong1v1(const std::string& name)
 {
-    Network::createLobby(GameMode::PONG_1v1, name);
+    this->createLobby(GameMode::PONG_1v1, name);
 }
 
-void Network::createLobbyPong2v2(const std::string& name)
+void Client::createLobbyPong2v2(const std::string& name)
 {
-    Network::createLobby(GameMode::PONG_2v2, name);
+    this->createLobby(GameMode::PONG_2v2, name);
 }
 
-void Network::startGame()
+void Client::startGame()
 {
     Client_StartGame p;
     network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::StartGame, p);
 }
 
-void Network::createLobby(GameMode gm, const std::string& name)
+void Client::joinLobby(uint32_t lobbyID)
+{
+    Client_JoinLobby p;
+    p.lobbyID = lobbyID;
+    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::JoinLobby, p);
+}
+
+
+void Client::completeAuthentication(uint32_t playerID)
+{
+    m_playerID = playerID;
+}
+
+void Client::createLobby(GameMode gm, const std::string& name)
 {
     int namelen = name.size() > 31 ? 31 : name.size();
 
@@ -134,18 +148,16 @@ void Network::createLobby(GameMode gm, const std::string& name)
     network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::CreateLobby, p);
 }
 
-int Network::sendPosition(int posY)
+int Client::sendPosition(int posY)
 {
-    extern int playerID;
-    std::cout << playerID << " : " << posY << '\n';
-    Client_PlayerMove packet{ playerID, posY };
+    Client_PlayerMove packet{ m_playerID, posY };
 
     network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 
     return 0;
 }
 
-void Network::handleTCPPacket(uint32_t packetID)
+void Client::handleTCPPacket(uint32_t packetID)
 {
     char buf[1020];
 
@@ -153,12 +165,11 @@ void Network::handleTCPPacket(uint32_t packetID)
     {
     case ServerPackets::ConnectResult:
     {
-        extern int playerID;
         recv(m_socketTCP.mSocket, buf, sizeof(Server_ConnectResult), 0);
-        playerID = ((Server_ConnectResult*) buf)->playerID;
+        this->completeAuthentication(((Server_ConnectResult*) buf)->playerID);
 
         Client_PlayerConnectUDP p;
-        p.playerID = playerID;
+        p.playerID = m_playerID;
         network::sendPacketUDP(m_socketUDP, (sockaddr*) & serverUDPAddr, (uint32_t)ClientPackets::PlayerConnectUDP, p);
     }
     break;
@@ -178,11 +189,10 @@ void Network::handleTCPPacket(uint32_t packetID)
     {
         int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_AcceptJoin), 0);
         if (received == sizeof(Server_AcceptJoin)) {
-            extern int playerID;
-            playerID = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
-            printf("Accepted! Player ID: %d\n", playerID);
+            int p = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
+            printf("Accepted! Player ID: %d\n", p);
 
-            Scene::setCurrentScene(new LobbyMenu(font));
+            Scene::setCurrentScene(new LobbyMenu());
         }
     }
     break;
@@ -202,7 +212,7 @@ void Network::handleTCPPacket(uint32_t packetID)
             std::cout << "Successfully created Lobby" << std::endl;
         }
 
-        Scene::setCurrentScene(new LobbyMenu(font));
+        Scene::setCurrentScene(new LobbyMenu());
     }
     break;
 
@@ -215,12 +225,10 @@ void Network::handleTCPPacket(uint32_t packetID)
     }
 }
 
-void Network::handleUDPPacket()
+void Client::handleUDPPacket()
 {
-    sockaddr_in addr;
-    int addrlen = sizeof(sockaddr);
     char buf[MAX_PACKET_SIZE];
-    int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, (sockaddr*) & addr, &addrlen);
+    int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, 0, 0);
 
     uint32_t packetID = *((uint32_t*) buf);
 
@@ -229,21 +237,21 @@ void Network::handleUDPPacket()
     case ServerPackets::PlayerMove: {
         Server_PlayerMove* packet = (Server_PlayerMove*) (buf + 4);
         GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
-        std::cout << "received : " << packet->playerID << " : " << packet->position << '\n';
         scene->setPlayerPos(packet->position);
     }
-        break;
+    break;
 
     case ServerPackets::BallInfo: {
         Server_BallInfo* packet = (Server_BallInfo*)(buf + 4);
         GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
         if (scene) {
             scene->setBallInfo(sf::Vector2f(packet->xPos, packet->yPos), sf::Vector2f(packet->xVel, packet->yVel));
-            }
+        }
     }
     break;
     }
 }
+
 
 void create_window()
 {
@@ -273,7 +281,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
             int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
 
             if (received == sizeof(packetID)) {
-                Network::handleTCPPacket(packetID);
+                Client::getInstance().handleTCPPacket(packetID);
             }
             else {
                 std::cerr << "Failed to receive valid packet ID.\n";
@@ -281,41 +289,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
         }
         break;
     case MESSAGE_UDP:
-        Network::handleUDPPacket();
+        Client::getInstance().handleUDPPacket();
         break;
     }
 
     return DefWindowProc(hwnd, msg, wparam, lparam);
-}
-
-void Network::receiveUDPPackets() {
-    sockaddr_in senderAddr;
-    uint32_t packetID;
-
-    while (network::receivePacketUDP(m_socketUDP, &senderAddr, packetID)) {
-        handleUDPPacket(packetID);
-    }
-}
-
-
-void Network::handleUDPPacket(uint32_t packetID) {
-    switch (static_cast<ServerPackets>(packetID)) {
-    case ServerPackets::PlayerMove: {
-        Server_PlayerMove packet;
-        if (network::receivePacketUDP(m_socketUDP, nullptr, packet)) {
-            std::cout << "Player " << packet.playerID << " move to " << packet.position << std::endl;
-        }
-    } break;
-
-    case ServerPackets::GameState: {
-        Server_GameState packet;
-        network::receivePacketUDP(m_socketUDP, nullptr, packet);
-    } break;
-
-
-    default:
-        std::cerr << "Unknown UDP packet received: " << packetID << std::endl;
-        break;
-    }
-    /////////ADD THEM ALL!!!!!///////// eventually
 }

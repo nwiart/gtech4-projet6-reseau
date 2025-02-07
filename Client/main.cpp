@@ -1,11 +1,10 @@
 #include "SFMLInclude.h"
-#include "ConnectScreen.h"
+
 #include "Networking.h"
-#include "Network.h"
+#include "Client.h"
 
-sf::Font font;
+#include "Scene/ConnectScreen.h"
 
-int playerID;
 
 int main()
 {
@@ -13,16 +12,16 @@ int main()
         std::cerr << "WSAStartup failed" << std::endl;
     }
 
-    Network::init();
+    Client::getInstance().init();
 
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
-    if (!font.loadFromFile("arial.ttf")) {
+    if (!Scene::setGlobalFont("arial.ttf")) {
         return -1;
     }
 
-    ConnectScreen* menu = new ConnectScreen(font);
+    ConnectScreen* menu = new ConnectScreen();
 
     Scene::setCurrentScene(menu);
 
@@ -31,7 +30,7 @@ int main()
         Scene::sceneSwitch();
         Scene* s = Scene::getCurrentScene();
 
-        Network::pollEvents();
+        Client::getInstance().pollEvents();
 
         sf::Event event;
         while (window.pollEvent(event))

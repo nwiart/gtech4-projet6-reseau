@@ -186,12 +186,12 @@ void Server::joinLobby(Socket &player, Lobby *l)
 	LobbyPong *pongGame = dynamic_cast<LobbyPong *>(l);
 	if (pongGame)
 	{
-		Server_GameState state;
+		/*Server_GameState state;
 		pongGame->getGameState(state.ballX, state.ballY, state.ballRadius,
 							   state.paddle1Y, state.paddle2Y,
 							   state.scoreP1, state.scoreP2);
 
-		network::sendPacketTCP(player, (uint32_t)ServerPackets::GameState, state);
+		network::sendPacketTCP(player, (uint32_t)ServerPackets::GameState, state);*/
 	}
 }
 

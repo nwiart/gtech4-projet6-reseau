@@ -3,20 +3,19 @@
 #include "CreateLobbyMenu.h"
 
 #include "Networking.h"
-#include "Network.h"
+#include "Client.h"
 
 #include "PongPackets.h"
 
 #include <sstream>
 
-MainMenu::MainMenu(sf::Font& font)
-    : createButton(100, 250, "Creer une Partie", this->font, [this]() { 
-        Scene::setCurrentScene(new CreateLobbyMenu(this->font));
+MainMenu::MainMenu()
+    : createButton(100, 250, "Creer une Partie", getGlobalFont(), [this]() { 
+        Scene::setCurrentScene(new CreateLobbyMenu());
     })
-    , buttonRefresh(100, 350, "Actualiser", this->font, [this]() {
+    , buttonRefresh(100, 350, "Actualiser", getGlobalFont(), [this]() {
         refreshLobbyList();
     })
-    , font(font)
 {
     refreshLobbyList();
 }
@@ -31,13 +30,7 @@ void MainMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
 }
 
 void MainMenu::update(sf::RenderWindow& window) {
-    if (isConnected) {
-        // std::string receivedName = network.receiveDataUDP();
-        // if (!receivedName.empty()) {
-        //     opponentName = receivedName;
-        //     startGame(playerNameField.getInput(), opponentName);
-        // }
-    }
+
 }
 
 void MainMenu::draw(sf::RenderWindow& window) {
@@ -53,7 +46,7 @@ void MainMenu::refreshLobbyList()
 {
     lobbies.clear();
 
-    network::sendPacketTCP(Network::getServerTCP(), (uint32_t)ClientPackets::GetLobbies, Client_GetLobbies());
+    network::sendPacketTCP(Client::getInstance().getServerTCP(), (uint32_t)ClientPackets::GetLobbies, Client_GetLobbies());
 }
 
 void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxPlayers)
@@ -62,17 +55,9 @@ void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxP
     label << name << " (" << numPlayers << '/' << maxPlayers << ")";
 
     int yPos = lobbies.size() * 60 + 40;
-    Button b(1000, yPos, label.str(), font, [this, name]() {
-        joinLobby(0, name);
-        });
+    Button b(1000, yPos, label.str(), getGlobalFont(), [id]() {
+        Client::getInstance().joinLobby(id);
+    });
 
     lobbies.insert(std::pair<uint32_t, Button>(id, b));
-}
-
-void MainMenu::joinLobby(uint32_t lobbyID, const std::string& playerName)
-{
-    Client_JoinLobby packet;
-    packet.lobbyID = lobbyID;
-
-    network::sendPacketTCP(Network::getServerTCP(), (uint32_t)ClientPackets::JoinLobby, packet);
 }

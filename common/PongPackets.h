@@ -6,6 +6,7 @@
 
 enum class ClientPackets : uint32_t
 {
+	// TCP packets sent by client.
 	PlayerConnect,
 	PlayerConnectUDP,
 	GetLobbies,
@@ -13,11 +14,13 @@ enum class ClientPackets : uint32_t
 	JoinLobby,
 	StartGame,
 
+	// UDP packets sent by client.
 	PlayerMove,
 };
 
 enum class ServerPackets : uint32_t
 {
+	// TCP packets sent by server.
 	ConnectResult,
 	GetLobbies,
 	LobbyCreation,
@@ -25,8 +28,8 @@ enum class ServerPackets : uint32_t
 	DenyJoin,
 	GameStart,
 	PlayerJoined,
-	GameState,
 
+	// UDP packets sent by server.
 	PlayerMove,
 	BallInfo,
 };
@@ -128,10 +131,4 @@ struct Server_BallInfo
 {
 	float xPos, yPos;
 	float xVel, yVel;
-};
-
-struct Server_GameState {
-	float ballX, ballY, ballRadius;
-	int scoreP1, scoreP2;
-	float paddle1Y, paddle2Y;
 };

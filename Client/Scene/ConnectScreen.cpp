@@ -2,39 +2,38 @@
 
 #include "MainMenu.h"
 
-#include "Network.h"
+#include "Client.h"
 
-ConnectScreen::ConnectScreen(sf::Font& font)
-    : playerNameField(200, 100, font)
-    , font(font)
-    , ipField(200, 170, font, true)
-    , buttonConnect(100, 250, "Connexion", font, [this]() {
+ConnectScreen::ConnectScreen()
+    : playerNameField(200, 100, getGlobalFont())
+    , ipField(200, 170, getGlobalFont(), true)
+    , buttonConnect(100, 250, "Connexion", getGlobalFont(), [this]() {
         std::string playerName = playerNameField.getInput();
         std::string ip = ipField.getInput();
         if (!playerName.empty() && !ip.empty()) {
             showStatus = true;
             statusLabel.setString("Connexion en cours...");
 
-            int connectionResult = Network::connect(ip.c_str(), playerName.c_str());
-            if (connectionResult == 0) {  // Success.
-                Scene::setCurrentScene(new MainMenu(this->font));
+            int connectionResult = Client::getInstance().connect(ip.c_str(), playerName.c_str());
+            if (connectionResult == 0) {
+                Scene::setCurrentScene(new MainMenu());
             }
         }
      })
 {
-    playerNameLabel.setFont(font);
+    playerNameLabel.setFont(getGlobalFont());
     playerNameLabel.setCharacterSize(24);
     playerNameLabel.setFillColor(sf::Color::White);
     playerNameLabel.setString("Nom du joueur:");
     playerNameLabel.setPosition(5, 110);
 
-    ipLabel.setFont(font);
+    ipLabel.setFont(getGlobalFont());
     ipLabel.setCharacterSize(24);
     ipLabel.setFillColor(sf::Color::White);
     ipLabel.setString("Adresse IP:");
     ipLabel.setPosition(5, 180);
 
-    statusLabel.setFont(font);
+    statusLabel.setFont(getGlobalFont());
     statusLabel.setCharacterSize(24);
     statusLabel.setFillColor(sf::Color::White);
     statusLabel.setPosition(30, 680);
@@ -47,13 +46,7 @@ void ConnectScreen::handleEvent(sf::Event event, sf::RenderWindow& window) {
 }
 
 void ConnectScreen::update(sf::RenderWindow& window) {
-    if (isConnected) {
-        // std::string receivedName = network.receiveDataUDP();
-        // if (!receivedName.empty()) {
-        //     opponentName = receivedName;
-        //     startGame(playerNameField.getInput(), opponentName);
-        // }
-    }
+
 }
 
 void ConnectScreen::draw(sf::RenderWindow& window) {

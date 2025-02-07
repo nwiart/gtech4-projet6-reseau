@@ -1,21 +1,22 @@
-#ifndef GAMESCENE_H
-#define GAMESCENE_H
+#pragma once
 
-#include "Scene.h"
+#include "Scene/Scene.h"
+
+#include "Widget/Score.h"
+
 #include "Ball.h"
 #include "Player.h"
-#include "Score.h"
-#include "Networking.h"
 
-class GameScene : public Scene {
+
+class GameScene : public Scene
+{
 public:
     GameScene();
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
-    void receiveGameStateUDP();
-    void sendPlayerMove();
+    void updatePlayerMovement();
 
     void setPlayerPos(int p);
     void setBallInfo(const sf::Vector2f& pos, const sf::Vector2f& vel);
@@ -30,7 +31,4 @@ private:
 
     int score1 = 0;
     int score2 = 0;
-    Socket m_serverSocket;
 };
-
-#endif

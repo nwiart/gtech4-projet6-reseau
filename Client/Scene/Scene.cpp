@@ -4,6 +4,14 @@
 Scene* Scene::m_currentScene = 0;
 Scene* Scene::m_nextScene = 0;
 
+sf::Font Scene::m_font;
+
+
+bool Scene::setGlobalFont(const char* fileName)
+{
+	return m_font.loadFromFile(fileName);
+}
+
 void Scene::setCurrentScene(Scene* s)
 {
 	m_nextScene = s;
