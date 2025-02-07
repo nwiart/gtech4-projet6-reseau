@@ -71,7 +71,7 @@ void Server::notifyDisconnect(Socket& clientSocketTCP) {
 }
 
 
-uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string& playerName)
+uint32_t Server::confirmClient(Socket& clientSocketTCP, const std::string& playerName)
 {
 	sockaddr_in addr;
 	int addrSize = sizeof(addr);
@@ -100,7 +100,7 @@ uint32_t Server::confirmClient(Socket clientSocketTCP, const std::string& player
 }
 
 
-void Server::createLobby(Socket initiator, const std::string &name, GameMode gm)
+void Server::createLobby(Socket& initiator, const std::string &name, GameMode gm)
 {
 	Lobby *lobby = 0;
 
@@ -161,7 +161,7 @@ void Server::createLobby(Socket initiator, const std::string &name, GameMode gm)
 	}
 }
 
-void Server::joinLobby(Socket player, Lobby* l) {
+void Server::joinLobby(Socket& player, Lobby* l) {
 	ClientConnection& conn = m_clients[player.mSocket];
 	if (l == 0) return;
 	if (conn.getLobby()) return;
@@ -267,14 +267,20 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	case ClientPackets::CreateLobby:
 	{
 		recv(clientSocketTCP, buf, sizeof(Client_CreateLobby), 0);
-		createLobby(clientSocketTCP, reinterpret_cast<Client_CreateLobby *>(buf)->lobbyName, reinterpret_cast<Client_CreateLobby *>(buf)->gamemode);
+		Socket& playerSocket = conn.getSocket();
+		createLobby(playerSocket,
+			reinterpret_cast<Client_CreateLobby*>(buf)->lobbyName,
+			reinterpret_cast<Client_CreateLobby*>(buf)->gamemode);
+
 	}
 	break;
 
 	case ClientPackets::JoinLobby:
 	{
 		recv(clientSocketTCP, buf, sizeof(Client_JoinLobby), 0);
-		joinLobby(conn.getSocket(), getLobbyByID(reinterpret_cast<Client_JoinLobby *>(buf)->lobbyID));
+		Socket& playerSocket = conn.getSocket();
+		joinLobby(playerSocket, getLobbyByID(reinterpret_cast<Client_JoinLobby*>(buf)->lobbyID));
+
 	}
 	break;
 

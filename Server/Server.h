@@ -53,9 +53,9 @@ public:
 	bool notifyConnect(Socket& clientSocketTCP);
 	void notifyDisconnect(Socket& clientSocketTCP);
 
-	uint32_t confirmClient(Socket clientSocketTCP, const std::string& playerName);
-	void createLobby(Socket initiator, const std::string& name, GameMode gm);
-	void joinLobby(Socket player, Lobby* l);
+	uint32_t confirmClient(Socket& clientSocketTCP, const std::string& playerName);
+	void createLobby(Socket& initiator, const std::string& name, GameMode gm);
+	void joinLobby(Socket& player, Lobby* l);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void notifyReceiveUDP();
