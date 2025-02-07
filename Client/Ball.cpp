@@ -1,8 +1,16 @@
 #include "Ball.h"
 
+#include <iostream>
+
 Ball::Ball() {
     shape.setFillColor(sf::Color::White);
-    shape.setOrigin(10.f, 10.f);
+    shape.setRadius(20.0F);
+    //shape.setOrigin(10.f, 10.f);
+}
+
+void Ball::setPosition(float x, float y)
+{
+    shape.setPosition(x, y);
 }
 
 void Ball::updateFromServer(float x, float y, float r) {

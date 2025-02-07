@@ -18,6 +18,7 @@ public:
     void sendPlayerMove();
 
     void setPlayerPos(int p);
+    void setBallInfo(const sf::Vector2f& pos, const sf::Vector2f& vel);
 
 private:
     Player player1;

@@ -233,6 +233,15 @@ void Network::handleUDPPacket()
         scene->setPlayerPos(packet->position);
     }
         break;
+
+    case ServerPackets::BallInfo: {
+        Server_BallInfo* packet = (Server_BallInfo*)(buf + 4);
+        GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
+        if (scene) {
+            scene->setBallInfo(sf::Vector2f(packet->xPos, packet->yPos), sf::Vector2f(packet->xVel, packet->yVel));
+            }
+    }
+    break;
     }
 }
 
