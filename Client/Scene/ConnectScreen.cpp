@@ -14,7 +14,7 @@ ConnectScreen::ConnectScreen()
             showStatus = true;
             statusLabel.setString("Connexion en cours...");
 
-            int connectionResult = Client::getInstance().connect(ip.c_str(), playerName.c_str());
+            int connectionResult = Client::getInstance().connect(ip.c_str(), playerName);
             if (connectionResult == 0) {
                 Scene::setCurrentScene(new MainMenu());
             }

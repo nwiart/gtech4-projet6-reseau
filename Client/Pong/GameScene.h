@@ -16,19 +16,21 @@ public:
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
-    void updatePlayerMovement();
+    void updateLocalPlayerMovement();
 
-    void setPlayerPos(int p);
+    void setPlayerPos(uint32_t id, int p);
     void setBallInfo(const sf::Vector2f& pos, const sf::Vector2f& vel);
 
 private:
-    Player player1;
-    Player player2;
+    static constexpr int MAX_PLAYERS = 4;
+
+    Player players[MAX_PLAYERS];
     Ball ball;
     Score score;
     sf::Text player1Text;
     sf::Text player2Text;
 
-    int score1 = 0;
-    int score2 = 0;
+    bool twoTeams;
+    int scoreTeam1 = 0;
+    int scoreTeam2 = 0;
 };

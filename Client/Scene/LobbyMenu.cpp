@@ -15,11 +15,11 @@ LobbyMenu::LobbyMenu()
     })
 {
     labelLobbyName.setPosition(600, 200);
-    labelLobbyName.setString("1 player");
+    labelLobbyName.setString("1/2 players");
 }
 
 void LobbyMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
-    //if (playerID == 0) buttonStart.handleEvent(event, window);
+    if (Client::getInstance().getLobby().isHost()) buttonStart.handleEvent(event, window);
     buttonBack.handleEvent(event, window);
 }
 
@@ -28,7 +28,12 @@ void LobbyMenu::update(sf::RenderWindow& window) {
 }
 
 void LobbyMenu::draw(sf::RenderWindow& window) {
-    //if (playerID == 0) buttonStart.draw(window);
+    if (Client::getInstance().getLobby().isHost()) buttonStart.draw(window);
     buttonBack.draw(window);
     window.draw(labelLobbyName);
+
+    // TODO : display names.
+    for (auto& p : Client::getInstance().getLobby().getPlayers()) {
+        p.second.m_name;
+    }
 }

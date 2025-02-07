@@ -40,8 +40,10 @@ void Client::pollEvents()
     }
 }
 
-int Client::connect(const char* ip, const char* playerName)
+int Client::connect(const char* ip, const std::string& playerName)
 {
+    m_playerName = playerName;
+
     m_socketTCP.createSocketTCP();
 
     // Attempt to connect via TCP
@@ -80,11 +82,11 @@ int Client::connect(const char* ip, const char* playerName)
 
     // Copy player name safely
     Client_PlayerConnect packet;
-    len = strlen(playerName);
+    len = playerName.length();
     if (len > sizeof(packet.playerName) - 1) {
         len = sizeof(packet.playerName) - 1;
     }
-    strncpy(packet.playerName, playerName, len);
+    strncpy(packet.playerName, playerName.c_str(), len);
     packet.playerName[len] = '\0';
 
     bool success = network::sendPacketTCP(m_socketTCP, static_cast<uint32_t>(ClientPackets::PlayerConnect), packet);
@@ -129,6 +131,14 @@ void Client::joinLobby(uint32_t lobbyID)
     Client_JoinLobby p;
     p.lobbyID = lobbyID;
     network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::JoinLobby, p);
+}
+
+void Client::leaveLobby()
+{
+    Client_LeaveLobby p;
+    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::LeaveLobby, p);
+
+    m_lobby.leave();
 }
 
 
@@ -185,12 +195,17 @@ void Client::handleTCPPacket(uint32_t packetID)
     }
     break;
 
+    // Lobby join / create.
     case ServerPackets::AcceptJoin:
     {
         int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_AcceptJoin), 0);
         if (received == sizeof(Server_AcceptJoin)) {
-            int p = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
-            printf("Accepted! Player ID: %d\n", p);
+            int idInLobby = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
+            int max = reinterpret_cast<Server_AcceptJoin*>(buf)->maxPlayers;
+
+            printf("Accepted! Player ID: %d\n", idInLobby);
+
+            m_lobby.setupGuest(idInLobby, max);
 
             Scene::setCurrentScene(new LobbyMenu());
         }
@@ -207,10 +222,10 @@ void Client::handleTCPPacket(uint32_t packetID)
     break;
     case ServerPackets::LobbyCreation:
     {
-        int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_LobbyCreation), 0);
-        if (received == sizeof(Server_LobbyCreation)) {
-            std::cout << "Successfully created Lobby" << std::endl;
-        }
+        recv(m_socketTCP.mSocket, buf, sizeof(Server_LobbyCreation), 0);
+        Server_LobbyCreation* p = (Server_LobbyCreation*) buf;
+
+        m_lobby.setupHost(p->playerID, p->maxPlayers);
 
         Scene::setCurrentScene(new LobbyMenu());
     }
@@ -237,7 +252,7 @@ void Client::handleUDPPacket()
     case ServerPackets::PlayerMove: {
         Server_PlayerMove* packet = (Server_PlayerMove*) (buf + 4);
         GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
-        scene->setPlayerPos(packet->position);
+        scene->setPlayerPos(packet->playerID, packet->position);
     }
     break;
 

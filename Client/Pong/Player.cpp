@@ -24,10 +24,6 @@ sf::Keyboard::Key Player::getDownKey() const {
     return downKey;
 }
 
-void Player::updateFromServer(float y) {
-    paddle.setPosition(paddle.getPosition().x, y);
-}
-
 float Player::getPositionY() const {
     return paddle.getPosition().y;
 }

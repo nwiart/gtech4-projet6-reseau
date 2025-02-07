@@ -12,6 +12,7 @@ enum class ClientPackets : uint32_t
 	GetLobbies,
 	CreateLobby,
 	JoinLobby,
+	LeaveLobby,
 	StartGame,
 
 	// UDP packets sent by client.
@@ -27,7 +28,7 @@ enum class ServerPackets : uint32_t
 	AcceptJoin,
 	DenyJoin,
 	GameStart,
-	PlayerJoined,
+	PlayerJoinedLobby,
 
 	// UDP packets sent by server.
 	PlayerMove,
@@ -63,6 +64,11 @@ struct Client_JoinLobby
 	int lobbyID;
 };
 
+struct Client_LeaveLobby
+{
+
+};
+
 struct Client_StartGame
 {
 
@@ -86,6 +92,7 @@ struct Server_GetLobbies
 struct Server_LobbyCreation
 {
 	int playerID;  // Lobby creator's assigned ID (if successful).
+	int maxPlayers;
 	bool success;
 };
 
@@ -93,12 +100,7 @@ struct Server_LobbyCreation
 struct Server_AcceptJoin
 {
 	int playerID;
-};
-
-// Sent by server to a new player if their connection was successful.
-struct Server_PlayerJoined
-{
-	int playerID;
+	int maxPlayers;
 };
 
 // Sent by server if a new player's connection is refused.
@@ -110,6 +112,14 @@ struct Server_DenyJoin
 struct Server_GameStart
 {
 	bool started;
+};
+
+// Sent by server to a new player if their connection was successful.
+struct Server_PlayerJoinedLobby
+{
+	char playerName[32];
+	int playerID;
+	int idInLobby;
 };
 
 

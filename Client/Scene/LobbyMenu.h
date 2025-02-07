@@ -22,8 +22,6 @@ private:
 
     std::map<uint32_t, sf::Text> m_playersInLobby;
 
-    int maxPlayers;
-
     sf::Text labelLobbyName;
     sf::Text labelNumPlayers;
 };

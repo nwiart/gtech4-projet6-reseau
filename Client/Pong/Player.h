@@ -8,7 +8,6 @@ public:
     Player();
     Player(float xRatio, sf::Keyboard::Key upKey, sf::Keyboard::Key downKey);
 
-    void updateFromServer(float y);
     void draw(sf::RenderWindow& window);
 
     float getPositionY() const;
