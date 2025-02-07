@@ -34,6 +34,12 @@ uint32_t LobbyPong::getPlayerID(uint64_t socket) const {
     return -1;
 }
 
+bool LobbyPong::hasGameStarted() const
+{
+    return gameStarted;
+}
+
+
 void LobbyPong::start() {
     if (gameStarted) return;
     gameStarted = true;

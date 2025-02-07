@@ -155,9 +155,6 @@ void Network::handleTCPPacket(uint32_t packetID)
 
             Scene::setCurrentScene(new LobbyMenu(font));
         }
-        else {
-            std::cerr << "Failed to receive AcceptJoin packet.\n";
-        }
     }
     break;
 
@@ -167,9 +164,6 @@ void Network::handleTCPPacket(uint32_t packetID)
         if (received == sizeof(Server_DenyJoin)) {
             printf("Join request denied: %s\n", reinterpret_cast<Server_DenyJoin*>(buf)->reason);
         }
-        else {
-            std::cerr << "Failed to receive DenyJoin packet.\n";
-        }
     }
     break;
     case ServerPackets::LobbyCreation:
@@ -177,9 +171,6 @@ void Network::handleTCPPacket(uint32_t packetID)
         int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_LobbyCreation), 0);
         if (received == sizeof(Server_LobbyCreation)) {
             std::cout << "Successfully created Lobby" << std::endl;
-        }
-        else {
-            std::cerr << "Failed to receive LobbyCreation packet. Eroor:" << WSAGetLastError() << std::endl;
         }
 
         Scene::setCurrentScene(new LobbyMenu(font));

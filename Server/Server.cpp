@@ -163,9 +163,22 @@ void Server::createLobby(Socket& initiator, const std::string &name, GameMode gm
 
 void Server::joinLobby(Socket& player, Lobby* l) {
 	ClientConnection& conn = m_clients[player.mSocket];
+
+	// Lobby is non-existent.
 	if (l == 0) return;
+
+	// Player already in a lobby.
 	if (conn.getLobby()) return;
 
+	// Game already started.
+	if (l->hasGameStarted()) {
+		Server_DenyJoin p;
+		p.reason = ConnectionDenialReason::GAME_STARTED;
+		network::sendPacketTCP(player, (uint32_t)ServerPackets::DenyJoin, p);
+		return;
+	}
+
+	// Everything good, the player can join.
 	uint32_t playerID = l->addPlayer(player.mSocket);
 	conn.m_lobby = l;
 

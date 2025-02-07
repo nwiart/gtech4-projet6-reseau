@@ -19,6 +19,8 @@ public:
 
 	virtual void start() = 0;
 
+	virtual bool hasGameStarted() const = 0;
+
 	virtual uint32_t addPlayer(uint64_t playerID) { return -1; }
 	virtual void disconnectPlayer(uint32_t playerID) { }
 

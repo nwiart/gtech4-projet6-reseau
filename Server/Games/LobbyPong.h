@@ -18,6 +18,8 @@ public:
     virtual uint32_t addPlayer(uint64_t id) override;
     virtual uint32_t getPlayerID(uint64_t socket) const override;
 
+    virtual bool hasGameStarted() const override;
+
     void update(float dt) override;
     void receivePlayerMove(uint32_t playerID, float positionY);
     void sendGameState();
