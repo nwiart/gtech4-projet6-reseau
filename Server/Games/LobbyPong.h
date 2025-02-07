@@ -4,8 +4,6 @@
 #include "Pong/PongScene.h"
 #include <unordered_map>
 #include "Socket.h"
-#include "Pong/Ball.h"
-#include "PongPackets.h"
 
 class LobbyPong : public Lobby {
 public:

@@ -8,7 +8,7 @@ Socket::Socket(SOCKET s) : mSocket(s) {}
 
 Socket::~Socket()
 {
-    //closeSocket();
+
 }
 
 void Socket::createSocketTCP()
@@ -110,31 +110,4 @@ void Socket::closeSocket()
         closesocket(mSocket);
         mSocket = INVALID_SOCKET;
     }
-}
-
-Socket &Socket::operator=(const Socket &other)
-{
-    if (this != &other)
-    {
-        closeSocket();
-        mSocket = other.mSocket;
-    }
-    return *this;
-}
-
-Socket::Socket(Socket &&other) noexcept
-{
-    mSocket = other.mSocket;
-    other.mSocket = INVALID_SOCKET;
-}
-
-Socket &Socket::operator=(Socket &&other) noexcept
-{
-    if (this != &other)
-    {
-        closeSocket();
-        mSocket = other.mSocket;
-        other.mSocket = INVALID_SOCKET;
-    }
-    return *this;
 }
