@@ -11,7 +11,6 @@
 
 class Lobby;
 
-
 class ClientConnection
 {
 	friend class Server;
@@ -19,68 +18,69 @@ class ClientConnection
 public:
 	ClientConnection() : m_id(-1), m_lobby(0), m_ip(0) {}
 
-	Socket& getSocket() { return m_socket; }
-	uint32_t getIP() const { return m_ip; }
-	const std::string& getName() const { return m_name; }
-	Lobby* getLobby() const { return m_lobby; }
+	Socket &getSocket() { return m_socket; }
+	const sockaddr *getIP() const { return (const sockaddr *)&m_addr; }
+	const sockaddr *getUDPAddr() const { return (const sockaddr *)&m_udpAddr; }
+	const std::string &getName() const { return m_name; }
+	Lobby *getLobby() const { return m_lobby; }
 
-	void setIP(const sockaddr_in& addr) {
+	void setIP(const sockaddr_in &addr)
+	{
 		m_ip = addr.sin_addr.s_addr;
 		m_addr = addr;
 	}
 
-	const sockaddr_in& getAddr() const { return m_addr; }
+	const sockaddr_in &getAddr() const { return m_addr; }
 
 private:
 	uint32_t m_id;
 	Socket m_socket;
-	uint32_t m_ip;
+	sockaddr_in m_addr;
+	sockaddr_in m_udpAddr;
 	std::string m_name;
-	Lobby* m_lobby;
+	Lobby *m_lobby;
 	sockaddr_in m_addr;
 };
-
 
 class Server
 {
 public:
-
-	static Server* m_instance;
+	static Server *m_instance;
 
 public:
-
 	Server();
 
 	void open();
 
-	inline Socket& getListenSocket() { return m_socketListener; }
-	inline Socket& getUDPSocket() { return m_socketUDP; }
+	inline Socket &getListenSocket() { return m_socketListener; }
+	inline Socket &getUDPSocket() { return m_socketUDP; }
 
-	bool notifyConnect(Socket& clientSocketTCP);
-	void notifyDisconnect(Socket& clientSocketTCP);
+	bool notifyConnect(Socket &clientSocketTCP);
+	void notifyDisconnect(Socket &clientSocketTCP);
 
-	uint32_t confirmClient(Socket& clientSocketTCP, const std::string& playerName);
-	void createLobby(Socket& initiator, const std::string& name, GameMode gm);
-	void joinLobby(Socket& player, Lobby* l);
+	uint32_t confirmClient(Socket &clientSocketTCP, const std::string &playerName);
+	void createLobby(Socket &initiator, const std::string &name, GameMode gm);
+	void joinLobby(Socket &player, Lobby *l);
 
 	void notifyReceiveTCP(SOCKET clientSocketTCP);
 	void notifyReceiveUDP();
 
-	void handleUDPPacket(uint32_t packetID, ClientConnection* conn);
+	void handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr);
 
 	void updateGames(float dt);
 
-	Lobby* getLobbyByID(uint32_t id) const;
+	Lobby *getLobbyByID(uint32_t id) const;
 
-	ClientConnection* getClientBySocket(SOCKET s);
+	ClientConnection *getClientByID(uint32_t id);
+
+	ClientConnection *getClientBySocket(SOCKET s);
 
 	// Used to identify who sent data over UDP.
-	ClientConnection* getClientByAddress(const sockaddr& addr);
+	ClientConnection *getClientByAddress(const sockaddr &addr);
 
 private:
-
 	static const uint16_t serverBasePort = 27014;
-	static const uint16_t serverSecondaryPort = serverBasePort+1;
+	static const uint16_t serverSecondaryPort = serverBasePort + 1;
 
 	std::map<uint64_t, ClientConnection> m_clients;
 	Socket m_socketListener;
@@ -88,6 +88,6 @@ private:
 
 	uint32_t m_lobbyUID;
 	uint32_t m_clientUID;
-	
-	std::vector<Lobby*> m_games;
+
+	std::vector<Lobby *> m_games;
 };

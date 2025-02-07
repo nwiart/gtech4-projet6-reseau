@@ -29,9 +29,14 @@ void GameScene::handleEvent(sf::Event event, sf::RenderWindow &window)
 void GameScene::update(sf::RenderWindow &window)
 {
 
-    receiveGameStateUDP();
+    //receiveGameStateUDP();
     sendPlayerMove();
 }
+void GameScene::setPlayerPos(int p)
+{
+    player1.setPosition(p);
+}
+
 
 void GameScene::draw(sf::RenderWindow &window)
 {

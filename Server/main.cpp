@@ -38,8 +38,8 @@ int main(int argc, const char** argv)
 	{
 		MSG msg;
 		while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
-			DispatchMessage(&msg);
 			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
 
 		auto now = std::chrono::high_resolution_clock().now();
@@ -95,7 +95,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			std::stringstream ss;
 			sockaddr_in addr;
 			int len = sizeof(sockaddr_in);
-			getsockname(newClientSocket.mSocket, (sockaddr*) &addr, &len);
+
+			getsockname(newClientSocket.mSocket, (sockaddr*)&addr, &len);
+			std::cout << "Sock port " << addr.sin_port << '\n';
+
+			getpeername(newClientSocket.mSocket, (sockaddr*) &addr, &len);
+			std::cout << "Peer port " << addr.sin_port << '\n';
 
 			UCHAR* ipb = &addr.sin_addr.S_un.S_un_b.s_b1;
 			ss << (int) ipb[0] << '.' << (int)ipb[1] << '.' << (int)ipb[2] << '.' << (int)ipb[3] << ':' << (int)addr.sin_port;
@@ -115,7 +120,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	case MESSAGE_UDP:
 		server.notifyReceiveUDP();
-		break;
+		return 0;
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);

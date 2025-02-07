@@ -16,6 +16,9 @@ public:
 
     void receiveGameStateUDP();
     void sendPlayerMove();
+
+    void setPlayerPos(int p);
+
 private:
     Player player1;
     Player player2;

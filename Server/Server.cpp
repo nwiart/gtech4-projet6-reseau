@@ -10,9 +10,7 @@
 #include <WinSock2.h>
 #include <stdlib.h>
 
-
-Server* Server::m_instance = 0;
-
+Server *Server::m_instance = 0;
 
 Server::Server()
 	: m_lobbyUID(0), m_clientUID(0)
@@ -26,10 +24,10 @@ void Server::open()
 	m_socketListener.listenTCP(serverBasePort);
 
 	m_socketUDP.createSocketUDP();
-	m_socketUDP.bindUDP(serverSecondaryPort);
+	m_socketUDP.bindUDP(serverSecondaryPort - 1);
 }
 
-bool Server::notifyConnect(Socket& clientSocketTCP)
+bool Server::notifyConnect(Socket &clientSocketTCP)
 {
 	if (m_clients.find(clientSocketTCP.mSocket) != m_clients.end())
 	{
@@ -37,7 +35,7 @@ bool Server::notifyConnect(Socket& clientSocketTCP)
 	}
 
 	auto it = m_clients.emplace(clientSocketTCP.mSocket, ClientConnection());
-	ClientConnection& conn = it.first->second;
+	ClientConnection &conn = it.first->second;
 
 	conn.m_id = -1;
 	conn.m_name = "PLAYER_CONNECTING";
@@ -46,42 +44,45 @@ bool Server::notifyConnect(Socket& clientSocketTCP)
 	return true;
 }
 
-void Server::notifyDisconnect(Socket& clientSocketTCP) {
+void Server::notifyDisconnect(Socket &clientSocketTCP)
+{
 	auto it = m_clients.find(clientSocketTCP.mSocket);
 
-	if (it == m_clients.end()) {
-		std::cerr << "Erreur: Tentative de deconnexion d’un client inconnu !" << std::endl;
+	if (it == m_clients.end())
+	{
+		std::cerr << "Erreur: Tentative de deconnexion dï¿½un client inconnu !" << std::endl;
 		return;
 	}
 
-	ClientConnection& conn = it->second;
+	ClientConnection &conn = it->second;
 
-	if (conn.m_lobby) {
+	if (conn.m_lobby)
+	{
 		conn.m_lobby->disconnectPlayer(conn.m_id);
-		std::cout << "Joueur " << conn.m_id << " retiré du lobby " << conn.m_lobby->getLobbyID() << std::endl;
+		std::cout << "Joueur " << conn.m_id << " retirï¿½ du lobby " << conn.m_lobby->getLobbyID() << std::endl;
 	}
 
 	shutdown(clientSocketTCP.mSocket, SD_BOTH);
 	closesocket(clientSocketTCP.mSocket);
 
-	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") déconnecté.\n";
+	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") dï¿½connectï¿½.\n";
 
 	conn.m_socket.closeSocket();
 	m_clients.erase(it);
 }
 
-
-uint32_t Server::confirmClient(Socket& clientSocketTCP, const std::string& playerName)
+uint32_t Server::confirmClient(Socket &clientSocketTCP, const std::string &playerName)
 {
 	sockaddr_in addr;
 	int addrSize = sizeof(addr);
-	if (getpeername(clientSocketTCP.mSocket, reinterpret_cast<sockaddr*>(&addr), &addrSize) == SOCKET_ERROR) {
+	if (getpeername(clientSocketTCP.mSocket, reinterpret_cast<sockaddr *>(&addr), &addrSize) == SOCKET_ERROR)
+	{
 		std::cerr << "getpeername failed with error: " << WSAGetLastError() << std::endl;
 	}
 
 	uint32_t clientIP = addr.sin_addr.s_addr;
 
-	ClientConnection& conn = m_clients.at(clientSocketTCP.mSocket);
+	ClientConnection &conn = m_clients.at(clientSocketTCP.mSocket);
 
 	conn.m_id = m_clientUID;
 	conn.m_name = playerName;
@@ -92,8 +93,7 @@ uint32_t Server::confirmClient(Socket& clientSocketTCP, const std::string& playe
 	return conn.m_id;
 }
 
-
-void Server::createLobby(Socket& initiator, const std::string &name, GameMode gm)
+void Server::createLobby(Socket &initiator, const std::string &name, GameMode gm)
 {
 	Lobby *lobby = 0;
 
@@ -154,17 +154,21 @@ void Server::createLobby(Socket& initiator, const std::string &name, GameMode gm
 	}
 }
 
-void Server::joinLobby(Socket& player, Lobby* l) {
-	ClientConnection& conn = m_clients[player.mSocket];
+void Server::joinLobby(Socket &player, Lobby *l)
+{
+	ClientConnection &conn = m_clients[player.mSocket];
 
 	// Lobby is non-existent.
-	if (l == 0) return;
+	if (l == 0)
+		return;
 
 	// Player already in a lobby.
-	if (conn.getLobby()) return;
+	if (conn.getLobby())
+		return;
 
 	// Game already started.
-	if (l->hasGameStarted()) {
+	if (l->hasGameStarted())
+	{
 		Server_DenyJoin p;
 		p.reason = ConnectionDenialReason::GAME_STARTED;
 		network::sendPacketTCP(player, (uint32_t)ServerPackets::DenyJoin, p);
@@ -179,17 +183,17 @@ void Server::joinLobby(Socket& player, Lobby* l) {
 	p.playerID = playerID;
 	network::sendPacketTCP(player, (uint32_t)ServerPackets::AcceptJoin, p);
 
-	LobbyPong* pongGame = dynamic_cast<LobbyPong*>(l);
-	if (pongGame) {
+	LobbyPong *pongGame = dynamic_cast<LobbyPong *>(l);
+	if (pongGame)
+	{
 		Server_GameState state;
 		pongGame->getGameState(state.ballX, state.ballY, state.ballRadius,
-			state.paddle1Y, state.paddle2Y,
-			state.scoreP1, state.scoreP2);
+							   state.paddle1Y, state.paddle2Y,
+							   state.scoreP1, state.scoreP2);
 
 		network::sendPacketTCP(player, (uint32_t)ServerPackets::GameState, state);
 	}
 }
-
 
 void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 {
@@ -273,20 +277,18 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	case ClientPackets::CreateLobby:
 	{
 		recv(clientSocketTCP, buf, sizeof(Client_CreateLobby), 0);
-		Socket& playerSocket = conn.getSocket();
+		Socket &playerSocket = conn.getSocket();
 		createLobby(playerSocket,
-			reinterpret_cast<Client_CreateLobby*>(buf)->lobbyName,
-			reinterpret_cast<Client_CreateLobby*>(buf)->gamemode);
-
+					reinterpret_cast<Client_CreateLobby *>(buf)->lobbyName,
+					reinterpret_cast<Client_CreateLobby *>(buf)->gamemode);
 	}
 	break;
 
 	case ClientPackets::JoinLobby:
 	{
 		recv(clientSocketTCP, buf, sizeof(Client_JoinLobby), 0);
-		Socket& playerSocket = conn.getSocket();
-		joinLobby(playerSocket, getLobbyByID(reinterpret_cast<Client_JoinLobby*>(buf)->lobbyID));
-
+		Socket &playerSocket = conn.getSocket();
+		joinLobby(playerSocket, getLobbyByID(reinterpret_cast<Client_JoinLobby *>(buf)->lobbyID));
 	}
 	break;
 
@@ -307,41 +309,48 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 	}
 }
 
-
 void Server::notifyReceiveUDP()
 {
-	uint32_t packetID;
-	sockaddr clientAddr;
-	int addrlen = sizeof(clientAddr);
-	int rec = recvfrom(m_socketUDP.mSocket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0, &clientAddr, &addrlen);
+	char buf[MAX_PACKET_SIZE];
+	sockaddr_in clientAddr;
+	int addrlen = sizeof(sockaddr);
+
+	int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, (sockaddr *)&clientAddr, &addrlen);
 	int error = WSAGetLastError();
 
-	if (rec != sizeof(packetID)) {
-		std::cerr << "Received UDP packet of unexpected size." << std::endl;
-		return;
-	}
+	std::cout << "Receive port " << clientAddr.sin_port << '\n';
 
-	ClientConnection* conn = getClientByAddress(clientAddr);
+	/*ClientConnection* conn = getClientByAddress(*(sockaddr*)&clientAddr);
 	if (!conn) {
 		std::cout << "Received UDP data, but the client could not be resolved..." << std::endl;
 		return;
-	}
+	}*/
 
-	handleUDPPacket(packetID, conn);
+	uint32_t packetID = *((uint32_t *)buf);
+	handleUDPPacket(packetID, buf + 4, (sockaddr *)&clientAddr);
 }
 
-void Server::handleUDPPacket(uint32_t packetID, ClientConnection* conn)
+void Server::handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr)
 {
 	switch (static_cast<ClientPackets>(packetID))
 	{
+	case ClientPackets::PlayerConnectUDP:
+	{
+		uint32_t id = ((Client_PlayerConnectUDP *)buf)->playerID;
+		getClientByID(id)->m_udpAddr = *(sockaddr_in *)addr;
+	}
+	break;
 	case ClientPackets::PlayerMove:
 	{
-		Client_PlayerMove packet;
-		network::receivePacketUDP(m_socketUDP, nullptr, packet);
-		//std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
+		Client_PlayerMove *packet = reinterpret_cast<Client_PlayerMove *>(buf);
+		// std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
 
-		LobbyPong* pong = dynamic_cast<LobbyPong*>(conn->getLobby());
-		pong->receivePlayerMove(pong->getPlayerID(conn->getSocket().mSocket), packet.position);
+		std::cout << packet->playerID << " : " << packet->position << '\n';
+
+		ClientConnection *conn = getClientByID(packet->playerID);
+
+		LobbyPong *pong = dynamic_cast<LobbyPong *>(conn->getLobby());
+		pong->receivePlayerMove(pong->getPlayerID(conn->getSocket().mSocket), packet->position);
 	}
 	break;
 
@@ -351,21 +360,24 @@ void Server::handleUDPPacket(uint32_t packetID, ClientConnection* conn)
 	}
 }
 
-void Server::updateGames(float dt) {
-	for (auto it = m_games.begin(); it != m_games.end();) {
+void Server::updateGames(float dt)
+{
+	for (auto it = m_games.begin(); it != m_games.end();)
+	{
 		(*it)->update(dt);
 
-		if ((*it)->getNumPlayers() == 0) {
-			std::cout << "Lobby " << (*it)->getLobbyID() << " supprimé (aucun joueur actif)" << std::endl;
-			delete* it;
+		if ((*it)->getNumPlayers() == 0)
+		{
+			std::cout << "Lobby " << (*it)->getLobbyID() << " supprimï¿½ (aucun joueur actif)" << std::endl;
+			delete *it;
 			it = m_games.erase(it);
 		}
-		else {
+		else
+		{
 			++it;
 		}
 	}
 }
-
 
 Lobby *Server::getLobbyByID(uint32_t id) const
 {
@@ -379,19 +391,34 @@ Lobby *Server::getLobbyByID(uint32_t id) const
 	return 0;
 }
 
-ClientConnection* Server::getClientBySocket(SOCKET s)
+ClientConnection *Server::getClientByID(uint32_t id)
+{
+	for (auto &p : m_clients)
+	{
+		if (p.second.m_id == id)
+		{
+			return &p.second;
+		}
+	}
+	return 0;
+}
+
+ClientConnection *Server::getClientBySocket(SOCKET s)
 {
 	auto it = m_clients.find(s);
-	if (it == m_clients.end()) return 0;
+	if (it == m_clients.end())
+		return 0;
 	return &it->second;
 }
 
-ClientConnection* Server::getClientByAddress(const sockaddr& addr)
+ClientConnection *Server::getClientByAddress(const sockaddr &addr)
 {
-	const sockaddr_in& inetAddr = reinterpret_cast<const sockaddr_in&>(addr);
-	for (auto& p : m_clients) {
+	const sockaddr_in &inetAddr = reinterpret_cast<const sockaddr_in &>(addr);
+	for (auto &p : m_clients)
+	{
 		if (p.second.getAddr().sin_addr.s_addr == inetAddr.sin_addr.s_addr &&
-			p.second.getAddr().sin_port == inetAddr.sin_port) {
+			p.second.getAddr().sin_port == inetAddr.sin_port)
+		{
 			return &p.second;
 		}
 	}
