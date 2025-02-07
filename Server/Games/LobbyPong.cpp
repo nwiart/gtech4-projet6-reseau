@@ -9,7 +9,7 @@
 
 
 LobbyPong::LobbyPong(uint32_t id, bool twoPlayersTeam)
-    : Lobby(id), m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam) {}
+    : Lobby(id), m_pong(1280, 720), m_twoPlayerTeams(twoPlayersTeam), gameStarted(false) {}
 
 uint32_t LobbyPong::addPlayer(uint64_t socket) {
     if (m_players.size() >= getMaxPlayers()) {
