@@ -5,7 +5,7 @@ Player::Player()
     paddle.setFillColor(sf::Color::White);
     paddle.setSize(sf::Vector2f(10.f, 100.f));
     paddle.setOrigin(5.f, 50.f);
-    paddle.setPosition(0, 360);
+    paddle.setPosition(50, 360);
 }
 
 Player::Player(float xRatio, sf::Keyboard::Key upKey, sf::Keyboard::Key downKey)
@@ -30,6 +30,11 @@ float Player::getPositionY() const {
 
 void Player::setPosition(float y) {
     paddle.setPosition(paddle.getPosition().x, y);
+}
+
+void Player::setX(float x)
+{
+    paddle.setPosition(x, paddle.getPosition().y);
 }
 
 void Player::draw(sf::RenderWindow& window) {

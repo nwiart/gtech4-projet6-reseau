@@ -18,6 +18,9 @@ GameScene::GameScene()
     player2Text.setFillColor(sf::Color::White);
     player2Text.setString("player2Name");
     player2Text.setPosition(1100, 20);
+
+    players[0].setX(50);
+    players[1].setX(1280 - 60);
 }
 
 void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window)

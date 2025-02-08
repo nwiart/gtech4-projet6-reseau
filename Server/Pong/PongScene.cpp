@@ -58,15 +58,11 @@ void PongScene::checkCollisions() {
     float ballTop = m_ball.getPosition().y - m_ball.getRadius();
     float ballBottom = m_ball.getPosition().y + m_ball.getRadius();
 
-    float paddle1Left = 50;
-    float paddle1Right = 60;
-    float paddle1Top = paddle1Y;
-    float paddle1Bottom = paddle1Y + 100;
+    float paddle1Left = PADDLE_MARGIN, paddle1Right = PADDLE_MARGIN + PADDLE_WIDTH;
+    float paddle1Top = paddle1Y, paddle1Bottom = paddle1Y + 100;
 
-    float paddle2Left = sizeX - 60;
-    float paddle2Right = sizeX - 50;
-    float paddle2Top = paddle2Y;
-    float paddle2Bottom = paddle2Y + 100;
+    float paddle2Left = sizeX - PADDLE_MARGIN - PADDLE_WIDTH, paddle2Right = sizeX - PADDLE_MARGIN;
+    float paddle2Top = paddle2Y, paddle2Bottom = paddle2Y + 100;
 
     // Check collision with paddles
     if (ballLeft <= paddle1Right && ballRight >= paddle1Left &&

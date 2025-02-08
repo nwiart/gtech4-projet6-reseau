@@ -25,6 +25,9 @@ public:
 private:
     void checkCollisions();
 
+    static constexpr int PADDLE_MARGIN = 50;
+    static constexpr int PADDLE_WIDTH = 10;
+
     int sizeX, sizeY;
     float paddle1Y, paddle2Y;
     bool started;

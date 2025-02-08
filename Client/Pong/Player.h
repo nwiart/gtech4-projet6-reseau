@@ -13,6 +13,8 @@ public:
     float getPositionY() const;
     void setPosition(float y);
 
+    void setX(float x);
+
     sf::Keyboard::Key getUpKey() const;
     sf::Keyboard::Key getDownKey() const;
 
