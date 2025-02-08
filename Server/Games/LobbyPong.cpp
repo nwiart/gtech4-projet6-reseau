@@ -86,10 +86,10 @@ void LobbyPong::sendGameState()
     const sf::Vector2f &p = m_pong.getBall().getPosition();
     const sf::Vector2f &v = m_pong.getBall().getVelocity();
     Server_BallInfo packet;
-    packet.xPos = p.x;
+    /*packet.xPos = p.x;
     packet.yPos = p.y;
     packet.xVel = v.x;
-    packet.yVel = v.y;
+    packet.yVel = v.y;*/
 
     for (auto &player : m_players)
     {

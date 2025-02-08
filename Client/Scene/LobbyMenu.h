@@ -13,12 +13,9 @@ public:
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
-    void listPlayer(uint32_t playerID, const std::string& name);
-    void removePlayer(uint32_t playerID);
-
 private:
     Button buttonStart;
-    Button buttonBack;
+    Button buttonLeave;
 
     std::map<uint32_t, sf::Text> m_playersInLobby;
 

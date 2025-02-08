@@ -224,10 +224,11 @@ void Client::handleTCPPacket(uint32_t packetID)
     {
         recv(m_socketTCP.mSocket, buf, sizeof(Server_LobbyCreation), 0);
         Server_LobbyCreation* p = (Server_LobbyCreation*) buf;
+        if (p->success) {
+            m_lobby.setupHost(p->playerID, p->maxPlayers);
 
-        m_lobby.setupHost(p->playerID, p->maxPlayers);
-
-        Scene::setCurrentScene(new LobbyMenu());
+            Scene::setCurrentScene(new LobbyMenu());
+        }
     }
     break;
 
@@ -272,7 +273,7 @@ void Client::handleUDPPacket()
         Server_BallInfo* packet = (Server_BallInfo*)(buf + 4);
         GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
         if (scene) {
-            scene->setBallInfo(sf::Vector2f(packet->xPos, packet->yPos), sf::Vector2f(packet->xVel, packet->yVel));
+            //scene->setBallInfo(sf::Vector2f(packet->xPos, packet->yPos), sf::Vector2f(packet->xVel, packet->yVel));
         }
     }
     break;

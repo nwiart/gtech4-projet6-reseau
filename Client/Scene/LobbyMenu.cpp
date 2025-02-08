@@ -10,7 +10,7 @@ LobbyMenu::LobbyMenu()
     , buttonStart(600, 500, "Démarrer la partie", getGlobalFont(), []() {
         Client::getInstance().startGame();
     })
-    , buttonBack(80, 80, "Retour", getGlobalFont(), []() {
+    , buttonLeave(80, 80, "Quitter", getGlobalFont(), []() {
         Scene::setCurrentScene(new MainMenu());
     })
 {
@@ -20,7 +20,7 @@ LobbyMenu::LobbyMenu()
 
 void LobbyMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
     if (Client::getInstance().getLobby().isHost()) buttonStart.handleEvent(event, window);
-    buttonBack.handleEvent(event, window);
+    buttonLeave.handleEvent(event, window);
 }
 
 void LobbyMenu::update(sf::RenderWindow& window) {
@@ -29,7 +29,7 @@ void LobbyMenu::update(sf::RenderWindow& window) {
 
 void LobbyMenu::draw(sf::RenderWindow& window) {
     if (Client::getInstance().getLobby().isHost()) buttonStart.draw(window);
-    buttonBack.draw(window);
+    buttonLeave.draw(window);
     window.draw(labelLobbyName);
 
     // TODO : display names.
