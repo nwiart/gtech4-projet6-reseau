@@ -266,6 +266,7 @@ void Client::handleTCPPacket(uint32_t packetID)
 		Scene::setCurrentScene(new GameScene());
 	}
 	break;
+
 	}
 }
 
@@ -300,6 +301,17 @@ void Client::handleUDPPacket()
 		}
 	}
 	break;
+	case ServerPackets::PingInfo: {
+		Server_PingInfo* packet = (Server_PingInfo*)(buf + 4);
+		int ping = packet->ping;
+
+		GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
+		if (scene) {
+			scene->updatePlayerPing(Client::getInstance().getLobby().getLocalPlayerID(), ping);
+		}
+	}
+								break;
+
 	}
 }
 

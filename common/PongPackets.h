@@ -34,6 +34,7 @@ enum class ServerPackets : uint32_t
 	PlayerMove,
 	BallInfo,
 	ScoreInfo,
+    PingInfo,
 };
 
 
@@ -154,4 +155,9 @@ struct Server_BallInfo
 struct Server_ScoreInfo
 {
 	int score1, score2;
+};
+
+struct Server_PingInfo
+{
+	uint32_t ping;
 };

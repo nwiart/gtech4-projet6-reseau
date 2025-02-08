@@ -378,16 +378,27 @@ void Server::handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr)
 
         auto pingEndTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> latency = pingEndTime - pingStartTime;
-        std::cout << "Received BallInfo from server." << std::endl;
-        std::cout << "Latency: " << latency.count() << " ms" << std::endl;
+        int roundedLatency = static_cast<int>(latency.count() + 0.5);
+        if (roundedLatency < 1) roundedLatency = 0;
 
-        Client_PlayerMove *packet = reinterpret_cast<Client_PlayerMove *>(buf);
-        ClientConnection *conn = getClientByID(packet->playerID);
+        // Création du paquet de ping
+        Server_PingInfo pingPacket;
+        pingPacket.ping = roundedLatency;
 
-        LobbyPong *pong = dynamic_cast<LobbyPong *>(conn->getLobby());
+        // Envoi du ping au client
+        network::sendPacketUDP(m_socketUDP, addr, (uint32_t)ServerPackets::PingInfo, pingPacket);
+
+        std::cout << "Ping envoyé : " << roundedLatency << " ms" << std::endl;
+
+        // Gestion du mouvement du joueur
+        Client_PlayerMove* packet = reinterpret_cast<Client_PlayerMove*>(buf);
+        ClientConnection* conn = getClientByID(packet->playerID);
+
+        LobbyPong* pong = dynamic_cast<LobbyPong*>(conn->getLobby());
         pong->receivePlayerMove(pong->getPlayerID(conn->getSocket().mSocket), packet->position);
     }
     break;
+
 
     default:
         std::cerr << "Unknown UDP packet received: " << packetID << std::endl;
