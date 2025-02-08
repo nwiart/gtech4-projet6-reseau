@@ -14,21 +14,9 @@ LobbyPong::LobbyPong(uint32_t id, bool twoPlayersTeam)
 {
 }
 
-uint32_t LobbyPong::addPlayer(uint64_t socket)
+uint32_t LobbyPong::addPlayer(ClientConnection* conn)
 {
-    if (m_players.size() >= getMaxPlayers())
-    {
-        std::cout << "Lobby full!" << std::endl;
-        return -1;
-    }
-
-    uint32_t playerID = m_players.size();
-    m_players[playerID] = Socket(socket);
-    m_paddles[socket] = playerID;
-
-    std::cout << "Player " << playerID << " added!" << std::endl;
-
-    return playerID;
+    return Lobby::addPlayer(conn);
 }
 
 uint32_t LobbyPong::getPlayerID(uint64_t socket) const
