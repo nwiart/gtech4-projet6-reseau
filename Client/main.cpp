@@ -60,5 +60,7 @@ int main()
         window.display();
     }
 
+    Scene::quit();
+
     return 0;
 }

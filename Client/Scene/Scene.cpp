@@ -12,6 +12,11 @@ bool Scene::setGlobalFont(const char* fileName)
 	return m_font.loadFromFile(fileName);
 }
 
+void Scene::quit()
+{
+	m_font = sf::Font();
+}
+
 void Scene::setCurrentScene(Scene* s)
 {
 	m_nextScene = s;

@@ -19,6 +19,8 @@ public:
     static inline sf::Font& getGlobalFont() { return m_font; }
     static bool setGlobalFont(const char* fileName);
 
+    static void quit();
+
     static inline Scene* getCurrentScene() { return m_currentScene; }
     static void setCurrentScene(Scene* s);
 
