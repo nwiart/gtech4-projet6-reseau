@@ -29,6 +29,7 @@ void GameScene::handleEvent(sf::Event event, sf::RenderWindow &window)
 void GameScene::update(sf::RenderWindow &window)
 {
     updateLocalPlayerMovement();
+    ball.update(1.f / 60.f);
 }
 
 void GameScene::setPlayerPos(uint32_t id, int p)
@@ -36,9 +37,10 @@ void GameScene::setPlayerPos(uint32_t id, int p)
     players[id].setPosition(p);
 }
 
-void GameScene::setBallInfo(const sf::Vector2f& pos, const sf::Vector2f& vel)
+void GameScene::setBallInfo(float xDir, float yDir, float speed)
 {
-    ball.setPosition(pos.x, pos.y);
+    sf::Vector2f velocity(xDir * speed, yDir * speed);
+    ball.setVelocity(velocity);
 }
 
 
