@@ -3,6 +3,7 @@
 
 #include "Scene/MainMenu.h"
 #include "Scene/LobbyMenu.h"
+#include "Scene/ConnectScreen.h"
 
 #include "Pong/GameScene.h"
 
@@ -54,7 +55,7 @@ int Client::connect(const char* ip, const std::string& playerName)
 	}
 
 	// Now that we are connected, set up async socket event handling
-	if (WSAAsyncSelect(m_socketTCP.mSocket, hwnd, MESSAGE_RECV, FD_READ) == SOCKET_ERROR) {
+	if (WSAAsyncSelect(m_socketTCP.mSocket, hwnd, MESSAGE_RECV, FD_READ | FD_CLOSE) == SOCKET_ERROR) {
 		std::cerr << "WSAAsyncSelect failed. Error: " << WSAGetLastError() << "\n";
 		return -1;
 	}
@@ -108,6 +109,18 @@ int Client::connect(const char* ip, const std::string& playerName)
 	}
 
 	return 0;
+}
+
+void Client::signalConnectionLost(int err)
+{
+	std::cout << "Connection with server has been lost : " << err << '\n';
+
+	char buf[1024]; buf[0] = 0;
+	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, 0, err, 0, buf, sizeof(buf), 0);
+
+	ConnectScreen* s = new ConnectScreen();
+	s->setStatus(std::string("Connection lost : ") + buf);
+	Scene::setCurrentScene(s);
 }
 
 void Client::createLobbyPong1v1(const std::string& name)
@@ -310,7 +323,12 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
 	switch (msg)
 	{
 	case MESSAGE_RECV:
-		{
+		// Server has closed for some reason.
+		if (LOWORD(lparam) == FD_CLOSE) {
+			int err = HIWORD(lparam);
+			Client::getInstance().signalConnectionLost(err);
+		}
+		else {
 			SOCKET socket = (SOCKET)wparam;
 			uint32_t packetID;
 			int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
