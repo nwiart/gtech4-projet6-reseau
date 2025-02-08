@@ -25,7 +25,7 @@ public:
 	void setupGuest(uint32_t myID, uint32_t maxPlayers);
 	void leave();
 
-	void listPlayer(uint32_t playerID);
+	void listPlayer(uint32_t playerID, uint32_t inLobbyID, const std::string& playerName);
 	void removePlayer(uint32_t playerID);
 
 	inline bool isValid() const { return !m_players.empty(); }

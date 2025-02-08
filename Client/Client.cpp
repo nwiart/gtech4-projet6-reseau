@@ -200,7 +200,7 @@ void Client::handleTCPPacket(uint32_t packetID)
     {
         int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_AcceptJoin), 0);
         if (received == sizeof(Server_AcceptJoin)) {
-            int idInLobby = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
+            int idInLobby = reinterpret_cast<Server_AcceptJoin*>(buf)->inLobbyID;
             int max = reinterpret_cast<Server_AcceptJoin*>(buf)->maxPlayers;
 
             printf("Accepted! Player ID: %d\n", idInLobby);
@@ -228,6 +228,18 @@ void Client::handleTCPPacket(uint32_t packetID)
         m_lobby.setupHost(p->playerID, p->maxPlayers);
 
         Scene::setCurrentScene(new LobbyMenu());
+    }
+    break;
+
+    case ServerPackets::PlayerJoinedLobby:
+    {
+        recv(m_socketTCP.mSocket, buf, sizeof(Server_PlayerJoinedLobby), 0);
+
+        // We're not in lobby, ignore it.
+        if (!m_lobby.isValid()) break;
+
+        Server_PlayerJoinedLobby* p = (Server_PlayerJoinedLobby*) buf;
+        m_lobby.listPlayer(p->playerID, p->idInLobby, p->playerName);
     }
     break;
 

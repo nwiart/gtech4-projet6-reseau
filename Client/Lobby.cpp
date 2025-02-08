@@ -30,7 +30,7 @@ void Lobby::leave()
 	m_myID = -1;
 }
 
-void Lobby::listPlayer(uint32_t playerID)
+void Lobby::listPlayer(uint32_t playerID, uint32_t inLobbyID, const std::string& playerName)
 {
 	
 }

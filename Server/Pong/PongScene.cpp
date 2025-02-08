@@ -6,8 +6,7 @@ PongScene::PongScene(int sizeX, int sizeY)
 void PongScene::startGame() {
     started = true;
 
-    setPaddlePositions(sizeY / 2 - 50, sizeY / 2 - 50);
-
+    reset();
 }
 
 void PongScene::update(float dt) {
@@ -15,22 +14,6 @@ void PongScene::update(float dt) {
 
     m_ball.update(dt, nullptr);
     checkCollisions();
-}
-
-void PongScene::setPaddlePositions(float newPaddle1Y, float newPaddle2Y) {
-    if (newPaddle1Y < 0) newPaddle1Y = 0;
-    if (newPaddle1Y > sizeY - 100) newPaddle1Y = sizeY - 100;
-
-    if (newPaddle2Y < 0) newPaddle2Y = 0;
-    if (newPaddle2Y > sizeY - 100) newPaddle2Y = sizeY - 100;
-
-    paddle1Y = newPaddle1Y;
-    paddle2Y = newPaddle2Y;
-
-    float paddle1X = 50;
-    float paddle2X = sizeX - 60;
-
-    m_ball.setPosition(sizeX / 2, sizeY / 2);
 }
 
 void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
@@ -46,7 +29,8 @@ void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
 
 void PongScene::getGameState(float& ballX, float& ballY, float& ballRadius,
     float& paddle1Y, float& paddle2Y,
-    int& score1, int& score2) const {
+    int& score1, int& score2) const
+{
     ballX = m_ball.getPosition().x;
     ballY = m_ball.getPosition().y;
     ballRadius = m_ball.getRadius();
@@ -103,6 +87,9 @@ void PongScene::checkCollisions() {
     }
 }
 
-void PongScene::resetPaddles() {
-    setPaddlePositions(sizeY / 2 - 50, sizeY / 2 - 50);
+void PongScene::reset() {
+    paddle1Y = sizeY / 2 - 50;
+    paddle2Y = sizeY / 2 - 50;
+
+    m_ball.setPosition(sizeX / 2, sizeY / 2);
 }

@@ -176,11 +176,11 @@ void Server::joinLobby(Socket &player, Lobby *l)
 	}
 
 	// Everything good, the player can join.
-	uint32_t playerID = l->addPlayer(player.mSocket);
+	uint32_t inLobbyID = l->addPlayer(player.mSocket);
 	conn.m_lobby = l;
 
 	Server_AcceptJoin p;
-	p.playerID = playerID;
+	p.inLobbyID = inLobbyID;
 	network::sendPacketTCP(player, (uint32_t)ServerPackets::AcceptJoin, p);
 
 	LobbyPong *pongGame = dynamic_cast<LobbyPong *>(l);

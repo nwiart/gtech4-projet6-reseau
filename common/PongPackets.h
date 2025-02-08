@@ -58,7 +58,8 @@ struct Client_CreateLobby
 	GameMode gamemode;
 };
 
-// Sent by client to provide the info.
+// Sent by client to join a specific lobby.
+// The client should expect a Server_AcceptJoin or Server_DenyJoin as response.
 struct Client_JoinLobby
 {
 	int lobbyID;
@@ -69,6 +70,7 @@ struct Client_LeaveLobby
 
 };
 
+// Sent by client to start a game. This requires the client to be the master of the lobby.
 struct Client_StartGame
 {
 
@@ -97,9 +99,11 @@ struct Server_LobbyCreation
 };
 
 // Sent by server to a new player if their connection was successful.
+// The "inLobbyID" is the ID assigned to the player WITHIN the lobby, not to be confused with the unique player ID.
+// The inLobbyID also determines teams and positions in games.
 struct Server_AcceptJoin
 {
-	int playerID;
+	int inLobbyID;
 	int maxPlayers;
 };
 
@@ -114,7 +118,7 @@ struct Server_GameStart
 	bool started;
 };
 
-// Sent by server to a new player if their connection was successful.
+// Sent by server to all players in a lobby to signal that someone just joined.
 struct Server_PlayerJoinedLobby
 {
 	char playerName[32];
