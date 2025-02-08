@@ -20,6 +20,7 @@ public:
 
     void setPlayerPos(uint32_t id, int p);
     void setBallInfo(float x, float y, float xDir, float yDir, float speed);
+    void setScore(int score1, int score2);
 
 private:
     static constexpr int MAX_PLAYERS = 4;

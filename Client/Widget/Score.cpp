@@ -21,10 +21,11 @@ void Score::update(int score1, int score2, sf::Vector2u windowSize) {
     sf::FloatRect textRect = scoreText.getLocalBounds();
     scoreText.setOrigin(textRect.width / 2.f, textRect.height / 2.f);
 
-    scoreText.setPosition(windowSize.x / 2.f, windowSize.y / 4.f);
 }
 
 void Score::draw(sf::RenderWindow& window) {
+    scoreText.setPosition(window.getSize().x / 2.f, window.getSize().y / 4.f);
+
     window.draw(scoreText);
 }
 

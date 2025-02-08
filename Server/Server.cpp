@@ -6,6 +6,7 @@
 #include <WinSock2.h>
 #include <stdlib.h>
 #include <iostream>
+#include <chrono>
 
 Server *Server::m_instance = 0;
 
@@ -373,6 +374,13 @@ void Server::handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr)
     break;
     case ClientPackets::PlayerMove:
     {
+        auto pingStartTime = std::chrono::high_resolution_clock::now();
+
+        auto pingEndTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> latency = pingEndTime - pingStartTime;
+        std::cout << "Received BallInfo from server." << std::endl;
+        std::cout << "Latency: " << latency.count() << " ms" << std::endl;
+
         Client_PlayerMove *packet = reinterpret_cast<Client_PlayerMove *>(buf);
         ClientConnection *conn = getClientByID(packet->playerID);
 

@@ -44,6 +44,11 @@ void GameScene::setBallInfo(float x, float y, float xDir, float yDir, float spee
     ball.updateFromServer(x, y, xDir, yDir, speed);
 }
 
+void GameScene::setScore(int score1, int score2)
+{
+    score.setScore(score1, score2);
+}
+
 void GameScene::draw(sf::RenderWindow& window)
 {
     window.draw(player1Text);

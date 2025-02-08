@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <iostream>
+#include <chrono>
 
 #define MESSAGE_RECV (WM_USER + 1)
 #define MESSAGE_UDP (WM_USER+2)
@@ -295,7 +296,7 @@ void Client::handleUDPPacket()
 		Server_ScoreInfo* packet = (Server_ScoreInfo*)(buf + 4);
 		GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
 		if (scene) {
-			//scene->setScore(packet->score1, packet->score2);
+			scene->setScore(packet->score1, packet->score2);
 		}
 	}
 	break;
