@@ -1,10 +1,11 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "Socket.h"
 #include <WS2tcpip.h>
+#include <iostream>
 
 Socket::Socket() : mSocket(INVALID_SOCKET) {}
 
-Socket::Socket(SOCKET s) : mSocket(s) {}
+Socket::Socket(uint64_t s) : mSocket(s) {}
 
 Socket::~Socket()
 {
@@ -85,18 +86,6 @@ int Socket::bindUDP(uint16_t port)
     return bind(mSocket, (sockaddr *)&serverAddr, sizeof(serverAddr));
 }
 
-int Socket::sendUDP(const void *data, int dataSize, sockaddr_in &destAddr)
-{
-    return sendto(mSocket, reinterpret_cast<const char *>(data), dataSize, 0,
-                  (sockaddr *)&destAddr, sizeof(destAddr));
-}
-
-int Socket::receiveUDP(void *buffer, int bufferSize, sockaddr_in &senderAddr)
-{
-    int senderAddrSize = sizeof(senderAddr);
-    return recvfrom(mSocket, reinterpret_cast<char *>(buffer), bufferSize, 0,
-                    (sockaddr *)&senderAddr, &senderAddrSize);
-}
 
 bool Socket::isValid() const
 {

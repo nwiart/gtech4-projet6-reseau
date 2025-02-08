@@ -7,11 +7,7 @@ bool network::sendPacketTCP(Socket& s, uint32_t packetID, const T& data)
 	*((uint32_t*)buf) = packetID;
 	memcpy(buf + 4, &data, sizeof(T));
 
-	size_t bytesSent = sendPacketTCP(s, buf, sizeof(T) + 4);
-	if (bytesSent == 0) {
-		std::cerr << "sendPacketTCP() failed! WSA Error: " << WSAGetLastError() << std::endl;
-		return false;
-	}
+	sendPacketTCP(s, buf, sizeof(T) + 4);
 
 	return true;
 }
@@ -31,11 +27,6 @@ bool network::sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, 
 template<typename T>
 bool network::receivePacketTCP(Socket& s, T& data) {
 	int receivedBytes = recv(s.mSocket, reinterpret_cast<char*>(&data), sizeof(T), 0);
-
-	if (receivedBytes == SOCKET_ERROR) {
-		std::cerr << "Error receiving packet TCP! WSA Error: " << WSAGetLastError() << std::endl;
-		return false;
-	}
 
 	return receivedBytes == sizeof(T);
 }

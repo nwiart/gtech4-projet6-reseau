@@ -9,6 +9,8 @@
 
 #include <WinSock2.h>
 #include <stdlib.h>
+#include <iostream>
+
 
 Server *Server::m_instance = 0;
 

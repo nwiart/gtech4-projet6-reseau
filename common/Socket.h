@@ -1,17 +1,15 @@
 #pragma once
 
 #include <stdint.h>
-#include <iostream>
 #include <winsock2.h>
 
-#pragma comment(lib, "ws2_32.lib")
 
 class Socket {
 public:
-    SOCKET mSocket;
+    uint64_t mSocket;
 
     Socket();
-    Socket(SOCKET s);
+    Socket(uint64_t s);
     ~Socket();
 
     void createSocketUDP();
@@ -23,8 +21,6 @@ public:
 
     int bindUDP(uint16_t port);
 
-    int sendUDP(const void* data, int dataSize, sockaddr_in& destAddr);
-    int receiveUDP(void* buffer, int bufferSize, sockaddr_in& senderAddr);
 
     bool isValid() const;
     void closeSocket();

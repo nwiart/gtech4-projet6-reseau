@@ -5,6 +5,8 @@
 
 #include "Scene/ConnectScreen.h"
 
+#include <iostream>
+
 
 int main()
 {
