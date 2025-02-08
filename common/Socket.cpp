@@ -1,10 +1,11 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "Socket.h"
 #include <WS2tcpip.h>
+#include <iostream>
 
 Socket::Socket() : mSocket(INVALID_SOCKET) {}
 
-Socket::Socket(SOCKET s) : mSocket(s) {}
+Socket::Socket(uint64_t s) : mSocket(s) {}
 
 Socket::~Socket()
 {

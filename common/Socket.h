@@ -1,17 +1,15 @@
 #pragma once
 
 #include <stdint.h>
-#include <iostream>
 #include <winsock2.h>
 
-#pragma comment(lib, "ws2_32.lib")
 
 class Socket {
 public:
-    SOCKET mSocket;
+    uint64_t mSocket;
 
     Socket();
-    Socket(SOCKET s);
+    Socket(uint64_t s);
     ~Socket();
 
     void createSocketUDP();
