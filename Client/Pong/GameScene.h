@@ -19,7 +19,7 @@ public:
     void updateLocalPlayerMovement();
 
     void setPlayerPos(uint32_t id, int p);
-    void setBallInfo(float xDir, float yDir, float speed);
+    void setBallInfo(float x, float y, float xDir, float yDir, float speed);
 
 private:
     static constexpr int MAX_PLAYERS = 4;

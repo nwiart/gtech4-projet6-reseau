@@ -273,7 +273,7 @@ void Client::handleUDPPacket()
 		Server_BallInfo* packet = (Server_BallInfo*)(buf + 4);
 		GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
 		if (scene) {
-			scene->setBallInfo(packet->xDir, packet->yDir, packet->speed);
+			scene->setBallInfo(packet->xPos, packet->yPos, packet->xDir, packet->yDir, packet->speed);
 		}
 	}
 	case ServerPackets::ScoreInfo: {

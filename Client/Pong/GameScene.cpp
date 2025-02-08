@@ -1,8 +1,7 @@
 #include "GameScene.h"
 #include "PongPackets.h"
-
 #include "Client.h"
-
+#include <iostream>
 
 GameScene::GameScene()
     : score(getGlobalFont(), sf::Vector2u(1280, 720)), twoTeams(false)
@@ -20,16 +19,16 @@ GameScene::GameScene()
     player2Text.setPosition(1100, 20);
 }
 
-void GameScene::handleEvent(sf::Event event, sf::RenderWindow &window)
+void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window)
 {
     if (event.type == sf::Event::Closed)
         window.close();
 }
 
-void GameScene::update(sf::RenderWindow &window)
+void GameScene::update(sf::RenderWindow& window)
 {
     updateLocalPlayerMovement();
-    ball.update(1.f / 60.f);
+    ball.update(1.f / 60.f); // Update the ball's position
 }
 
 void GameScene::setPlayerPos(uint32_t id, int p)
@@ -37,14 +36,12 @@ void GameScene::setPlayerPos(uint32_t id, int p)
     players[id].setPosition(p);
 }
 
-void GameScene::setBallInfo(float xDir, float yDir, float speed)
+void GameScene::setBallInfo(float x, float y, float xDir, float yDir, float speed)
 {
-    sf::Vector2f velocity(xDir * speed, yDir * speed);
-    ball.setVelocity(velocity);
+    ball.updateFromServer(x, y, xDir, yDir, speed);
 }
 
-
-void GameScene::draw(sf::RenderWindow &window)
+void GameScene::draw(sf::RenderWindow& window)
 {
     window.draw(player1Text);
     window.draw(player2Text);
@@ -55,7 +52,7 @@ void GameScene::draw(sf::RenderWindow &window)
         players[i].draw(window);
     }
 
-    ball.draw(window);
+    ball.draw(window); // Draw the ball
 }
 
 void GameScene::updateLocalPlayerMovement()
@@ -72,10 +69,6 @@ void GameScene::updateLocalPlayerMovement()
     else if (sf::Keyboard::isKeyPressed(localPlayer.getDownKey()))
     {
         paddleY += 7;
-    }
-    else
-    {
-        return;
     }
 
     Client::getInstance().sendPosition(paddleY);

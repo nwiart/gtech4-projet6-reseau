@@ -77,10 +77,10 @@ void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY)
 
 void LobbyPong::sendGameState()
 {
-	float xDir, yDir, speed;
+	float x, y, xDir, yDir, speed;
 	int score1, score2;
 
-	m_pong.getBallInfo(xDir, yDir, speed);
+	m_pong.getBallInfo(x, y, xDir, yDir, speed);
 	m_pong.getScoreInfo(score1, score2);
 
 	Server_ScoreInfo scorePacket;
@@ -88,6 +88,8 @@ void LobbyPong::sendGameState()
 	scorePacket.score2 = score2;
 
 	Server_BallInfo packet;
+    packet.xPos = x;
+    packet.yPos = y;
 	packet.xDir = xDir;
 	packet.yDir = yDir;
 	packet.speed = speed;

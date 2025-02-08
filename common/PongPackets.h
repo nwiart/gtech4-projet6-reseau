@@ -33,7 +33,7 @@ enum class ServerPackets : uint32_t
 	// UDP packets sent by server.
 	PlayerMove,
 	BallInfo,
-    ScoreInfo,
+	ScoreInfo,
 };
 
 
@@ -145,6 +145,7 @@ struct Server_PlayerMove
 // Sent by server to all players to update the ball's position.
 struct Server_BallInfo
 {
+	float xPos, yPos;
 	float xDir, yDir;
 	float speed;
 };
@@ -152,5 +153,5 @@ struct Server_BallInfo
 // Sent by server to all players to update the score.
 struct Server_ScoreInfo
 {
-    int score1, score2;
+	int score1, score2;
 };
