@@ -14,14 +14,15 @@ public:
     GameScene();
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
     void update(sf::RenderWindow& window, double dt) override;
-    void draw(sf::RenderWindow& window) override;
-
+    void updatePlayerPing(uint32_t playerID, int ping);
+    void updatePlayerName(uint32_t playerID, const std::string& name);
     void updateLocalPlayerMovement(double dt);
 
     void setPlayerPos(uint32_t id, int p);
     void setBallInfo(float x, float y, float xDir, float yDir, float speed);
     void setScore(int score1, int score2);
 
+    void draw(sf::RenderWindow& window) override;
 private:
     static constexpr int MAX_PLAYERS = 4;
 
@@ -36,4 +37,10 @@ private:
     int scoreTeam2 = 0;
 
     double localTimer;
+
+private:
+    std::map<uint32_t, int> playerPings;
+    sf::Text player1PingText;
+    sf::Text player2PingText;
+
 };

@@ -18,6 +18,19 @@ GameScene::GameScene()
     player2Text.setFillColor(sf::Color::White);
     player2Text.setString("player2Name");
     player2Text.setPosition(1100, 20);
+
+    player1PingText.setFont(getGlobalFont());
+    player1PingText.setCharacterSize(20);
+    player1PingText.setFillColor(sf::Color::White);
+    player1PingText.setString("Ping: 15 ms");
+    player1PingText.setPosition(50, 70);
+
+    player2PingText.setFont(getGlobalFont());
+    player2PingText.setCharacterSize(20);
+    player2PingText.setFillColor(sf::Color::White);
+    player2PingText.setString("Ping: 15 ms");
+    player2PingText.setPosition(1100, 70);
+
 }
 
 void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window)
@@ -32,35 +45,6 @@ void GameScene::update(sf::RenderWindow& window, double dt)
 
     updateLocalPlayerMovement(dt);
     ball.update(dt); // Update the ball's position
-}
-
-void GameScene::setPlayerPos(uint32_t id, int p)
-{
-    players[id].setPosition(p);
-}
-
-void GameScene::setBallInfo(float x, float y, float xDir, float yDir, float speed)
-{
-    ball.updateFromServer(x, y, xDir, yDir, speed);
-}
-
-void GameScene::setScore(int score1, int score2)
-{
-    score.setScore(score1, score2);
-}
-
-void GameScene::draw(sf::RenderWindow& window)
-{
-    window.draw(player1Text);
-    window.draw(player2Text);
-
-    score.draw(window);
-
-    for (int i = 0; i < (twoTeams ? 4 : 2); i++) {
-        players[i].draw(window);
-    }
-
-    ball.draw(window); // Draw the ball
 }
 
 void GameScene::updateLocalPlayerMovement(double dt)
@@ -84,3 +68,60 @@ void GameScene::updateLocalPlayerMovement(double dt)
         Client::getInstance().sendPosition(paddleY);
     }
 }
+
+void GameScene::updatePlayerPing(uint32_t playerID, int ping)
+{
+    playerPings[playerID] = ping;
+
+    // Met à jour les textes selon l'ID du joueur
+    if (playerID == 0) {
+        player1PingText.setString("Ping: " + std::to_string(ping) + " ms");
+    }
+    else if (playerID == 1) {
+        player2PingText.setString("Ping: " + std::to_string(ping) + " ms");
+    }
+}
+
+void GameScene::updatePlayerName(uint32_t playerID, const std::string& name)
+{
+    if (playerID == 0) {
+        player1Text.setString(name);
+    }
+    else if (playerID == 1) {
+        player2Text.setString(name);
+    }
+}
+
+
+void GameScene::setPlayerPos(uint32_t id, int p)
+{
+    players[id].setPosition(p);
+}
+
+void GameScene::setBallInfo(float x, float y, float xDir, float yDir, float speed)
+{
+    ball.updateFromServer(x, y, xDir, yDir, speed);
+}
+
+void GameScene::setScore(int score1, int score2)
+{
+    score.setScore(score1, score2);
+}
+
+void GameScene::draw(sf::RenderWindow& window)
+{
+    window.draw(player1Text);
+    window.draw(player2Text);
+
+    window.draw(player1PingText);
+    window.draw(player2PingText);
+
+    score.draw(window);
+
+    for (int i = 0; i < (twoTeams ? 4 : 2); i++) {
+        players[i].draw(window);
+    }
+
+    ball.draw(window); // Draw the ball
+}
+
