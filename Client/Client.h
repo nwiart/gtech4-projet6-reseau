@@ -34,6 +34,7 @@ public:
 public:
 
     void signalConnectionLost(int err);
+    void signalGameStart();
 
     void createLobbyPong1v1(const std::string& name);
     void createLobbyPong2v2(const std::string& name);

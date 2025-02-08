@@ -124,6 +124,15 @@ void Client::signalConnectionLost(int err)
 	Scene::setCurrentScene(s);
 }
 
+void Client::signalGameStart()
+{
+	GameScene* s = new GameScene();
+	for (auto& p : m_lobby.getPlayers()) {
+		s->updatePlayerName(p.first, p.second.m_name);
+	}
+	Scene::setCurrentScene(s);
+}
+
 void Client::createLobbyPong1v1(const std::string& name)
 {
 	this->createLobby(GameMode::PONG_1v1, name);
@@ -263,7 +272,7 @@ void Client::handleTCPPacket(uint32_t packetID)
 	case ServerPackets::GameStart:
 	{
 		recv(m_socketTCP.mSocket, buf, sizeof(Server_GameStart), 0);
-		Scene::setCurrentScene(new GameScene());
+		Client::getInstance().signalGameStart();
 	}
 	break;
 
