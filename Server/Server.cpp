@@ -388,8 +388,6 @@ void Server::handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr)
         // Envoi du ping au client
         network::sendPacketUDP(m_socketUDP, addr, (uint32_t)ServerPackets::PingInfo, pingPacket);
 
-        std::cout << "Ping envoyé : " << roundedLatency << " ms" << std::endl;
-
         // Gestion du mouvement du joueur
         Client_PlayerMove* packet = reinterpret_cast<Client_PlayerMove*>(buf);
         ClientConnection* conn = getClientByID(packet->playerID);
