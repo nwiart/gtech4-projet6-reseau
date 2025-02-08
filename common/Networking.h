@@ -14,38 +14,27 @@
 #define UDPPort 27015
 #define TCPPort 27014
 
-class network {
-public:
-	network();
-	~network();
-	std::string serverAddress;
-	struct sockaddr_in serverAddr;
+namespace network {
+    int initializeWinsock();
+    void cleanupWinsock();
+    int getServerAddressUDP(sockaddr* out, const char* ip, uint16_t port);
+    int getServerAddressTCP(sockaddr* out, const char* ip, uint16_t port);
+    size_t sendPacketTCP(Socket& s, const void* buf, size_t size);
+    size_t sendPacketUDP(Socket& s, const sockaddr* addr, const void* buf, size_t size);
+    bool fetchTCPID(Socket& s, uint32_t& packetID);
 
-	static int initializeWinsock();
-	static void cleanupWinsock();
+    template<typename T>
+    bool sendPacketTCP(Socket& s, uint32_t packetID, const T& data);
 
-	static int getServerAddressUDP(struct sockaddr* out, const char* ip, uint16_t port);
-	static int getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t port);
-	void sendPacketUDP(Socket& s, std::string message);
-	void sendPacketTCP(Socket& s, std::string message);
+    template<typename T>
+    bool sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, const T& data);
 
-	static size_t sendPacketTCP(Socket& s, const void* buf, size_t size);
-	static size_t sendPacketUDP(Socket& s, const sockaddr* addr, const void* buf, size_t size);
+    template<typename T>
+    bool receivePacketTCP(Socket& s, uint32_t& packetID, T& data);
 
-		/// Advanced interface for packet-oriented communication.
-	template<typename T>
-	static bool sendPacketTCP(Socket& s, uint32_t packetID, const T& data);
-
-	template<typename T>
-	static bool sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, const T& data);
-
-	template<typename T>
-	static bool receivePacketTCP(Socket& s, T& data);
-
-	template<typename T>
-	static bool receivePacketUDP(Socket& s, sockaddr_in* senderAddr, T& data);
-private:
-};
+    template<typename T>
+    bool receivePacketUDP(Socket& s, sockaddr_in* senderAddr, T& data);
+}
 
 
 #include "Networking.inl"

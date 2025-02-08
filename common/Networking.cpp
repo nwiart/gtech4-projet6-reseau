@@ -1,16 +1,6 @@
 #include "Networking.h"
 #include <iostream>
 
-network::network()
-{
-    initializeWinsock();
-}
-
-network::~network()
-{
-    cleanupWinsock();
-}
-
 int network::initializeWinsock() {
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -46,51 +36,48 @@ int network::getServerAddressTCP(struct sockaddr* out, const char* ip, uint16_t 
     return 0;
 }
 
-void network::sendPacketUDP(Socket& s, std::string message)
-{
-    int iResult;
 
-    iResult = sendto(s.mSocket, message.c_str(), message.length(), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-    if (iResult == SOCKET_ERROR) {
-        std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
-        cleanupWinsock();
-        return;
+size_t network::sendPacketTCP(Socket& s, const void* buf, size_t size) {
+    const char* data = static_cast<const char*>(buf);
+    size_t totalSent = 0;
+
+    while (totalSent < size) {
+        int bytesSent = send(s.mSocket, data + totalSent, size - totalSent, 0);
+        if (bytesSent == SOCKET_ERROR) {
+            std::cerr << "send failed! WSA Error: " << WSAGetLastError() << std::endl;
+            return 0;
+        }
+        totalSent += bytesSent;
     }
-}
-
-void network::sendPacketTCP(Socket& s, std::string message)
-{
-    int iResult;
-
-    iResult = send(s.mSocket, message.c_str(), message.length(), 0);
-    if (iResult == SOCKET_ERROR) {
-        std::cerr << "sendto failed with error: " << WSAGetLastError() << std::endl;
-        cleanupWinsock();
-        return;
-    }
-}
-
-
-size_t network::sendPacketTCP(Socket& s, const void* buf, size_t size)
-{
-    int iResult;
-
-    iResult = send(s.mSocket, (const char*) buf, size, 0);
-    if (iResult == SOCKET_ERROR) {
-        return 0;
-    }
-
-    return size;
+    return totalSent;
 }
 
 size_t network::sendPacketUDP(Socket& s, const sockaddr* addr, const void* buf, size_t size)
 {
-    int iResult;
-
-    iResult = sendto(s.mSocket, (const char*) buf, size, 0, addr, sizeof(sockaddr));
+    int iResult = sendto(s.mSocket, (const char*)buf, size, 0, addr, sizeof(sockaddr_in));
     if (iResult == SOCKET_ERROR) {
         return 0;
     }
 
     return size;
+}
+
+bool network::fetchTCPID(Socket& s, uint32_t& packetID) {
+    char buffer[MAX_PACKET_SIZE];
+    int receivedBytes = recv(s.mSocket, buffer, sizeof(buffer), 0);
+
+    if (receivedBytes == SOCKET_ERROR) {
+        std::cerr << "Error receiving packet TCP! WSA Error: " << WSAGetLastError() << std::endl;
+        return false;
+    }
+
+    if (receivedBytes < sizeof(uint32_t)) {
+        std::cerr << "Invalid packet received (too small)\n";
+        return false;
+    }
+
+    memcpy(&packetID, buffer, sizeof(uint32_t));
+    packetID = ntohl(packetID);
+
+    return true;
 }

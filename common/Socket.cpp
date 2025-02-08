@@ -8,7 +8,7 @@ Socket::Socket(SOCKET s) : mSocket(s) {}
 
 Socket::~Socket()
 {
-
+    closeSocket();
 }
 
 void Socket::createSocketTCP()
@@ -29,18 +29,25 @@ void Socket::createSocketUDP()
     }
 }
 
-int Socket::connectTCP(const char *ip, uint16_t port)
-{
-    sockaddr_in serverAddr;
+int Socket::connectTCP(const char* ip, uint16_t port) {
+    if (!isValid()) {
+        createSocketTCP();  // Ensure we have a valid socket
+    }
+
+    sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
-    if (inet_pton(AF_INET, ip, &serverAddr.sin_addr) <= 0)
-    {
-        std::cerr << "Erreur: Adresse IP invalide " << ip << std::endl;
+    if (inet_pton(AF_INET, ip, &serverAddr.sin_addr) <= 0) {
+        std::cerr << "Invalid IP address: " << ip << std::endl;
         return SOCKET_ERROR;
     }
 
-    return connect(mSocket, (sockaddr *)&serverAddr, sizeof(serverAddr));
+    if (connect(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "Connect failed, error: " << WSAGetLastError() << std::endl;
+        return SOCKET_ERROR;
+    }
+
+    return 0;
 }
 
 int Socket::listenTCP(uint16_t port)
@@ -59,15 +66,13 @@ int Socket::listenTCP(uint16_t port)
     return listen(mSocket, SOMAXCONN);
 }
 
-bool Socket::acceptTCP(Socket &outSocket)
-{
+bool Socket::acceptTCP(Socket& outSocket) {
     sockaddr_in clientAddr;
-    int addrSize = sizeof(clientAddr);
+    socklen_t addrSize = sizeof(clientAddr);
 
-    SOCKET clientSocket = accept(mSocket, (sockaddr *)&clientAddr, &addrSize);
-    if (clientSocket == INVALID_SOCKET)
-    {
-        std::cerr << "Erreur: �chec de l'acceptation de la connexion" << std::endl;
+    SOCKET clientSocket = accept(mSocket, (sockaddr*)&clientAddr, &addrSize);
+    if (clientSocket == INVALID_SOCKET) {
+        std::cerr << "Erreur: échec de l'acceptation de la connexion" << std::endl;
         return false;
     }
 

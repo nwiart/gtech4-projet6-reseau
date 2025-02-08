@@ -8,19 +8,17 @@
 
 #include <string.h>
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 #define MESSAGE_RECV (WM_USER + 1)
 #define MESSAGE_UDP (WM_USER+2)
 
 
-static HWND hwnd;
+HWND hwnd = 0;
 
 void create_window();
-static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-Socket Client::m_socketTCP;
-Socket Client::m_socketUDP;
-sockaddr_in Client::serverUDPAddr;
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 extern sf::Font font;
@@ -45,8 +43,6 @@ int Client::connect(const char* ip, const std::string& playerName)
     m_playerName = playerName;
 
     m_socketTCP.createSocketTCP();
-
-    // Attempt to connect via TCP
     if (m_socketTCP.connectTCP(ip, serverBasePort) == SOCKET_ERROR) {
         int error = WSAGetLastError();
         std::cerr << "TCP connection failed. Error: " << error << "\n";
@@ -59,30 +55,9 @@ int Client::connect(const char* ip, const std::string& playerName)
         return -1;
     }
 
-    // UDP Initialization
-    m_socketUDP.createSocketUDP();
-
-    /*if (m_socketUDP.bindUDP(0) == SOCKET_ERROR) {
-        std::cerr << "UDP socket bind failed.\n";
-        return -1;
-    }*/
-
-    /*sockaddr_in ua;
-    ua.sin_family = AF_INET;
-    ua.sin_port = 27014;
-    ua.sin_addr.s_addr = inet_addr(ip);
-    ::connect(m_socketUDP.mSocket, (sockaddr*) &ua, sizeof(sockaddr));*/
-
-    bool t = true;
-    setsockopt(m_socketUDP.mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&t, 1);
-
-    sockaddr_in ua;
-    int len = sizeof(sockaddr);
-    getpeername(m_socketUDP.mSocket, (sockaddr*) &ua, &len);
-
     // Copy player name safely
     Client_PlayerConnect packet;
-    len = playerName.length();
+    int len = playerName.length();
     if (len > sizeof(packet.playerName) - 1) {
         len = sizeof(packet.playerName) - 1;
     }
@@ -95,12 +70,21 @@ int Client::connect(const char* ip, const std::string& playerName)
         return -1;
     }
 
-    WSAAsyncSelect(m_socketUDP.mSocket, hwnd, MESSAGE_UDP, FD_READ);
+
+    // UDP Initialization
+    m_socketUDP.createSocketUDP();
+    bool t = true;
+    setsockopt(m_socketUDP.mSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&t, sizeof(t));
+
+    if (m_socketUDP.bindUDP(0) == SOCKET_ERROR) {
+        std::cerr << "UDP socket bind failed.\n";
+        return -1;
+    }
 
     // Setup server UDP address
     memset(&serverUDPAddr, 0, sizeof(serverUDPAddr));
     serverUDPAddr.sin_family = AF_INET;
-    serverUDPAddr.sin_port = htons(serverSecondaryPort-1);
+    serverUDPAddr.sin_port = htons(serverSecondaryPort);
 
     if (inet_pton(AF_INET, ip, &serverUDPAddr.sin_addr) <= 0) {
         std::cerr << "Invalid IP address format.\n";
@@ -120,33 +104,6 @@ void Client::createLobbyPong2v2(const std::string& name)
     this->createLobby(GameMode::PONG_2v2, name);
 }
 
-void Client::startGame()
-{
-    Client_StartGame p;
-    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::StartGame, p);
-}
-
-void Client::joinLobby(uint32_t lobbyID)
-{
-    Client_JoinLobby p;
-    p.lobbyID = lobbyID;
-    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::JoinLobby, p);
-}
-
-void Client::leaveLobby()
-{
-    Client_LeaveLobby p;
-    network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::LeaveLobby, p);
-
-    m_lobby.leave();
-}
-
-
-void Client::completeAuthentication(uint32_t playerID)
-{
-    m_playerID = playerID;
-}
-
 void Client::createLobby(GameMode gm, const std::string& name)
 {
     int namelen = name.size() > 31 ? 31 : name.size();
@@ -158,115 +115,74 @@ void Client::createLobby(GameMode gm, const std::string& name)
     network::sendPacketTCP(m_socketTCP, (uint32_t)ClientPackets::CreateLobby, p);
 }
 
-int Client::sendPosition(int posY)
-{
-    Client_PlayerMove packet{ m_playerID, posY };
-
-    network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
-
-    return 0;
-}
-
 void Client::handleTCPPacket(uint32_t packetID)
 {
-    char buf[1020];
-
     switch ((ServerPackets)packetID)
     {
     case ServerPackets::ConnectResult:
     {
-        recv(m_socketTCP.mSocket, buf, sizeof(Server_ConnectResult), 0);
-        this->completeAuthentication(((Server_ConnectResult*) buf)->playerID);
+        Server_ConnectResult result;
+         network::receivePacketTCP(m_socketTCP, packetID, result);
 
-        Client_PlayerConnectUDP p;
-        p.playerID = m_playerID;
-        network::sendPacketUDP(m_socketUDP, (sockaddr*) & serverUDPAddr, (uint32_t)ClientPackets::PlayerConnectUDP, p);
+        if (result.success) {
+            m_playerID = result.playerID;
+
+            Client_PlayerConnectUDP p;
+            p.playerID = m_playerID;
+            network::sendPacketUDP(m_socketUDP, (sockaddr*)&serverUDPAddr, (uint32_t)ClientPackets::PlayerConnectUDP, p);
+        }
     }
     break;
-
     case ServerPackets::GetLobbies:
     {
-        recv(m_socketTCP.mSocket, buf, sizeof(Server_GetLobbies), 0);
+        Server_GetLobbies lobby;
+        network::receivePacketTCP(m_socketTCP, packetID, lobby);
         MainMenu* menu = dynamic_cast<MainMenu*>(Scene::getCurrentScene());
         if (menu) {
-            Server_GetLobbies& p = *reinterpret_cast<Server_GetLobbies*>(buf);
-            menu->listLobby(p.lobbyID, p.lobbyName, p.numPlayers, p.maxPlayers);
+            menu->listLobby(lobby.lobbyID, lobby.lobbyName, lobby.numPlayers, lobby.maxPlayers);
         }
     }
     break;
-
-    // Lobby join / create.
     case ServerPackets::AcceptJoin:
     {
-        int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_AcceptJoin), 0);
-        if (received == sizeof(Server_AcceptJoin)) {
-            int idInLobby = reinterpret_cast<Server_AcceptJoin*>(buf)->playerID;
-            int max = reinterpret_cast<Server_AcceptJoin*>(buf)->maxPlayers;
+        Server_AcceptJoin result;
+        network::receivePacketTCP(m_socketTCP, packetID, result);
+        int idInLobby = result.playerID;
+        int max = result.maxPlayers;
 
-            printf("Accepted! Player ID: %d\n", idInLobby);
+        printf("Accepted! Player ID: %d\n", idInLobby);
 
-            m_lobby.setupGuest(idInLobby, max);
+        m_lobby.setupGuest(idInLobby, max);
 
-            Scene::setCurrentScene(new LobbyMenu());
-        }
+        Scene::setCurrentScene(new LobbyMenu());
     }
     break;
 
     case ServerPackets::DenyJoin:
     {
-        int received = recv(m_socketTCP.mSocket, buf, sizeof(Server_DenyJoin), 0);
-        if (received == sizeof(Server_DenyJoin)) {
-            printf("Join request denied: %s\n", reinterpret_cast<Server_DenyJoin*>(buf)->reason);
-        }
+        Server_DenyJoin result;
+        network::receivePacketTCP(m_socketTCP, packetID, result);
+        printf("Join request denied: %s\n", result.reason);
     }
     break;
     case ServerPackets::LobbyCreation:
     {
-        recv(m_socketTCP.mSocket, buf, sizeof(Server_LobbyCreation), 0);
-        Server_LobbyCreation* p = (Server_LobbyCreation*) buf;
-
-        m_lobby.setupHost(p->playerID, p->maxPlayers);
-
+        Server_LobbyCreation lobby;
+        network::receivePacketTCP(m_socketTCP, packetID, lobby);
+        m_lobby.setupHost(lobby.playerID, lobby.maxPlayers);
         Scene::setCurrentScene(new LobbyMenu());
     }
     break;
 
     case ServerPackets::GameStart:
     {
-        recv(m_socketTCP.mSocket, buf, sizeof(Server_GameStart), 0);
+        Server_GameStart gamestart;
+        network::receivePacketTCP(m_socketTCP, packetID, gamestart);
         Scene::setCurrentScene(new GameScene());
     }
     break;
     }
 }
-
-void Client::handleUDPPacket()
-{
-    char buf[MAX_PACKET_SIZE];
-    int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, 0, 0);
-
-    uint32_t packetID = *((uint32_t*) buf);
-
-    switch ((ServerPackets) packetID)
-    {
-    case ServerPackets::PlayerMove: {
-        Server_PlayerMove* packet = (Server_PlayerMove*) (buf + 4);
-        GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
-        scene->setPlayerPos(packet->playerID, packet->position);
-    }
-    break;
-
-    case ServerPackets::BallInfo: {
-        Server_BallInfo* packet = (Server_BallInfo*)(buf + 4);
-        GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
-        if (scene) {
-            scene->setBallInfo(sf::Vector2f(packet->xPos, packet->yPos), sf::Vector2f(packet->xVel, packet->yVel));
-        }
-    }
-    break;
-    }
-}
-
 
 void create_window()
 {
@@ -290,23 +206,33 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
     switch (msg)
     {
     case MESSAGE_RECV:
-        {
-            SOCKET socket = (SOCKET)wparam;
-            uint32_t packetID;
-            int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
+    {
+        SOCKET socket = (SOCKET)wparam;
+        uint32_t packetID;
+        int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
 
-            if (received == sizeof(packetID)) {
-                Client::getInstance().handleTCPPacket(packetID);
-            }
-            else {
-                std::cerr << "Failed to receive valid packet ID.\n";
-            }
+        if (received == sizeof(packetID)) {
+            Client::getInstance().handleTCPPacket(packetID);
+        }
+        if (received == SOCKET_ERROR) {
+            std::cerr << "recv() failed. Error: " << WSAGetLastError() << "\n";
+            break;
+        }
+        else {
+            std::cerr << "Failed to receive valid packet ID.\n";
         }
         break;
-    case MESSAGE_UDP:
-        Client::getInstance().handleUDPPacket();
+    }
+    case FD_CLOSE:
+    {
+        std::cerr << "Server closed the connection.\n";
+        //Client::getInstance().disconnect();
+
         break;
     }
-
+    default:
+        return DefWindowProc(hwnd, msg, wparam, lparam);
+ 
+    }
     return DefWindowProc(hwnd, msg, wparam, lparam);
 }

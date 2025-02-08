@@ -8,7 +8,7 @@
 LobbyMenu::LobbyMenu()
     : labelLobbyName("Salle Pong", getGlobalFont())
     , buttonStart(600, 500, "Démarrer la partie", getGlobalFont(), []() {
-        Client::getInstance().startGame();
+        //send packet for starting game
     })
     , buttonBack(80, 80, "Retour", getGlobalFont(), []() {
         Scene::setCurrentScene(new MainMenu());

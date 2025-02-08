@@ -46,7 +46,7 @@ void MainMenu::refreshLobbyList()
 {
     lobbies.clear();
 
-    network::sendPacketTCP(Client::getInstance().getServerTCP(), (uint32_t)ClientPackets::GetLobbies, Client_GetLobbies());
+    network::sendPacketTCP(Client::getInstance().getSocketTCP(), (uint32_t)ClientPackets::GetLobbies, Client_GetLobbies());
 }
 
 void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxPlayers)
@@ -56,7 +56,7 @@ void MainMenu::listLobby(uint32_t id, const char* name, int numPlayers, int maxP
 
     int yPos = lobbies.size() * 60 + 40;
     Button b(1000, yPos, label.str(), getGlobalFont(), [id]() {
-        Client::getInstance().joinLobby(id);
+        //Send packet for joing lobby
     });
 
     lobbies.insert(std::pair<uint32_t, Button>(id, b));

@@ -75,6 +75,4 @@ void GameScene::updateLocalPlayerMovement()
     {
         return;
     }
-
-    Client::getInstance().sendPosition(paddleY);
 }
