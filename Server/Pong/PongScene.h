@@ -10,10 +10,9 @@ public:
     void update(float dt);
 
     void receivePlayerMove(uint32_t playerID, float positionY);
+    void getScoreInfo(int& score1, int& score2) const;
+    void getBallInfo(float& xDir, float& yDir, float& speed) const;
 
-    void getGameState(float& ballX, float& ballY, float& ballRadius,
-        float& paddle1Y, float& paddle2Y,
-        int& score1, int& score2) const;
     void reset();
 
     inline Ball& getBall() { return m_ball; }

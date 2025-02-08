@@ -26,9 +26,6 @@ public:
     void update(float dt) override;
     void receivePlayerMove(uint32_t playerID, float positionY);
     void sendGameState();
-    void getGameState(float& ballX, float& ballY, float& ballRadius,
-        float& paddle1Y, float& paddle2Y,
-        int& score1, int& score2) const;
 
 private:
     PongScene m_pong;

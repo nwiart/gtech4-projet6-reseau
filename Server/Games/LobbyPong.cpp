@@ -14,9 +14,21 @@ LobbyPong::LobbyPong(uint32_t id, bool twoPlayersTeam)
 {
 }
 
-uint32_t LobbyPong::addPlayer(ClientConnection* conn)
+uint32_t LobbyPong::addPlayer(uint64_t socket)
 {
-    return Lobby::addPlayer(conn);
+    if (m_players.size() >= getMaxPlayers())
+    {
+        std::cout << "Lobby full!" << std::endl;
+        return -1;
+    }
+
+    uint32_t playerID = m_players.size();
+    m_players[playerID] = Socket(socket);
+    m_paddles[socket] = playerID;
+
+    std::cout << "Player " << playerID << " added!" << std::endl;
+
+    return playerID;
 }
 
 uint32_t LobbyPong::getPlayerID(uint64_t socket) const
@@ -49,7 +61,7 @@ void LobbyPong::start()
         network::sendPacketTCP(p.second.m_client->getSocket(), (uint32_t)ServerPackets::GameStart, packet);
     }
 
-    std::cout << "La partie commence !" << std::endl;
+    std::cout << "The game starts!" << std::endl;
 }
 
 void LobbyPong::update(float dt)
@@ -68,7 +80,7 @@ void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY)
     Server_PlayerMove p;
     p.playerID = playerID;
     p.position = positionY;
-    for (auto &p : m_players)
+    for (auto &pl : m_players)
     {
         const sockaddr *clientAddr = Server::m_instance->getClientBySocket(p.second.m_client->getSocket().mSocket)->getUDPAddr();
         network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::PlayerMove, p);
@@ -77,30 +89,25 @@ void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY)
 
 void LobbyPong::sendGameState()
 {
-    float ballX, ballY, ballRadius;
-    float paddle1Y, paddle2Y;
+    float xDir, yDir, speed;
     int score1, score2;
 
-    getGameState(ballX, ballY, ballRadius, paddle1Y, paddle2Y, score1, score2);
+    m_pong.getBallInfo(xDir, yDir, speed);
+    m_pong.getScoreInfo(score1, score2);
 
-    const sf::Vector2f &p = m_pong.getBall().getPosition();
-    const sf::Vector2f &v = m_pong.getBall().getVelocity();
+    Server_ScoreInfo scorePacket;
+    scorePacket.score1 = score1;
+    scorePacket.score2 = score2;
+
     Server_BallInfo packet;
-    /*packet.xPos = p.x;
-    packet.yPos = p.y;
-    packet.xVel = v.x;
-    packet.yVel = v.y;*/
+    packet.xDir = xDir;
+    packet.yDir = yDir;
+    packet.speed = speed;
 
     for (auto &player : m_players)
     {
         const sockaddr *clientAddr = Server::m_instance->getClientBySocket(player.second.m_client->getSocket().mSocket)->getUDPAddr();
-        network::sendPacketUDP(Server::m_instance->getUDPSocket(), (const sockaddr *)clientAddr, (uint32_t)ServerPackets::BallInfo, packet);
+        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::BallInfo, packet);
+        network::sendPacketUDP(Server::m_instance->getUDPSocket(), clientAddr, (uint32_t)ServerPackets::ScoreInfo, scorePacket);
     }
-}
-
-void LobbyPong::getGameState(float &ballX, float &ballY, float &ballRadius,
-                             float &paddle1Y, float &paddle2Y,
-                             int &score1, int &score2) const
-{
-    m_pong.getGameState(ballX, ballY, ballRadius, paddle1Y, paddle2Y, score1, score2);
 }
