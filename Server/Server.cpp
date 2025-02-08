@@ -60,7 +60,7 @@ void Server::notifyDisconnect(Socket &clientSocketTCP)
 
 	if (conn.m_lobby)
 	{
-		conn.m_lobby->disconnectPlayer(conn.m_id);
+		conn.m_lobby->disconnectPlayer(&conn);
 		std::cout << "Joueur " << conn.m_id << " retir� du lobby " << conn.m_lobby->getLobbyID() << std::endl;
 	}
 
@@ -201,6 +201,23 @@ void Server::joinLobby(Socket &player, Lobby *l)
 	}
 }
 
+void Server::leaveLobby(ClientConnection* conn)
+{
+	if (!conn->getLobby()) return;
+
+	Lobby* lobby = conn->getLobby();
+	uint32_t inLobbyID = lobby->getPlayerID(conn->getSocket().mSocket);
+	lobby->disconnectPlayer(conn);
+
+	// Delete lobby if empty.
+	if (lobby->getNumPlayers() == 0) {
+		m_games.erase(std::remove(m_games.begin(), m_games.end(), lobby));
+		delete lobby;
+	}
+
+	conn->m_lobby = 0;
+}
+
 void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 {
 	if (m_clients.find(clientSocketTCP) == m_clients.end())
@@ -295,6 +312,12 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		recv(clientSocketTCP, buf, sizeof(Client_JoinLobby), 0);
 		Socket &playerSocket = conn.getSocket();
 		joinLobby(playerSocket, getLobbyByID(reinterpret_cast<Client_JoinLobby *>(buf)->lobbyID));
+	}
+	break;
+
+	case ClientPackets::LeaveLobby:
+	{
+		leaveLobby(&m_clients[clientSocketTCP]);
 	}
 	break;
 

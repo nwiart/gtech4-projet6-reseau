@@ -32,7 +32,7 @@ public:
 	virtual bool hasGameStarted() const = 0;
 
 	virtual uint32_t addPlayer(ClientConnection* conn);
-	virtual void disconnectPlayer(uint32_t playerID) { }
+	virtual void disconnectPlayer(ClientConnection* conn);
 
 	const std::map<uint64_t, Player>& getPlayers() const { return m_players; }
 	virtual uint32_t getPlayerID(uint64_t socket) const { return -1; }

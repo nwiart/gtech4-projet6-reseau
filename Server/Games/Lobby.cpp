@@ -25,3 +25,8 @@ uint32_t Lobby::addPlayer(ClientConnection* conn)
 
     return playerID;
 }
+
+void Lobby::disconnectPlayer(ClientConnection* conn)
+{
+    m_players.erase(conn->getSocket().mSocket);
+}

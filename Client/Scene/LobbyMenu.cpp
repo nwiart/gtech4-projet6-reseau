@@ -11,6 +11,7 @@ LobbyMenu::LobbyMenu()
         Client::getInstance().startGame();
     })
     , buttonLeave(80, 80, "Quitter", getGlobalFont(), []() {
+        Client::getInstance().leaveLobby();
         Scene::setCurrentScene(new MainMenu());
     })
 {
