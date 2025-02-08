@@ -343,13 +343,21 @@ void Server::notifyReceiveUDP()
     int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, (sockaddr *)&clientAddr, &addrlen);
     int error = WSAGetLastError();
 
+    uint32_t packetID = *((uint32_t*)buf);
     ClientConnection* conn = getClientByAddress(*(sockaddr*)&clientAddr);
+
+    // Handle UDP authentication here.
+    if ((ClientPackets) packetID == ClientPackets::PlayerConnectUDP && !conn) {
+        uint32_t id = ((Client_PlayerConnectUDP*)(buf+4))->playerID;
+        getClientByID(id)->m_udpAddr = clientAddr;
+        return;
+    }
+
     if (!conn) {
         std::cout << "Received UDP data, but the client could not be resolved..." << std::endl;
         return;
     }
 
-    uint32_t packetID = *((uint32_t *)buf);
     handleUDPPacket(packetID, buf + 4, (sockaddr *)&clientAddr);
 }
 
@@ -435,8 +443,8 @@ ClientConnection *Server::getClientByAddress(const sockaddr &addr)
     const sockaddr_in &inetAddr = reinterpret_cast<const sockaddr_in &>(addr);
     for (auto &p : m_clients)
     {
-        if (p.second.getAddr().sin_addr.s_addr == inetAddr.sin_addr.s_addr &&
-            p.second.getAddr().sin_port == inetAddr.sin_port)
+        if (p.second.getUDPAddr()->sin_addr.s_addr == inetAddr.sin_addr.s_addr &&
+            p.second.getUDPAddr()->sin_port == inetAddr.sin_port)
         {
             return &p.second;
         }

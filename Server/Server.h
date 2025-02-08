@@ -21,7 +21,7 @@ public:
 
 	Socket &getSocket() { return m_socket; }
 	const sockaddr *getIP() const { return (const sockaddr *)&m_addr; }
-	const sockaddr *getUDPAddr() const { return (const sockaddr *)&m_udpAddr; }
+	const sockaddr_in *getUDPAddr() const { return &m_udpAddr; }
 	const std::string &getName() const { return m_name; }
 	Lobby *getLobby() const { return m_lobby; }
 
