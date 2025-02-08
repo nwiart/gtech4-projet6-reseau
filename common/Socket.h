@@ -23,8 +23,6 @@ public:
 
     int bindUDP(uint16_t port);
 
-    int sendUDP(const void* data, int dataSize, sockaddr_in& destAddr);
-    int receiveUDP(void* buffer, int bufferSize, sockaddr_in& senderAddr);
 
     bool isValid() const;
     void closeSocket();
