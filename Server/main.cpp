@@ -27,7 +27,6 @@ int main(int argc, const char** argv)
 	server.open();
 
 	WSAAsyncSelect(server.getListenSocket().mSocket, hwnd, MESSAGE_ACCEPT, FD_ACCEPT);
-	WSAAsyncSelect(server.getUDPSocket().mSocket, hwnd, MESSAGE_UDP, FD_READ);
 
 	std::cout << "Server started.\n";
 
@@ -85,42 +84,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case MESSAGE_ACCEPT:
 	{
 		Socket newClientSocket;
-		server.getListenSocket().acceptTCP(newClientSocket);
+		if (server.getListenSocket().acceptTCP(newClientSocket) == SOCKET_ERROR || newClientSocket.mSocket == INVALID_SOCKET) {
+			std::cerr << "Failed to accept new client.\n";
+			break;
+		}
+
 		WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, FD_READ);
 
-		if (newClientSocket.mSocket == INVALID_SOCKET) {
-			//std::cerr << "New client socket is invalid after accept!" << std::endl;
-		}
-		else {
-			std::stringstream ss;
-			sockaddr_in addr;
-			int len = sizeof(sockaddr_in);
+		std::stringstream ss;
+		sockaddr_in addr;
+		int len = sizeof(sockaddr_in);
 
-			getsockname(newClientSocket.mSocket, (sockaddr*)&addr, &len);
-			std::cout << "Sock port " << addr.sin_port << '\n';
+		getsockname(newClientSocket.mSocket, (sockaddr*)&addr, &len);
+		std::cout << "Sock port " << addr.sin_port << '\n';
 
-			getpeername(newClientSocket.mSocket, (sockaddr*) &addr, &len);
-			std::cout << "Peer port " << addr.sin_port << '\n';
+		getpeername(newClientSocket.mSocket, (sockaddr*)&addr, &len);
+		std::cout << "Peer port " << addr.sin_port << '\n';
 
-			UCHAR* ipb = &addr.sin_addr.S_un.S_un_b.s_b1;
-			ss << (int) ipb[0] << '.' << (int)ipb[1] << '.' << (int)ipb[2] << '.' << (int)ipb[3] << ':' << (int)addr.sin_port;
-			std::cout << "New connection from " << ss.str() << std::endl;
-		}
+		UCHAR* ipb = &addr.sin_addr.S_un.S_un_b.s_b1;
+		ss << (int)ipb[0] << '.' << (int)ipb[1] << '.' << (int)ipb[2] << '.' << (int)ipb[3] << ':' << (int)addr.sin_port;
+		std::cout << "New connection from " << ss.str() << std::endl;
 
 		server.notifyConnect(newClientSocket);
 	}
-	break;
+	break; // <-- FIXED
+
 
 	case MESSAGE_RECV:
-		{
-			SOCKET socket = (SOCKET)wparam;
-			server.notifyReceiveTCP(socket);
-		}
-		return 0;
-
-	case MESSAGE_UDP:
-		server.notifyReceiveUDP();
-		return 0;
+	{
+		SOCKET socket = (SOCKET)wparam;
+		server.notifyReceiveTCP(socket);
+		
+	}
+	break;
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
