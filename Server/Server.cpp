@@ -1,16 +1,11 @@
 #include "Server.h"
-
-#include "Games/Lobby.h"
 #include "Games/LobbyPong.h"
-
 #include "PongPackets.h"
-
 #include "Networking.h"
 
 #include <WinSock2.h>
 #include <stdlib.h>
 #include <iostream>
-
 
 Server *Server::m_instance = 0;
 
@@ -52,7 +47,7 @@ void Server::notifyDisconnect(Socket &clientSocketTCP)
 
     if (it == m_clients.end())
     {
-        std::cerr << "Erreur: Tentative de deconnexion d�un client inconnu !" << std::endl;
+        std::cerr << "Error: Attempt to disconnect an unknown client!" << std::endl;
         return;
     }
 
@@ -61,13 +56,13 @@ void Server::notifyDisconnect(Socket &clientSocketTCP)
     if (conn.m_lobby)
     {
         conn.m_lobby->disconnectPlayer(&conn);
-        std::cout << "Joueur " << conn.m_id << " retir� du lobby " << conn.m_lobby->getLobbyID() << std::endl;
+        std::cout << "Player " << conn.m_id << " removed from lobby " << conn.m_lobby->getLobbyID() << std::endl;
     }
 
     shutdown(clientSocketTCP.mSocket, SD_BOTH);
     closesocket(clientSocketTCP.mSocket);
 
-    std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") d�connect�.\n";
+    std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") disconnected.\n";
 
     conn.m_socket.closeSocket();
     m_clients.erase(it);
@@ -185,7 +180,8 @@ void Server::joinLobby(Socket &player, Lobby *l)
 
     // Send them players already in as well.
     for (auto& p : l->getPlayers()) {
-        if (p.first == player.mSocket) continue;
+        if (p.first == player.mSocket)
+            continue;
 
         // Just emulate a regular join.
         Server_PlayerJoinedLobby packet;
@@ -347,13 +343,11 @@ void Server::notifyReceiveUDP()
     int rec = recvfrom(m_socketUDP.mSocket, buf, MAX_PACKET_SIZE, 0, (sockaddr *)&clientAddr, &addrlen);
     int error = WSAGetLastError();
 
-    std::cout << "Receive port " << clientAddr.sin_port << '\n';
-
-    /*ClientConnection* conn = getClientByAddress(*(sockaddr*)&clientAddr);
+    ClientConnection* conn = getClientByAddress(*(sockaddr*)&clientAddr);
     if (!conn) {
         std::cout << "Received UDP data, but the client could not be resolved..." << std::endl;
         return;
-    }*/
+    }
 
     uint32_t packetID = *((uint32_t *)buf);
     handleUDPPacket(packetID, buf + 4, (sockaddr *)&clientAddr);
@@ -372,10 +366,6 @@ void Server::handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr)
     case ClientPackets::PlayerMove:
     {
         Client_PlayerMove *packet = reinterpret_cast<Client_PlayerMove *>(buf);
-        // std::cout << "Player " << playerID << " moved to " << packet.position << std::endl;
-
-        std::cout << packet->playerID << " : " << packet->position << '\n';
-
         ClientConnection *conn = getClientByID(packet->playerID);
 
         LobbyPong *pong = dynamic_cast<LobbyPong *>(conn->getLobby());
@@ -397,7 +387,7 @@ void Server::updateGames(float dt)
 
         if ((*it)->getNumPlayers() == 0)
         {
-            std::cout << "Lobby " << (*it)->getLobbyID() << " supprime (aucun joueur actif)" << std::endl;
+            std::cout << "Lobby " << (*it)->getLobbyID() << " deleted (no active players)" << std::endl;
             delete *it;
             it = m_games.erase(it);
         }

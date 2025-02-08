@@ -1,17 +1,16 @@
 ﻿#include "PongScene.h"
 
 PongScene::PongScene(int sizeX, int sizeY)
-    : sizeX(sizeX), sizeY(sizeY), paddle1Y(360), paddle2Y(360), started(false) {}
+    : sizeX(sizeX), sizeY(sizeY), paddle1Y(360), paddle2Y(360), started(false) {
+}
 
 void PongScene::startGame() {
     started = true;
-
     reset();
 }
 
 void PongScene::update(float dt) {
     if (!started) return;
-
     m_ball.update(dt, nullptr);
     checkCollisions();
 }
@@ -27,17 +26,15 @@ void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
     }
 }
 
-void PongScene::getGameState(float& ballX, float& ballY, float& ballRadius,
-    float& paddle1Y, float& paddle2Y,
-    int& score1, int& score2) const
-{
-    ballX = m_ball.getPosition().x;
-    ballY = m_ball.getPosition().y;
-    ballRadius = m_ball.getRadius();
-    paddle1Y = this->paddle1Y;
-    paddle2Y = this->paddle2Y;
+void PongScene::getScoreInfo(int& score1, int& score2) const {
     score1 = m_score.getScore1();
     score2 = m_score.getScore2();
+}
+
+void PongScene::getBallInfo(float& xDir, float& yDir, float& speed) const {
+    xDir = m_ball.getVelocity().x != 0 ? m_ball.getVelocity().x / abs(m_ball.getVelocity().x) : 0;
+    yDir = m_ball.getVelocity().y != 0 ? m_ball.getVelocity().y / abs(m_ball.getVelocity().y) : 0;
+    speed = sqrt(m_ball.getVelocity().x * m_ball.getVelocity().x + m_ball.getVelocity().y * m_ball.getVelocity().y);
 }
 
 void PongScene::checkCollisions() {
@@ -90,6 +87,5 @@ void PongScene::checkCollisions() {
 void PongScene::reset() {
     paddle1Y = sizeY / 2 - 50;
     paddle2Y = sizeY / 2 - 50;
-
     m_ball.setPosition(sizeX / 2, sizeY / 2);
 }
