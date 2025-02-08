@@ -19,7 +19,7 @@ public:
     void updateLocalPlayerMovement();
 
     void setPlayerPos(uint32_t id, int p);
-    void setBallInfo(const sf::Vector2f& pos, const sf::Vector2f& vel);
+    void setBallInfo(float xDir, float yDir, float speed);
 
 private:
     static constexpr int MAX_PLAYERS = 4;
