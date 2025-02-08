@@ -59,3 +59,9 @@ void ConnectScreen::draw(sf::RenderWindow& window) {
     ipField.draw(window);
     buttonConnect.draw(window);
 }
+
+void ConnectScreen::setStatus(const std::string& msg)
+{
+    showStatus = true;
+    statusLabel.setString(msg);
+}

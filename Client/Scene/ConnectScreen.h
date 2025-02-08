@@ -13,6 +13,8 @@ public:
     void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
+    void setStatus(const std::string& msg);
+
 private:
 
     TextField playerNameField;
