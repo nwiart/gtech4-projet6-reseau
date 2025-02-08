@@ -33,8 +33,21 @@ void LobbyMenu::draw(sf::RenderWindow& window) {
     buttonLeave.draw(window);
     window.draw(labelLobbyName);
 
-    // TODO : display names.
+    float yPos = 100.0F;
     for (auto& p : Client::getInstance().getLobby().getPlayers()) {
-        p.second.m_name;
+        auto it = m_playersInLobby.find(p.first);
+        if (it == m_playersInLobby.end()) {
+            sf::Text text;
+            text.setFont(getGlobalFont());
+            text.setString(p.second.m_name);
+
+            m_playersInLobby.emplace(p.first, text);
+            it = m_playersInLobby.find(p.first);
+        }
+
+        it->second.setPosition(1000.0F, yPos);
+        window.draw(it->second);
+
+        yPos += 40.0F;
     }
 }
