@@ -9,7 +9,7 @@ public:
     PongScene(int sizeX, int sizeY);
     void startGame();
     void update(float dt);
-    void receivePlayerMove(uint32_t playerID, float positionY);
+    float receivePlayerMove(uint32_t playerID, float positionY);
 
     void getScoreInfo(int& score1, int& score2) const;
     void getBallInfo(float& x, float& y, float& xDir, float& yDir, float& speed) const;

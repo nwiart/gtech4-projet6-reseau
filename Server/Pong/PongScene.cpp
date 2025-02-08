@@ -18,18 +18,20 @@ void PongScene::update(float dt) {
     //std::cout << "Ball updated: position (" << m_ball.getPosition().x << ", " << m_ball.getPosition().y << ")" << std::endl;
 }
 
-void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
+float PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
     if (playerID == 0) {
-        if (positionY >= 0 && positionY <= sizeY - 100) {
-            paddle1Y = positionY;
-            //std::cout << "Player 1 moved to position: " << positionY << std::endl;
-        }
+        paddle1Y = positionY;
+        if (paddle1Y < 50) paddle1Y = 50;
+        if (paddle1Y > sizeY - 50) paddle1Y = sizeY - 50;
+
+        return paddle1Y;
     }
     else if (playerID == 1) {
-        if (positionY >= 0 && positionY <= sizeY - 100) {
-            paddle2Y = positionY;
-            //std::cout << "Player 2 moved to position: " << positionY << std::endl;
-        }
+        paddle2Y = positionY;
+        if (paddle2Y < 50) paddle2Y = 50;
+        if (paddle2Y > sizeY - 50) paddle2Y = sizeY - 50;
+
+        return paddle2Y;
     }
 }
 

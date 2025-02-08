@@ -63,11 +63,11 @@ void LobbyPong::update(float dt)
 
 void LobbyPong::receivePlayerMove(uint32_t playerID, float positionY)
 {
-	m_pong.receivePlayerMove(playerID, positionY);
+	float correctPos = m_pong.receivePlayerMove(playerID, positionY);
 
 	Server_PlayerMove p;
 	p.playerID = playerID;
-	p.position = positionY;
+	p.position = correctPos;
 	for (auto &pl : m_players)
 	{
 		const sockaddr_in *clientAddr = Server::m_instance->getClientBySocket(pl.second.m_client->getSocket().mSocket)->getUDPAddr();
