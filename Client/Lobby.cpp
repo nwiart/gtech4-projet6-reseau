@@ -32,7 +32,7 @@ void Lobby::leave()
 
 void Lobby::listPlayer(uint32_t playerID, uint32_t inLobbyID, const std::string& playerName)
 {
-	
+    m_players.emplace(playerID, Player{ playerName, playerID, inLobbyID });
 }
 
 void Lobby::removePlayer(uint32_t playerID)
