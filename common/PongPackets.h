@@ -143,6 +143,11 @@ struct Server_PlayerMove
 
 struct Server_BallInfo
 {
-	float xPos, yPos;
-	float xVel, yVel;
+	float xDir, yDir;
+	float speed;
+};
+
+struct Server_ScoreInfo
+{
+    int score1, score2;
 };
