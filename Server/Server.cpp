@@ -368,7 +368,7 @@ void Server::updateGames(float dt)
 
 		if ((*it)->getNumPlayers() == 0)
 		{
-			std::cout << "Lobby " << (*it)->getLobbyID() << " supprim� (aucun joueur actif)" << std::endl;
+			std::cout << "Lobby " << (*it)->getLobbyID() << " supprime (aucun joueur actif)" << std::endl;
 			delete *it;
 			it = m_games.erase(it);
 		}
