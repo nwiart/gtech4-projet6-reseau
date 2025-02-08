@@ -173,7 +173,9 @@ void Client::createLobby(GameMode gm, const std::string& name)
 
 int Client::sendPosition(int posY)
 {
-	Client_PlayerMove packet{ m_playerID, posY };
+	Client_PlayerMove packet;
+	packet.playerID = m_playerID;
+	packet.position = posY;
 
 	network::sendPacketUDP(m_socketUDP, reinterpret_cast<const sockaddr*>(&serverUDPAddr), static_cast<uint32_t>(ClientPackets::PlayerMove), packet);
 

@@ -28,10 +28,6 @@ void CreateLobbyMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
     buttonBack.handleEvent(event, window);
 }
 
-void CreateLobbyMenu::update(sf::RenderWindow& window) {
-
-}
-
 void CreateLobbyMenu::draw(sf::RenderWindow& window) {
     fieldLobbyName.draw(window);
     buttonCreatePong1v1.draw(window);

@@ -10,7 +10,6 @@ class LobbyMenu : public Scene
 public:
     LobbyMenu();
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
-    void update(sf::RenderWindow& window) override;
     void draw(sf::RenderWindow& window) override;
 
 private:

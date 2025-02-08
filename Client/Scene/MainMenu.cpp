@@ -29,10 +29,6 @@ void MainMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
     }
 }
 
-void MainMenu::update(sf::RenderWindow& window) {
-
-}
-
 void MainMenu::draw(sf::RenderWindow& window) {
     createButton.draw(window);
     buttonRefresh.draw(window);

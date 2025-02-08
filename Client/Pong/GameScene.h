@@ -13,10 +13,10 @@ class GameScene : public Scene
 public:
     GameScene();
     void handleEvent(sf::Event event, sf::RenderWindow& window) override;
-    void update(sf::RenderWindow& window) override;
+    void update(sf::RenderWindow& window, double dt) override;
     void draw(sf::RenderWindow& window) override;
 
-    void updateLocalPlayerMovement();
+    void updateLocalPlayerMovement(double dt);
 
     void setPlayerPos(uint32_t id, int p);
     void setBallInfo(float x, float y, float xDir, float yDir, float speed);
@@ -33,4 +33,6 @@ private:
     bool twoTeams;
     int scoreTeam1 = 0;
     int scoreTeam2 = 0;
+
+    double localTimer;
 };

@@ -13,7 +13,7 @@ private:
 public:
     virtual ~Scene() = default;
     virtual void handleEvent(sf::Event event, sf::RenderWindow& window) = 0;
-    virtual void update(sf::RenderWindow& window) = 0;
+    virtual void update(sf::RenderWindow& window, double dt) { }
     virtual void draw(sf::RenderWindow& window) = 0;
 
     static inline sf::Font& getGlobalFont() { return m_font; }

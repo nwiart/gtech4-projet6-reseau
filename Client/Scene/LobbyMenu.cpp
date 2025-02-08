@@ -24,10 +24,6 @@ void LobbyMenu::handleEvent(sf::Event event, sf::RenderWindow& window) {
     buttonLeave.handleEvent(event, window);
 }
 
-void LobbyMenu::update(sf::RenderWindow& window) {
-
-}
-
 void LobbyMenu::draw(sf::RenderWindow& window) {
     if (Client::getInstance().getLobby().isHost()) buttonStart.draw(window);
     buttonLeave.draw(window);

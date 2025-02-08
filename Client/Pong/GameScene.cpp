@@ -5,6 +5,7 @@
 
 GameScene::GameScene()
     : score(getGlobalFont(), sf::Vector2u(1280, 720)), twoTeams(false)
+    , localTimer(0.0)
 {
     player1Text.setFont(getGlobalFont());
     player1Text.setCharacterSize(30);
@@ -25,10 +26,12 @@ void GameScene::handleEvent(sf::Event event, sf::RenderWindow& window)
         window.close();
 }
 
-void GameScene::update(sf::RenderWindow& window)
+void GameScene::update(sf::RenderWindow& window, double dt)
 {
-    updateLocalPlayerMovement();
-    ball.update(1.f / 60.f); // Update the ball's position
+    localTimer += dt;
+
+    updateLocalPlayerMovement(dt);
+    ball.update(dt); // Update the ball's position
 }
 
 void GameScene::setPlayerPos(uint32_t id, int p)
@@ -55,21 +58,24 @@ void GameScene::draw(sf::RenderWindow& window)
     ball.draw(window); // Draw the ball
 }
 
-void GameScene::updateLocalPlayerMovement()
+void GameScene::updateLocalPlayerMovement(double dt)
 {
     int localID = Client::getInstance().getLobby().getLocalPlayerID();
     Player& localPlayer = players[localID];
 
-    int paddleY = localPlayer.getPositionY();
-
+    float paddleY = localPlayer.getPositionY();
     if (sf::Keyboard::isKeyPressed(localPlayer.getUpKey()))
     {
-        paddleY -= 7;
+        paddleY -= 400 * dt;
     }
     else if (sf::Keyboard::isKeyPressed(localPlayer.getDownKey()))
     {
-        paddleY += 7;
+        paddleY += 400 * dt;
     }
+    localPlayer.setPosition(paddleY);
 
-    Client::getInstance().sendPosition(paddleY);
+    if (localTimer >= 1.0 / 20.0) {
+        localTimer = 0;
+        Client::getInstance().sendPosition(paddleY);
+    }
 }

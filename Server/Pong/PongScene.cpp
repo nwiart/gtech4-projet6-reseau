@@ -15,20 +15,20 @@ void PongScene::update(float dt) {
     if (!started) return;
     m_ball.update(dt, this);
     checkCollisions();
-    std::cout << "Ball updated: position (" << m_ball.getPosition().x << ", " << m_ball.getPosition().y << ")" << std::endl;
+    //std::cout << "Ball updated: position (" << m_ball.getPosition().x << ", " << m_ball.getPosition().y << ")" << std::endl;
 }
 
 void PongScene::receivePlayerMove(uint32_t playerID, float positionY) {
     if (playerID == 0) {
         if (positionY >= 0 && positionY <= sizeY - 100) {
             paddle1Y = positionY;
-            std::cout << "Player 1 moved to position: " << positionY << std::endl;
+            //std::cout << "Player 1 moved to position: " << positionY << std::endl;
         }
     }
     else if (playerID == 1) {
         if (positionY >= 0 && positionY <= sizeY - 100) {
             paddle2Y = positionY;
-            std::cout << "Player 2 moved to position: " << positionY << std::endl;
+            //std::cout << "Player 2 moved to position: " << positionY << std::endl;
         }
     }
 }

@@ -45,10 +45,6 @@ void ConnectScreen::handleEvent(sf::Event event, sf::RenderWindow& window) {
     buttonConnect.handleEvent(event, window);
 }
 
-void ConnectScreen::update(sf::RenderWindow& window) {
-
-}
-
 void ConnectScreen::draw(sf::RenderWindow& window) {
     window.draw(playerNameLabel);
     window.draw(ipLabel);

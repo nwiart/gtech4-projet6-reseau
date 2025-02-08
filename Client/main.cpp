@@ -6,6 +6,8 @@
 #include "Scene/ConnectScreen.h"
 
 #include <iostream>
+#include <chrono>
+using namespace std;
 
 
 int main()
@@ -17,7 +19,7 @@ int main()
     Client::getInstance().init();
 
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Pong", sf::Style::Titlebar | sf::Style::Close);
-    window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(false);
 
     if (!Scene::setGlobalFont("arial.ttf")) {
         return -1;
@@ -27,6 +29,8 @@ int main()
 
     Scene::setCurrentScene(menu);
 
+    auto start = chrono::high_resolution_clock::now();
+    auto last = start;
     while (window.isOpen())
     {
         Scene::sceneSwitch();
@@ -45,7 +49,11 @@ int main()
             }
         }
 
-        s->update(window);
+        auto current = chrono::high_resolution_clock::now();
+        double dt = chrono::duration_cast<chrono::nanoseconds>(current - last).count() / 1000000000.0;
+        last = current;
+
+        s->update(window, dt);
 
         window.clear();
         s->draw(window);
