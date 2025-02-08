@@ -98,6 +98,7 @@ uint32_t Server::confirmClient(Socket &clientSocketTCP, const std::string &playe
 void Server::createLobby(Socket &initiator, const std::string &name, GameMode gm)
 {
 	Lobby *lobby = 0;
+	ClientConnection& conn = m_clients[initiator.mSocket];
 
 	auto it = m_clients.find(initiator.mSocket);
 	if (it == m_clients.end() || it->second.getLobby() != 0)
@@ -117,8 +118,6 @@ void Server::createLobby(Socket &initiator, const std::string &name, GameMode gm
 		LobbyPong *pong = new LobbyPong(id, false);
 		pong->init(name);
 		lobby = pong;
-		ClientConnection &conn = m_clients[initiator.mSocket];
-		conn.m_lobby = lobby;
 	}
 	break;
 	case GameMode::PONG_2v2:
@@ -126,8 +125,6 @@ void Server::createLobby(Socket &initiator, const std::string &name, GameMode gm
 		LobbyPong *pong = new LobbyPong(id, true);
 		pong->init(name);
 		lobby = pong;
-		ClientConnection &conn = m_clients[initiator.mSocket];
-		conn.m_lobby = lobby;
 	}
 	break;
 	}
@@ -137,9 +134,10 @@ void Server::createLobby(Socket &initiator, const std::string &name, GameMode gm
 	if (lobby)
 	{
 		m_games.push_back(lobby);
+		conn.m_lobby = lobby;
 
 		it->second.m_lobby = lobby;
-		uint32_t pid = lobby->addPlayer(initiator.mSocket);
+		uint32_t pid = lobby->addPlayer(&conn);
 
 		std::cout << "Player \"" << it->second.getName() << "\" created a new lobby \"" << lobby->getName() << "\".\n";
 
@@ -178,22 +176,28 @@ void Server::joinLobby(Socket &player, Lobby *l)
 	}
 
 	// Everything good, the player can join.
-	uint32_t inLobbyID = l->addPlayer(player.mSocket);
+	uint32_t inLobbyID = l->addPlayer(&conn);
 	conn.m_lobby = l;
 
 	Server_AcceptJoin p;
 	p.inLobbyID = inLobbyID;
 	network::sendPacketTCP(player, (uint32_t)ServerPackets::AcceptJoin, p);
 
-	LobbyPong *pongGame = dynamic_cast<LobbyPong *>(l);
-	if (pongGame)
-	{
-		/*Server_GameState state;
-		pongGame->getGameState(state.ballX, state.ballY, state.ballRadius,
-							   state.paddle1Y, state.paddle2Y,
-							   state.scoreP1, state.scoreP2);
+	// Send them players already in as well.
+	for (auto& p : l->getPlayers()) {
+		if (p.first == player.mSocket) continue;
 
-		network::sendPacketTCP(player, (uint32_t)ServerPackets::GameState, state);*/
+		// Just emulate a regular join.
+		Server_PlayerJoinedLobby packet;
+		packet.idInLobby = p.second.m_inLobbyID;
+		packet.playerID = p.second.m_client->m_id;
+		memcpy(packet.playerName, p.second.m_client->getName().c_str(), p.second.m_client->getName().length() + 1);
+		network::sendPacketTCP(player, (uint32_t)ServerPackets::PlayerJoinedLobby, packet);
+
+		packet.idInLobby = inLobbyID;
+		packet.playerID = conn.m_id;
+		memcpy(packet.playerName, conn.getName().c_str(), conn.getName().length() + 1);
+		network::sendPacketTCP(p.second.m_client->getSocket(), (uint32_t)ServerPackets::PlayerJoinedLobby, packet);
 	}
 }
 

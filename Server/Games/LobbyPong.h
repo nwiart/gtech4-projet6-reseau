@@ -2,10 +2,15 @@
 
 #include "Lobby.h"
 #include "Pong/PongScene.h"
-#include <unordered_map>
 #include "Socket.h"
 
+#include <map>
+#include <stdint.h>
+
+class ClientConnection;
+
 class LobbyPong : public Lobby {
+
 public:
     LobbyPong(uint32_t id, bool twoPlayersTeam);
 
@@ -13,7 +18,7 @@ public:
     virtual int getMaxPlayers() const override { return m_twoPlayerTeams ? 4 : 2; }
 
     virtual void start() override;
-    virtual uint32_t addPlayer(uint64_t id) override;
+    virtual uint32_t addPlayer(ClientConnection* conn) override;
     virtual uint32_t getPlayerID(uint64_t socket) const override;
 
     virtual bool hasGameStarted() const override;
@@ -27,8 +32,7 @@ public:
 
 private:
     PongScene m_pong;
-    std::unordered_map<uint32_t, Socket> m_players;
-    std::unordered_map<uint64_t, uint32_t> m_paddles;
+
     bool m_twoPlayerTeams;
     bool gameStarted = false;
 };
