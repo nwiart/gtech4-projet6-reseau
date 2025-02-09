@@ -89,6 +89,7 @@ private:
 	Ball ball; ///< The game ball.
 	Score score; ///< Score management system.
 
+	std::map<uint32_t, std::string> playerNames;
 	sf::Text player1Text; ///< Display text for player 1's name.
 	sf::Text player2Text; ///< Display text for player 2's name.
 

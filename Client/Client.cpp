@@ -91,6 +91,8 @@ int Client::connect(const char* ip, const std::string& playerName)
 	strncpy(packet.playerName, playerName.c_str(), len);
 	packet.playerName[len] = '\0';
 
+	std::cout << "Envoi du pseudo au serveur : " << packet.playerName << std::endl;
+
 	bool success = network::sendPacketTCP(m_socketTCP, static_cast<uint32_t>(ClientPackets::PlayerConnect), packet);
 	if (!success) {
 		std::cerr << "Failed to send PlayerConnect packet.\n";
@@ -261,11 +263,23 @@ void Client::handleTCPPacket(uint32_t packetID)
 	{
 		recv(m_socketTCP.mSocket, buf, sizeof(Server_PlayerJoinedLobby), 0);
 
-		// We're not in lobby, ignore it.
-		if (!m_lobby.isValid()) break;
+		if (!m_lobby.isValid()) {
+			std::cerr << "Erreur: réception d'un joueur alors que le lobby est invalide !" << std::endl;
+			break;
+		}
 
-		Server_PlayerJoinedLobby* p = (Server_PlayerJoinedLobby*) buf;
-		m_lobby.listPlayer(p->playerID, p->idInLobby, p->playerName);
+		Server_PlayerJoinedLobby* p = (Server_PlayerJoinedLobby*)buf;
+
+		std::string receivedName(p->playerName);
+		std::cout << "Joueur ajouté au lobby : " << receivedName << " (ID: " << p->playerID << ")" << std::endl;
+
+		m_lobby.listPlayer(p->playerID, p->idInLobby, receivedName);
+
+		// Mettre à jour GameScene immédiatement
+		GameScene* scene = dynamic_cast<GameScene*>(Scene::getCurrentScene());
+		if (scene) {
+			scene->updatePlayerName(p->playerID, receivedName);
+		}
 	}
 	break;
 

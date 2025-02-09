@@ -66,8 +66,8 @@ public:
 	/// <returns>Reference to the sockaddr_in structure with the address.</returns>
 	const sockaddr_in& getAddr() const { return m_addr; }
 
-private:
 	uint32_t m_id;          ///< Unique identifier for the client.
+private:
 	Socket m_socket;        ///< TCP socket for client communication.
 	sockaddr_in m_addr;     ///< Client's TCP address.
 	sockaddr_in m_udpAddr;  ///< Client's UDP address.
@@ -97,6 +97,8 @@ public:
 	/// Opens the server for connections.
 	/// </summary>
 	void open();
+
+    void createBotLobby();
 
 	/// <summary>
 	/// Retrieves the server's listening socket for TCP connections.

@@ -86,6 +86,8 @@ void GameScene::updatePlayerPing(uint32_t playerID, int ping)
 
 void GameScene::updatePlayerName(uint32_t playerID, const std::string& name)
 {
+    playerNames[playerID] = name;
+
     if (playerID == 0) {
         player1Text.setString(name);
     }

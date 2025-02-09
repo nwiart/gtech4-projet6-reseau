@@ -150,28 +150,27 @@ void Server::createLobby(Socket &initiator, const std::string &name, GameMode gm
     }
 }
 
-void Server::joinLobby(Socket &player, Lobby *l)
+void Server::joinLobby(Socket& player, Lobby* l)
 {
-    ClientConnection &conn = m_clients[player.mSocket];
+    ClientConnection& conn = m_clients[player.mSocket];
 
-    // Lobby is non-existent.
-    if (l == 0)
+    if (!l) {
+        std::cerr << "Erreur: tentative de rejoindre un lobby inexistant !" << std::endl;
         return;
+    }
 
-    // Player already in a lobby.
-    if (conn.getLobby())
+    if (conn.getLobby() != nullptr) {
+        std::cerr << "Erreur: le joueur est déjà dans un lobby !" << std::endl;
         return;
+    }
 
-    // Game already started.
-    if (l->hasGameStarted())
-    {
+    if (l->hasGameStarted()) {
         Server_DenyJoin p;
         p.reason = ConnectionDenialReason::GAME_STARTED;
         network::sendPacketTCP(player, (uint32_t)ServerPackets::DenyJoin, p);
         return;
     }
 
-    // Everything good, the player can join.
     uint32_t inLobbyID = l->addPlayer(&conn);
     conn.m_lobby = l;
 
@@ -179,24 +178,54 @@ void Server::joinLobby(Socket &player, Lobby *l)
     p.inLobbyID = inLobbyID;
     network::sendPacketTCP(player, (uint32_t)ServerPackets::AcceptJoin, p);
 
-    // Send them players already in as well.
-    for (auto& p : l->getPlayers()) {
-        if (p.first == player.mSocket)
-            continue;
+    std::cout << "Le joueur " << conn.getName() << " a rejoint le lobby " << l->getLobbyID() << "." << std::endl;
 
-        // Just emulate a regular join.
+    // **Envoyer à tous les joueurs les pseudos mis à jour**
+    for (auto& p : l->getPlayers()) {
         Server_PlayerJoinedLobby packet;
         packet.idInLobby = p.second.m_inLobbyID;
         packet.playerID = p.second.m_client->m_id;
-        memcpy(packet.playerName, p.second.m_client->getName().c_str(), p.second.m_client->getName().length() + 1);
+
+        std::string playerName = p.second.m_client->getName();
+        strncpy(packet.playerName, playerName.c_str(), sizeof(packet.playerName) - 1);
+        packet.playerName[sizeof(packet.playerName) - 1] = '\0';
+
+        // Envoyer les informations au nouveau joueur
         network::sendPacketTCP(player, (uint32_t)ServerPackets::PlayerJoinedLobby, packet);
 
-        packet.idInLobby = inLobbyID;
-        packet.playerID = conn.m_id;
-        memcpy(packet.playerName, conn.getName().c_str(), conn.getName().length() + 1);
-        network::sendPacketTCP(p.second.m_client->getSocket(), (uint32_t)ServerPackets::PlayerJoinedLobby, packet);
+        // Envoyer les informations du nouveau joueur à tous les autres joueurs
+        if (p.first != player.mSocket) {
+            Server_PlayerJoinedLobby newPlayerPacket;
+            newPlayerPacket.idInLobby = inLobbyID;
+            newPlayerPacket.playerID = conn.m_id;
+
+            std::string newPlayerName = conn.getName();
+            strncpy(newPlayerPacket.playerName, newPlayerName.c_str(), sizeof(newPlayerPacket.playerName) - 1);
+            newPlayerPacket.playerName[sizeof(newPlayerPacket.playerName) - 1] = '\0';
+
+            network::sendPacketTCP(p.second.m_client->getSocket(), (uint32_t)ServerPackets::PlayerJoinedLobby, newPlayerPacket);
+        }
+    }
+
+    // **Nouvelle étape : envoyer les noms de tous les joueurs au nouveau joueur**
+    for (auto& p : l->getPlayers()) {
+        Server_PlayerJoinedLobby packet;
+        packet.idInLobby = p.second.m_inLobbyID;
+        packet.playerID = p.second.m_client->m_id;
+
+        std::string playerName = p.second.m_client->getName();
+        strncpy(packet.playerName, playerName.c_str(), sizeof(packet.playerName) - 1);
+        packet.playerName[sizeof(packet.playerName) - 1] = '\0';
+
+        network::sendPacketTCP(player, (uint32_t)ServerPackets::PlayerJoinedLobby, packet);
+    }
+
+    if (l->getNumPlayers() == 2) {
+        std::cout << "Lobby complet ! Lancement de la partie..." << std::endl;
+        l->start();
     }
 }
+
 
 void Server::leaveLobby(ClientConnection* conn)
 {
@@ -213,6 +242,30 @@ void Server::leaveLobby(ClientConnection* conn)
     }
 
     conn->m_lobby = 0;
+}
+
+void Server::createBotLobby()
+{
+    uint32_t botID = 9999; // ID unique du bot
+    std::string botName = "Bot_Host";
+
+    std::cout << "Création d'un lobby avec un bot en hôte..." << std::endl;
+
+    // Ajouter le bot en tant que faux client
+    ClientConnection& botClient = m_clients[botID];
+    botClient.m_id = botID;
+    botClient.m_name = botName;
+    botClient.m_lobby = nullptr;
+
+    Socket fakeSocket;
+    createLobby(fakeSocket, "Lobby_Bot", GameMode::PONG_1v1);
+
+    // Récupérer le lobby nouvellement créé et ajouter le bot
+    Lobby* newLobby = getLobbyByID(m_lobbyUID - 1);
+    if (newLobby) {
+        newLobby->addPlayer(&botClient);
+        std::cout << "Lobby créé par le bot (" << botName << ") avec succès ! En attente d'un joueur..." << std::endl;
+    }
 }
 
 void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
@@ -270,15 +323,32 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
     case ClientPackets::PlayerConnect:
     {
         recv(clientSocketTCP, buf, sizeof(Client_PlayerConnect), 0);
-        uint32_t playerID = confirmClient(conn.getSocket(), reinterpret_cast<Client_PlayerConnect *>(buf)->playerName);
+        uint32_t playerID = confirmClient(conn.getSocket(), reinterpret_cast<Client_PlayerConnect*>(buf)->playerName);
 
         Server_ConnectResult p;
         p.success = true;
         p.playerID = playerID;
         network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::ConnectResult, p);
-        std::cout << "Successfully connected Player " << playerID << " with name \"" << reinterpret_cast<Client_PlayerConnect *>(buf)->playerName << "\"." << std::endl;
+
+        std::cout << "Successfully connected Player " << playerID << " with name \"" << reinterpret_cast<Client_PlayerConnect*>(buf)->playerName << "\"." << std::endl;
+
+        // Vérifier s'il y a déjà un lobby avec un bot
+        if (m_games.empty()) {
+            std::cout << "Aucun lobby trouvé. Création d'un lobby automatique avec un bot..." << std::endl;
+            createBotLobby();
+        }
+
+        // Trouver le lobby avec un bot et y ajouter le joueur
+        for (Lobby* lobby : m_games) {
+            if (lobby->getNumPlayers() < lobby->getMaxPlayers()) {
+                std::cout << "Ajout du joueur " << playerID << " au lobby du bot..." << std::endl;
+                joinLobby(conn.getSocket(), lobby);
+                return;
+            }
+        }
     }
     break;
+
 
     case ClientPackets::GetLobbies:
     {
