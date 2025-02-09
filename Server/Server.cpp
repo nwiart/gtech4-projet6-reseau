@@ -285,7 +285,7 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
         for (Lobby *lobby : m_games)
         {
             Server_GetLobbies p;
-            strcpy(p.lobbyName, lobby->getName().c_str());
+            strcpy_s(p.lobbyName, lobby->getName().c_str());
             p.numPlayers = lobby->getNumPlayers();
             p.maxPlayers = lobby->getMaxPlayers();
             p.lobbyID = lobby->getLobbyID();
