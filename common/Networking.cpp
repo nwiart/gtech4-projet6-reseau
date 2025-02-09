@@ -52,13 +52,12 @@ size_t network::sendPacketTCP(Socket& s, const void* buf, size_t size) {
     return totalSent;
 }
 
-size_t network::sendPacketUDP(Socket& s, const sockaddr* addr, const void* buf, size_t size)
-{
+size_t network::sendPacketUDP(Socket& s, const sockaddr* addr, const void* buf, size_t size) {
     int iResult = sendto(s.mSocket, (const char*)buf, size, 0, addr, sizeof(sockaddr_in));
     if (iResult == SOCKET_ERROR) {
+        std::cerr << "sendto failed! WSA Error: " << WSAGetLastError() << std::endl;
         return 0;
     }
-
     return size;
 }
 

@@ -12,6 +12,13 @@ public:
 
     Socket();
     Socket(SOCKET s);
+    Socket(const Socket& other) { mSocket = other.mSocket; }
+    Socket& operator=(const Socket& other) {
+        if (this != &other) {
+            mSocket = other.mSocket;
+        }
+        return *this;
+    }
     ~Socket();
 
     void createSocketUDP();

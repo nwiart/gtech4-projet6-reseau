@@ -54,13 +54,13 @@ public:
 	inline Socket &getUDPSocket() { return m_socketUDP; }
 
 	bool notifyConnect(Socket &clientSocketTCP);
-	void notifyDisconnect(Socket &clientSocketTCP);
+	void notifyDisconnect(SOCKET clientSocketTCP);
 
 	uint32_t confirmClient(Socket &clientSocketTCP, const std::string &playerName);
 	void createLobby(Socket &initiator, const std::string &name, GameMode gm);
 	void joinLobby(Socket &player, Lobby *l);
 
-	void notifyReceiveTCP(SOCKET clientSocketTCP);
+	void notifyReceiveTCP(SOCKET clientSocketTCP, uint32_t packetID);
 	void notifyReceiveUDP();
 
 	void handleUDPPacket(uint32_t packetID, char *buf, sockaddr *addr);
@@ -75,6 +75,10 @@ public:
 
 	// Used to identify who sent data over UDP.
 	ClientConnection *getClientByAddress(const sockaddr &addr);
+
+	bool isClientSocketValid(SOCKET s) {
+		return m_clients.find(s) != m_clients.end();
+	}
 
 private:
 	static const uint16_t serverBasePort = 27014;

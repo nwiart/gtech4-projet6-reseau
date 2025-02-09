@@ -33,26 +33,24 @@ bool network::sendPacketUDP(Socket& s, const sockaddr* addr, uint32_t packetID, 
 template<typename T>
 bool network::receivePacketTCP(Socket& s, uint32_t& packetID, T& data) {
 	char buffer[MAX_PACKET_SIZE];
-	int receivedBytes = recv(s.mSocket, buffer, sizeof(buffer), 0);
+	size_t totalReceived = 0;
+	size_t expectedSize = sizeof(uint32_t) + sizeof(T);
 
-	if (receivedBytes == SOCKET_ERROR) {
-		std::cerr << "Error receiving packet TCP! WSA Error: " << WSAGetLastError() << std::endl;
-		return false;
-	}
-
-	if (receivedBytes < sizeof(uint32_t)) {
-		std::cerr << "Invalid packet received (too small)\n";
-		return false;
+	while (totalReceived < expectedSize) {
+		int receivedBytes = recv(s.mSocket, buffer + totalReceived, expectedSize - totalReceived, 0);
+		if (receivedBytes == SOCKET_ERROR) {
+			std::cerr << "Error receiving packet TCP! WSA Error: " << WSAGetLastError() << std::endl;
+			return false;
+		}
+		if (receivedBytes == 0) {
+			std::cerr << "Connection closed by peer\n";
+			return false;
+		}
+		totalReceived += receivedBytes;
 	}
 
 	memcpy(&packetID, buffer, sizeof(uint32_t));
 	packetID = ntohl(packetID); // Convert back to host byte order
-
-	if (receivedBytes < sizeof(uint32_t) + sizeof(T)) {
-		std::cerr << "Incomplete packet data received\n";
-		return false;
-	}
-
 	memcpy(&data, buffer + sizeof(uint32_t), sizeof(T));
 
 	return true;
@@ -65,6 +63,10 @@ bool network::receivePacketUDP(Socket& s, sockaddr_in* senderAddr, T& data) {
 	int senderAddrSize = sizeof(sockaddr_in);
 
 	int bytesReceived = recvfrom(s.mSocket, buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr*>(senderAddr), &senderAddrSize);
+	if (bytesReceived == SOCKET_ERROR) {
+		std::cerr << "recvfrom failed! WSA Error: " << WSAGetLastError() << std::endl;
+		return false;
+	}
 
 	if (bytesReceived < sizeof(uint32_t)) {
 		std::cerr << "Invalid UDP packet received (too small)\n";

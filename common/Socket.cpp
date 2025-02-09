@@ -43,23 +43,26 @@ int Socket::connectTCP(const char* ip, uint16_t port) {
     }
 
     if (connect(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Connect failed, error: " << WSAGetLastError() << std::endl;
+        std::cerr << "Connect failed to " << ip << ":" << port << ", error: " << WSAGetLastError() << std::endl;
         return SOCKET_ERROR;
     }
 
     return 0;
 }
 
-int Socket::listenTCP(uint16_t port)
-{
+int Socket::listenTCP(uint16_t port) {
+    if (!isValid()) {
+        std::cerr << "Socket is not valid!" << std::endl;
+        return SOCKET_ERROR;
+    }
+
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(mSocket, (sockaddr *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
-    {
-        std::cerr << "Erreur: Bind du socket �chou� !" << std::endl;
+    if (bind(mSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "Erreur: Bind du socket échoué !" << std::endl;
         return SOCKET_ERROR;
     }
 

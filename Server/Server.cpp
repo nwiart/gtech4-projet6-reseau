@@ -27,47 +27,50 @@ void Server::open()
 	m_socketUDP.bindUDP(serverSecondaryPort - 1);
 }
 
-bool Server::notifyConnect(Socket &clientSocketTCP)
+bool Server::notifyConnect(Socket& clientSocketTCP)
 {
-	if (m_clients.find(clientSocketTCP.mSocket) != m_clients.end())
-	{
+	if (!clientSocketTCP.isValid()) {
+		std::cerr << "notifyConnect: Received an invalid client socket!\n";
 		return false;
 	}
 
-	auto it = m_clients.emplace(clientSocketTCP.mSocket, ClientConnection());
-	ClientConnection &conn = it.first->second;
+	if (m_clients.find(clientSocketTCP.mSocket) != m_clients.end()) {
+		std::cerr << "notifyConnect: Client socket already exists!\n";
+		return false;
+	}
 
+	// Store the client socket in m_clients (COPY, don't move)
+	ClientConnection conn;
+	conn.m_socket = clientSocketTCP;  // Copy the socket instead of moving it
 	conn.m_id = -1;
 	conn.m_name = "PLAYER_CONNECTING";
-	conn.m_socket = std::move(clientSocketTCP);
+
+	m_clients[clientSocketTCP.mSocket] = conn;  // Store properly
+	std::cout << "Client stored. Socket: " << clientSocketTCP.mSocket << "\n";
 
 	return true;
 }
 
-void Server::notifyDisconnect(Socket &clientSocketTCP)
+void Server::notifyDisconnect(SOCKET clientSocketTCP)
 {
-	auto it = m_clients.find(clientSocketTCP.mSocket);
-
-	if (it == m_clients.end())
-	{
-		std::cerr << "Erreur: Tentative de deconnexion d�un client inconnu !" << std::endl;
+	auto it = m_clients.find(clientSocketTCP);
+	if (it == m_clients.end()) {
+		std::cerr << "Error: Attempted to disconnect an unknown client socket!\n";
 		return;
 	}
 
-	ClientConnection &conn = it->second;
+	ClientConnection& conn = it->second;
 
-	if (conn.m_lobby)
-	{
+	if (conn.m_lobby) {
 		conn.m_lobby->disconnectPlayer(conn.m_id);
-		std::cout << "Joueur " << conn.m_id << " retir� du lobby " << conn.m_lobby->getLobbyID() << std::endl;
+		std::cout << "Player " << conn.m_id << " removed from lobby " << conn.m_lobby->getLobbyID() << std::endl;
 	}
 
-	shutdown(clientSocketTCP.mSocket, SD_BOTH);
-	closesocket(clientSocketTCP.mSocket);
+	shutdown(clientSocketTCP, SD_BOTH);
+	closesocket(clientSocketTCP);
 
-	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") d�connect�.\n";
+	std::cout << "Client " << conn.m_id << " (" << conn.m_name << ") disconnected.\n";
 
-	conn.m_socket.closeSocket();
 	m_clients.erase(it);
 }
 
@@ -195,7 +198,7 @@ void Server::joinLobby(Socket &player, Lobby *l)
 	}
 }
 
-void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
+void Server::notifyReceiveTCP(SOCKET clientSocketTCP, uint32_t packetID)
 {
 	if (m_clients.find(clientSocketTCP) == m_clients.end())
 	{
@@ -203,111 +206,74 @@ void Server::notifyReceiveTCP(SOCKET clientSocketTCP)
 		return;
 	}
 
-	ClientConnection &conn = m_clients.at(clientSocketTCP);
-	uint32_t packetID;
-	char buf[1020];
-
-	if (clientSocketTCP == INVALID_SOCKET)
-	{
-		std::cerr << "Error: Attempted to receive on an invalid socket!\n";
-		return;
-	}
-
-	int receivedBytes = recv(clientSocketTCP, reinterpret_cast<char *>(&packetID), sizeof(packetID), 0);
-
-	if (receivedBytes == 0)
-	{
-		std::cerr << "Client disconnected gracefully.\n";
-		notifyDisconnect(conn.getSocket());
-		return;
-	}
-	else if (receivedBytes == SOCKET_ERROR)
-	{
-		int error = WSAGetLastError();
-		std::cerr << "Error receiving packet ID. WSA Error: " << error << std::endl;
-
-		if (error == WSAECONNRESET)
-		{
-			std::cerr << "Client forcibly closed the connection.\n";
-		}
-		else if (error == WSAETIMEDOUT)
-		{
-			std::cerr << "Connection timed out.\n";
-		}
-		else if (error == WSAENOTSOCK)
-		{
-			std::cerr << "Invalid socket error (10038). Check if the socket is closed or uninitialized.\n";
-		}
-
-		notifyDisconnect(conn.getSocket());
-		return;
-	}
-
-	int e = WSAGetLastError();
+	ClientConnection& conn = m_clients.at(clientSocketTCP);
 
 	switch ((ClientPackets)packetID)
 	{
 	case ClientPackets::PlayerConnect:
 	{
-		recv(clientSocketTCP, buf, sizeof(Client_PlayerConnect), 0);
-		uint32_t playerID = confirmClient(conn.getSocket(), reinterpret_cast<Client_PlayerConnect *>(buf)->playerName);
+		Client_PlayerConnect packet;
+		if (network::receivePacketTCP(conn.getSocket(), packetID, packet))
+		{
+			uint32_t playerID = confirmClient(conn.getSocket(), packet.playerName);
 
-		Server_ConnectResult p;
-		p.success = true;
-		p.playerID = playerID;
-		network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::ConnectResult, p);
-		std::cout << "Successfully connected Player " << playerID << " with name \"" << reinterpret_cast<Client_PlayerConnect *>(buf)->playerName << "\"." << std::endl;
+			Server_ConnectResult response;
+			response.success = true;
+			response.playerID = playerID;
+			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::ConnectResult, response);
+		}
 	}
 	break;
 
 	case ClientPackets::GetLobbies:
 	{
-		for (Lobby *lobby : m_games)
+		for (Lobby* lobby : m_games)
 		{
-			Server_GetLobbies p;
-			strcpy(p.lobbyName, lobby->getName().c_str());
-			p.numPlayers = lobby->getNumPlayers();
-			p.maxPlayers = lobby->getMaxPlayers();
-			p.lobbyID = lobby->getLobbyID();
-			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GetLobbies, p);
+			Server_GetLobbies response;
+			strcpy(response.lobbyName, lobby->getName().c_str());
+			response.numPlayers = lobby->getNumPlayers();
+			response.maxPlayers = lobby->getMaxPlayers();
+			response.lobbyID = lobby->getLobbyID();
+			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GetLobbies, response);
 		}
 	}
 	break;
 
 	case ClientPackets::CreateLobby:
 	{
-		recv(clientSocketTCP, buf, sizeof(Client_CreateLobby), 0);
-		Socket &playerSocket = conn.getSocket();
-		createLobby(playerSocket,
-					reinterpret_cast<Client_CreateLobby *>(buf)->lobbyName,
-					reinterpret_cast<Client_CreateLobby *>(buf)->gamemode);
+		Client_CreateLobby packet;
+		if (network::receivePacketTCP(conn.getSocket(), packetID, packet))
+		{
+			createLobby(conn.getSocket(), packet.lobbyName, packet.gamemode);
+		}
 	}
 	break;
 
 	case ClientPackets::JoinLobby:
 	{
-		recv(clientSocketTCP, buf, sizeof(Client_JoinLobby), 0);
-		Socket &playerSocket = conn.getSocket();
-		joinLobby(playerSocket, getLobbyByID(reinterpret_cast<Client_JoinLobby *>(buf)->lobbyID));
+		Client_JoinLobby packet;
+		if (network::receivePacketTCP(conn.getSocket(), packetID, packet))
+		{
+			joinLobby(conn.getSocket(), getLobbyByID(packet.lobbyID));
+		}
 	}
 	break;
 
 	case ClientPackets::StartGame:
 	{
-		// Not in lobby or not owner.
-		if (conn.getLobby() == 0 || conn.getLobby()->getPlayerID(clientSocketTCP) != 0)
+		Server_GameStart response;
+		if (conn.getLobby() == nullptr || conn.getLobby()->getPlayerID(clientSocketTCP) != 0)
 		{
-			Server_GameStart p;
-			p.started = false;
-			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GameStart, p);
+			response.started = false;
+			network::sendPacketTCP(conn.getSocket(), (uint32_t)ServerPackets::GameStart, response);
 			return;
 		}
-
 		conn.getLobby()->start();
 	}
 	break;
 	}
 }
+
 
 void Server::notifyReceiveUDP()
 {

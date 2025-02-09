@@ -84,40 +84,73 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case MESSAGE_ACCEPT:
 	{
 		Socket newClientSocket;
-		if (server.getListenSocket().acceptTCP(newClientSocket) == SOCKET_ERROR || newClientSocket.mSocket == INVALID_SOCKET) {
-			std::cerr << "Failed to accept new client.\n";
+		if (!server.getListenSocket().acceptTCP(newClientSocket) || !newClientSocket.isValid()) {
+			std::cerr << "Failed to accept new client connection. Invalid socket.\n";
 			break;
 		}
 
-		WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, FD_READ);
+		std::cout << "New client connected! Socket: " << newClientSocket.mSocket << std::endl;
 
-		std::stringstream ss;
-		sockaddr_in addr;
-		int len = sizeof(sockaddr_in);
-
-		getsockname(newClientSocket.mSocket, (sockaddr*)&addr, &len);
-		std::cout << "Sock port " << addr.sin_port << '\n';
-
-		getpeername(newClientSocket.mSocket, (sockaddr*)&addr, &len);
-		std::cout << "Peer port " << addr.sin_port << '\n';
-
-		UCHAR* ipb = &addr.sin_addr.S_un.S_un_b.s_b1;
-		ss << (int)ipb[0] << '.' << (int)ipb[1] << '.' << (int)ipb[2] << '.' << (int)ipb[3] << ':' << (int)addr.sin_port;
-		std::cout << "New connection from " << ss.str() << std::endl;
+		if (WSAAsyncSelect(newClientSocket.mSocket, hwnd, MESSAGE_RECV, FD_READ | FD_CLOSE) == SOCKET_ERROR) {
+			std::cerr << "WSAAsyncSelect failed. Error: " << WSAGetLastError() << "\n";
+			break;
+		}
 
 		server.notifyConnect(newClientSocket);
 	}
-	break; // <-- FIXED
-
-
+	break;
 	case MESSAGE_RECV:
 	{
 		SOCKET socket = (SOCKET)wparam;
-		server.notifyReceiveTCP(socket);
-		
+
+		if (!server.isClientSocketValid(socket)) {
+			std::cerr << "MESSAGE_RECV: Invalid or unknown client socket: " << socket << "\n";
+			break;
+		}
+
+		if (socket == INVALID_SOCKET) {
+			std::cerr << "ERROR: SOCKET IS ALREADY INVALID! (Socket: " << socket << ")\n";
+			break;
+		}
+
+		std::cout << "Receiving data on socket: " << socket << "\n";
+
+		uint32_t packetID;
+		int received = recv(socket, reinterpret_cast<char*>(&packetID), sizeof(packetID), 0);
+
+		if (received == sizeof(packetID)) {
+			std::cout << "Received packet ID: " << packetID << " from socket: " << socket << "\n";
+			server.notifyReceiveTCP(socket, packetID);
+		}
+		else if (received == 0) {
+			std::cerr << "Client disconnected gracefully.\n";
+			server.notifyDisconnect(socket);
+		}
+		else if (received == SOCKET_ERROR) {
+			int error = WSAGetLastError();
+			std::cerr << "recv() failed. Error: " << error << " (Socket: " << socket << ")\n";
+
+			if (error == WSAENOTSOCK) {
+				std::cerr << "WSAENOTSOCK: The socket is invalid! Check if it was closed elsewhere.\n";
+			}
+
+			server.notifyDisconnect(socket);
+		}
+		else {
+			std::cerr << "Failed to receive valid packet ID.\n";
+		}
 	}
 	break;
-	}
+	case FD_CLOSE:
+	{
+		std::cerr << "Client closed the connection.\n";
+		//Client::getInstance().disconnect();
 
+		break;
+	}
+	default:
+		return DefWindowProc(hwnd, msg, wparam, lparam);
+
+	}
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
